@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rift://schemas/v1/envelope",
+  "title": "Envelope",
+  "description": "Common wrapper for every Rift WebSocket message (protocol V1). Source of truth: backend/src/protocol.rs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocol_version", "message_id", "message_type", "timestamp"],
+  "properties": {
+    "protocol_version": { "const": 1 },
+    "message_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "message_type": {
+      "enum": ["hello", "ping", "create_session", "player_action",
+               "hello_ack", "pong", "session_created", "world_event", "error"]
+    },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "session_id": { "type": ["string", "null"], "format": "uuid" },
+    "reply_to": { "type": "string", "description": "Server -> client only. message_id being answered." },
+    "payload": { "description": "Shape depends on message_type. Missing/null is treated as {}." }
+  }
+}

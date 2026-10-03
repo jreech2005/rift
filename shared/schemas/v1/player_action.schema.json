@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rift://schemas/v1/player_action",
+  "title": "PlayerAction",
+  "description": "Payload of a player_action message. A request, never trusted until Rust validates it. Source of truth: backend/src/action.rs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocol_version", "action_id", "session_id", "actor_id", "action_type", "timestamp"],
+  "properties": {
+    "protocol_version": { "const": 1 },
+    "action_id": { "type": "string", "format": "uuid", "description": "Client-generated; replays are rejected with duplicate_action." },
+    "session_id": { "type": "string", "format": "uuid", "description": "Must equal the envelope session_id." },
+    "actor_id": { "$ref": "#/$defs/identifier" },
+    "action_type": { "enum": ["interact", "inspect", "move", "speak"] },
+    "target": { "$ref": "#/$defs/identifier", "description": "Required for interact, inspect, move. Optional for speak." },
+    "content": { "type": "string", "minLength": 1, "maxLength": 500, "description": "Required for speak; rejected otherwise." },
+    "timestamp": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "identifier": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,64}$" }
+  }
+}
