@@ -1,0 +1,19 @@
+{
+  "page": 1,
+  "results": [
+    {"adult": false, "id": 224377, "media_type": "tv", "name": "Harry Potter", "original_name": "Harry Potter",
+     "original_language": "en", "overview": "A new adaptation of the novels.",
+     "popularity": 13.8525, "first_air_date": "2026-12-25", "vote_count": 0},
+    {"adult": false, "id": 672, "media_type": "movie", "title": "Harry Potter and the Chamber of Secrets",
+     "original_title": "Harry Potter and the Chamber of Secrets", "original_language": "en", "overview": "A second year at school.",
+     "popularity": 46.229, "release_date": "2002-11-13", "vote_count": 24151},
+    {"adult": false, "id": 671, "media_type": "movie", "title": "Harry Potter and the Philosopher's Stone",
+     "original_title": "Harry Potter and the Philosopher's Stone", "original_language": "en", "overview": "A boy learns he is a wizard.",
+     "popularity": 58.9571, "release_date": "2001-11-16", "vote_count": 30329},
+    {"adult": false, "id": 674, "media_type": "movie", "title": "Harry Potter and the Goblet of Fire",
+     "original_title": "Harry Potter and the Goblet of Fire", "original_language": "en", "overview": "A dangerous tournament.",
+     "popularity": 43.7757, "release_date": "2005-11-16", "vote_count": 22704}
+  ],
+  "total_pages": 1,
+  "total_results": 4
+}

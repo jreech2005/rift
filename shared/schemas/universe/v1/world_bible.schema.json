@@ -1,0 +1,912 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rift://schemas/universe/v1/world_bible",
+  "$comment": "Generated from canon/src/rift_canon/world_bible.py by rift_canon.schema_export. Do not edit.",
+  "$defs": {
+    "Character": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "role": {
+          "description": "Who they are in the story, in one line.",
+          "minLength": 1,
+          "title": "Role",
+          "type": "string"
+        },
+        "personality_traits": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 6,
+          "minItems": 1,
+          "title": "Personality Traits",
+          "type": "array"
+        },
+        "goals": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "maxItems": 4,
+          "title": "Goals",
+          "type": "array"
+        },
+        "known_facts": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Known Facts",
+          "type": "array"
+        },
+        "status": {
+          "description": "Their situation at the canon cutoff.",
+          "minLength": 1,
+          "title": "Status",
+          "type": "string"
+        },
+        "classification": {
+          "$ref": "#/$defs/Classification",
+          "description": "canon: stated in the cited evidence. inferred: your deduction from the evidence. generated: invented for the game."
+        },
+        "source_refs": {
+          "description": "source_id of each evidence document that supports this item. Must not be empty when classification is canon.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Refs",
+          "type": "array"
+        },
+        "relationships": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/CharacterRelationship"
+          },
+          "title": "Relationships",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "role",
+        "personality_traits",
+        "goals",
+        "known_facts",
+        "status",
+        "classification",
+        "source_refs"
+      ],
+      "title": "Character",
+      "type": "object"
+    },
+    "CharacterRelationship": {
+      "additionalProperties": false,
+      "description": "A relationship seen from one character; derived from ``relationships``.",
+      "properties": {
+        "other_id": {
+          "title": "Other Id",
+          "type": "string"
+        },
+        "direction": {
+          "enum": [
+            "outgoing",
+            "incoming"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "kind": {
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "classification": {
+          "$ref": "#/$defs/Classification",
+          "description": "canon: stated in the cited evidence. inferred: your deduction from the evidence. generated: invented for the game."
+        },
+        "source_refs": {
+          "description": "source_id of each evidence document that supports this item. Must not be empty when classification is canon.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "other_id",
+        "direction",
+        "kind",
+        "description",
+        "classification",
+        "source_refs"
+      ],
+      "title": "CharacterRelationship",
+      "type": "object"
+    },
+    "Claim": {
+      "additionalProperties": false,
+      "description": "One statement with its provenance.",
+      "properties": {
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "classification": {
+          "$ref": "#/$defs/Classification",
+          "description": "canon: stated in the cited evidence. inferred: your deduction from the evidence. generated: invented for the game."
+        },
+        "source_refs": {
+          "description": "source_id of each evidence document that supports this item. Must not be empty when classification is canon.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "classification",
+        "source_refs"
+      ],
+      "title": "Claim",
+      "type": "object"
+    },
+    "Classification": {
+      "description": "Where a statement comes from. Only retrieved evidence is ``canon``.",
+      "enum": [
+        "canon",
+        "inferred",
+        "generated"
+      ],
+      "title": "Classification",
+      "type": "string"
+    },
+    "Conflict": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "party_ids": {
+          "description": "Character ids, faction ids, or 'player'.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Party Ids",
+          "type": "array"
+        },
+        "stakes": {
+          "minLength": 1,
+          "title": "Stakes",
+          "type": "string"
+        },
+        "classification": {
+          "$ref": "#/$defs/Classification",
+          "description": "canon: stated in the cited evidence. inferred: your deduction from the evidence. generated: invented for the game."
+        },
+        "source_refs": {
+          "description": "source_id of each evidence document that supports this item. Must not be empty when classification is canon.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "party_ids",
+        "stakes",
+        "classification",
+        "source_refs"
+      ],
+      "title": "Conflict",
+      "type": "object"
+    },
+    "Faction": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "member_ids": {
+          "description": "ids of characters in this faction.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Member Ids",
+          "type": "array"
+        },
+        "classification": {
+          "$ref": "#/$defs/Classification",
+          "description": "canon: stated in the cited evidence. inferred: your deduction from the evidence. generated: invented for the game."
+        },
+        "source_refs": {
+          "description": "source_id of each evidence document that supports this item. Must not be empty when classification is canon.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "member_ids",
+        "classification",
+        "source_refs"
+      ],
+      "title": "Faction",
+      "type": "object"
+    },
+    "LLMRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "api": {
+          "title": "Api",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "attempts": {
+          "title": "Attempts",
+          "type": "integer"
+        },
+        "usage": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "default": {},
+          "title": "Usage",
+          "type": "object"
+        }
+      },
+      "required": [
+        "provider",
+        "api",
+        "model",
+        "attempts"
+      ],
+      "title": "LLMRecord",
+      "type": "object"
+    },
+    "Location": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "importance": {
+          "enum": [
+            "primary",
+            "secondary",
+            "background"
+          ],
+          "title": "Importance",
+          "type": "string"
+        },
+        "classification": {
+          "$ref": "#/$defs/Classification",
+          "description": "canon: stated in the cited evidence. inferred: your deduction from the evidence. generated: invented for the game."
+        },
+        "source_refs": {
+          "description": "source_id of each evidence document that supports this item. Must not be empty when classification is canon.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "importance",
+        "classification",
+        "source_refs"
+      ],
+      "title": "Location",
+      "type": "object"
+    },
+    "MediaType": {
+      "enum": [
+        "movie",
+        "tv"
+      ],
+      "title": "MediaType",
+      "type": "string"
+    },
+    "OpeningConflict": {
+      "additionalProperties": false,
+      "description": "One conflict sized for a 10-20 minute episode. Always ``generated``.",
+      "properties": {
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "summary": {
+          "minLength": 1,
+          "title": "Summary",
+          "type": "string"
+        },
+        "location_id": {
+          "description": "The starting location, or one near it.",
+          "title": "Location Id",
+          "type": "string"
+        },
+        "involved_character_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 5,
+          "minItems": 1,
+          "title": "Involved Character Ids",
+          "type": "array"
+        },
+        "immediate_goal": {
+          "description": "What the player must do in the next minutes.",
+          "minLength": 1,
+          "title": "Immediate Goal",
+          "type": "string"
+        },
+        "decision_options": {
+          "description": "Distinct choices open to the player right away.",
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 4,
+          "minItems": 2,
+          "title": "Decision Options",
+          "type": "array"
+        },
+        "stakes": {
+          "minLength": 1,
+          "title": "Stakes",
+          "type": "string"
+        },
+        "estimated_minutes": {
+          "maximum": 20,
+          "minimum": 10,
+          "title": "Estimated Minutes",
+          "type": "integer"
+        },
+        "classification": {
+          "const": "generated",
+          "title": "Classification",
+          "type": "string"
+        },
+        "source_refs": {
+          "description": "Evidence documents this conflict is consistent with.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "title",
+        "summary",
+        "location_id",
+        "involved_character_ids",
+        "immediate_goal",
+        "decision_options",
+        "stakes",
+        "estimated_minutes",
+        "classification",
+        "source_refs"
+      ],
+      "title": "OpeningConflict",
+      "type": "object"
+    },
+    "PlayerConnection": {
+      "additionalProperties": false,
+      "properties": {
+        "character_id": {
+          "title": "Character Id",
+          "type": "string"
+        },
+        "description": {
+          "description": "How the player role knows this character.",
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "character_id",
+        "description"
+      ],
+      "title": "PlayerConnection",
+      "type": "object"
+    },
+    "PlayerRole": {
+      "additionalProperties": false,
+      "description": "An original role for the player. Always ``generated``.",
+      "properties": {
+        "title": {
+          "description": "The role, e.g. 'Forensic accountant'. Not a canon character.",
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "reason_for_presence": {
+          "description": "Why this person is plausibly in the starting location.",
+          "minLength": 1,
+          "title": "Reason For Presence",
+          "type": "string"
+        },
+        "capabilities": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 6,
+          "minItems": 1,
+          "title": "Capabilities",
+          "type": "array"
+        },
+        "connections": {
+          "items": {
+            "$ref": "#/$defs/PlayerConnection"
+          },
+          "maxItems": 4,
+          "minItems": 1,
+          "title": "Connections",
+          "type": "array"
+        },
+        "classification": {
+          "const": "generated",
+          "title": "Classification",
+          "type": "string"
+        },
+        "source_refs": {
+          "description": "Evidence documents that make this role plausible.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "title",
+        "description",
+        "reason_for_presence",
+        "capabilities",
+        "connections",
+        "classification",
+        "source_refs"
+      ],
+      "title": "PlayerRole",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "compiler_version": {
+          "title": "Compiler Version",
+          "type": "string"
+        },
+        "compiled_at": {
+          "format": "date-time",
+          "title": "Compiled At",
+          "type": "string"
+        },
+        "retrieved_at": {
+          "format": "date-time",
+          "title": "Retrieved At",
+          "type": "string"
+        },
+        "canon_packet_sha256": {
+          "title": "Canon Packet Sha256",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceRecord"
+          },
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        },
+        "llm": {
+          "$ref": "#/$defs/LLMRecord"
+        },
+        "classification_counts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "default": {},
+          "title": "Classification Counts",
+          "type": "object"
+        },
+        "validation_notes": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Validation Notes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "compiler_version",
+        "compiled_at",
+        "retrieved_at",
+        "canon_packet_sha256",
+        "sources",
+        "llm"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "Relationship": {
+      "additionalProperties": false,
+      "properties": {
+        "from_id": {
+          "description": "Character id, faction id, or 'player'.",
+          "title": "From Id",
+          "type": "string"
+        },
+        "to_id": {
+          "description": "Character id, faction id, or 'player'.",
+          "title": "To Id",
+          "type": "string"
+        },
+        "kind": {
+          "description": "Short label, e.g. 'brother-in-law', 'rival'.",
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "classification": {
+          "$ref": "#/$defs/Classification",
+          "description": "canon: stated in the cited evidence. inferred: your deduction from the evidence. generated: invented for the game."
+        },
+        "source_refs": {
+          "description": "source_id of each evidence document that supports this item. Must not be empty when classification is canon.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "from_id",
+        "to_id",
+        "kind",
+        "description",
+        "classification",
+        "source_refs"
+      ],
+      "title": "Relationship",
+      "type": "object"
+    },
+    "SourceRecord": {
+      "additionalProperties": false,
+      "description": "An evidence document a ``source_ref`` can point to.",
+      "properties": {
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "source_type": {
+          "$ref": "#/$defs/SourceType"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "source_url": {
+          "title": "Source Url",
+          "type": "string"
+        },
+        "retrieved_at": {
+          "format": "date-time",
+          "title": "Retrieved At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_id",
+        "source_type",
+        "title",
+        "source_url",
+        "retrieved_at"
+      ],
+      "title": "SourceRecord",
+      "type": "object"
+    },
+    "SourceType": {
+      "enum": [
+        "tmdb",
+        "wikipedia"
+      ],
+      "title": "SourceType",
+      "type": "string"
+    },
+    "StartingLocation": {
+      "additionalProperties": false,
+      "properties": {
+        "location_id": {
+          "description": "id of one of the locations.",
+          "title": "Location Id",
+          "type": "string"
+        },
+        "rationale": {
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "location_id",
+        "rationale"
+      ],
+      "title": "StartingLocation",
+      "type": "object"
+    },
+    "TimelineContext": {
+      "additionalProperties": false,
+      "properties": {
+        "canon_cutoff": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Point in the canon timeline where the slice begins, e.g. 'Season 1, after the pilot'. null if the evidence does not support one.",
+          "title": "Canon Cutoff"
+        },
+        "summary": {
+          "description": "What has already happened by that point.",
+          "minLength": 1,
+          "title": "Summary",
+          "type": "string"
+        },
+        "classification": {
+          "$ref": "#/$defs/Classification",
+          "description": "canon: stated in the cited evidence. inferred: your deduction from the evidence. generated: invented for the game."
+        },
+        "source_refs": {
+          "description": "source_id of each evidence document that supports this item. Must not be empty when classification is canon.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "canon_cutoff",
+        "summary",
+        "classification",
+        "source_refs"
+      ],
+      "title": "TimelineContext",
+      "type": "object"
+    },
+    "UniverseInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "universe_id": {
+          "pattern": "^[a-z0-9_]{1,96}$",
+          "title": "Universe Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "media_type": {
+          "$ref": "#/$defs/MediaType"
+        },
+        "release_year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Release Year"
+        },
+        "tmdb_id": {
+          "title": "Tmdb Id",
+          "type": "integer"
+        },
+        "genres": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Genres",
+          "type": "array"
+        },
+        "era": {
+          "$ref": "#/$defs/Claim"
+        },
+        "setting": {
+          "$ref": "#/$defs/Claim"
+        }
+      },
+      "required": [
+        "universe_id",
+        "title",
+        "media_type",
+        "release_year",
+        "tmdb_id",
+        "genres",
+        "era",
+        "setting"
+      ],
+      "title": "UniverseInfo",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "universe": {
+      "$ref": "#/$defs/UniverseInfo"
+    },
+    "world_rules": {
+      "items": {
+        "$ref": "#/$defs/Claim"
+      },
+      "title": "World Rules",
+      "type": "array"
+    },
+    "locations": {
+      "items": {
+        "$ref": "#/$defs/Location"
+      },
+      "title": "Locations",
+      "type": "array"
+    },
+    "characters": {
+      "items": {
+        "$ref": "#/$defs/Character"
+      },
+      "title": "Characters",
+      "type": "array"
+    },
+    "factions": {
+      "items": {
+        "$ref": "#/$defs/Faction"
+      },
+      "title": "Factions",
+      "type": "array"
+    },
+    "relationships": {
+      "items": {
+        "$ref": "#/$defs/Relationship"
+      },
+      "title": "Relationships",
+      "type": "array"
+    },
+    "important_conflicts": {
+      "items": {
+        "$ref": "#/$defs/Conflict"
+      },
+      "title": "Important Conflicts",
+      "type": "array"
+    },
+    "player_role": {
+      "$ref": "#/$defs/PlayerRole"
+    },
+    "starting_location": {
+      "$ref": "#/$defs/StartingLocation"
+    },
+    "opening_conflict": {
+      "$ref": "#/$defs/OpeningConflict"
+    },
+    "timeline_context": {
+      "$ref": "#/$defs/TimelineContext"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "universe",
+    "world_rules",
+    "locations",
+    "characters",
+    "factions",
+    "relationships",
+    "important_conflicts",
+    "player_role",
+    "starting_location",
+    "opening_conflict",
+    "timeline_context",
+    "provenance"
+  ],
+  "title": "WorldBible",
+  "type": "object"
+}

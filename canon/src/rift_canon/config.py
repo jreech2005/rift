@@ -22,6 +22,7 @@ class Settings(BaseModel):
     model_config = ConfigDict(frozen=True, extra="ignore")
 
     gemini_api_key: SecretStr | None = None
+    gemini_model: str = "gemini-3.8-flash"
     tmdb_api_key: SecretStr | None = None
     world_labs_api_key: SecretStr | None = None
     elevenlabs_api_key: SecretStr | None = None

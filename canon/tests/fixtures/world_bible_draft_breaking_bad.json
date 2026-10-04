@@ -1,0 +1,224 @@
+{
+  "era": {
+    "text": "The contemporary United States of the late 2000s.",
+    "classification": "inferred",
+    "source_refs": ["tmdb:tv:1396"]
+  },
+  "setting": {
+    "text": "Albuquerque, New Mexico, and the desert outside the city.",
+    "classification": "canon",
+    "source_refs": ["wikipedia:en:1001"]
+  },
+  "timeline_context": {
+    "canon_cutoff": "Season 1, shortly after Walter and Jesse become partners",
+    "summary": "Walter White has been diagnosed with cancer and has just pressured Jesse Pinkman into cooking methamphetamine with him.",
+    "classification": "canon",
+    "source_refs": ["wikipedia:en:1003"]
+  },
+  "world_rules": [
+    {
+      "text": "The Drug Enforcement Administration actively investigates the local drug trade.",
+      "classification": "canon",
+      "source_refs": ["wikipedia:en:1001"]
+    },
+    {
+      "text": "The world is realistic: there are no supernatural or science fiction elements.",
+      "classification": "inferred",
+      "source_refs": ["tmdb:tv:1396"]
+    }
+  ],
+  "locations": [
+    {
+      "id": "a1a_car_wash",
+      "name": "A1A Car Wash",
+      "description": "The car wash where Walter White works a second job.",
+      "importance": "primary",
+      "classification": "canon",
+      "source_refs": ["wikipedia:en:1001"]
+    },
+    {
+      "id": "wynne_high_school",
+      "name": "J. P. Wynne High School",
+      "description": "The school where Walter White teaches chemistry.",
+      "importance": "secondary",
+      "classification": "canon",
+      "source_refs": ["wikipedia:en:1001"]
+    },
+    {
+      "id": "desert_cook_site",
+      "name": "Desert cook site",
+      "description": "A remote stretch of desert where a recreational vehicle serves as a lab.",
+      "importance": "background",
+      "classification": "inferred",
+      "source_refs": ["wikipedia:en:1001"]
+    }
+  ],
+  "characters": [
+    {
+      "id": "walter_white",
+      "name": "Walter White",
+      "role": "High school chemistry teacher who has secretly begun producing methamphetamine.",
+      "personality_traits": ["meticulous", "proud", "secretive"],
+      "goals": [
+        {
+          "text": "Keep his new work hidden from his family and from Hank.",
+          "classification": "inferred",
+          "source_refs": ["wikipedia:en:1001"]
+        }
+      ],
+      "known_facts": [
+        {
+          "text": "He teaches chemistry and works a second job at a car wash.",
+          "classification": "canon",
+          "source_refs": ["wikipedia:en:1001"]
+        },
+        {
+          "text": "He co-founded Gray Matter Technologies before becoming a teacher.",
+          "classification": "canon",
+          "source_refs": ["wikipedia:en:1003"]
+        }
+      ],
+      "status": "Alive; recently diagnosed with lung cancer.",
+      "classification": "canon",
+      "source_refs": ["wikipedia:en:1001", "wikipedia:en:1003"]
+    },
+    {
+      "id": "jesse_pinkman",
+      "name": "Jesse Pinkman",
+      "role": "Walter's former student, now his partner in the drug trade.",
+      "personality_traits": ["impulsive", "streetwise"],
+      "goals": [],
+      "known_facts": [
+        {
+          "text": "He is a small-time methamphetamine cook and dealer.",
+          "classification": "canon",
+          "source_refs": ["wikipedia:en:1004"]
+        }
+      ],
+      "status": "Alive; working with Walter.",
+      "classification": "canon",
+      "source_refs": ["wikipedia:en:1001", "wikipedia:en:1004"]
+    },
+    {
+      "id": "hank_schrader",
+      "name": "Hank Schrader",
+      "role": "DEA agent and Walter's brother-in-law.",
+      "personality_traits": ["confident", "persistent"],
+      "goals": [
+        {
+          "text": "Find out who is behind the new methamphetamine in Albuquerque.",
+          "classification": "inferred",
+          "source_refs": ["wikipedia:en:1001"]
+        }
+      ],
+      "known_facts": [
+        {
+          "text": "He is an agent of the Drug Enforcement Administration.",
+          "classification": "canon",
+          "source_refs": ["wikipedia:en:1001", "wikipedia:en:1002"]
+        }
+      ],
+      "status": "Alive; investigating the local drug trade.",
+      "classification": "canon",
+      "source_refs": ["wikipedia:en:1001", "wikipedia:en:1002"]
+    },
+    {
+      "id": "marisol_vega",
+      "name": "Marisol Vega",
+      "role": "Shift manager at the car wash who keeps the daily cash log.",
+      "personality_traits": ["observant", "wary"],
+      "goals": [],
+      "known_facts": [
+        {
+          "text": "She has noticed that the register totals stopped matching the log.",
+          "classification": "generated",
+          "source_refs": []
+        }
+      ],
+      "status": "Alive; an original supporting character.",
+      "classification": "generated",
+      "source_refs": []
+    }
+  ],
+  "factions": [
+    {
+      "id": "dea",
+      "name": "Drug Enforcement Administration",
+      "description": "The federal agency investigating the Albuquerque drug trade.",
+      "member_ids": ["hank_schrader"],
+      "classification": "canon",
+      "source_refs": ["wikipedia:en:1001"]
+    }
+  ],
+  "relationships": [
+    {
+      "from_id": "walter_white",
+      "to_id": "jesse_pinkman",
+      "kind": "business partner",
+      "description": "Walter cooks methamphetamine with his former student Jesse.",
+      "classification": "canon",
+      "source_refs": ["wikipedia:en:1001"]
+    },
+    {
+      "from_id": "hank_schrader",
+      "to_id": "walter_white",
+      "kind": "brother-in-law",
+      "description": "Hank is Walter's brother-in-law and does not suspect him.",
+      "classification": "canon",
+      "source_refs": ["wikipedia:en:1001"]
+    },
+    {
+      "from_id": "player",
+      "to_id": "walter_white",
+      "kind": "coworker",
+      "description": "The player audits the books of the car wash where Walter works.",
+      "classification": "generated",
+      "source_refs": []
+    }
+  ],
+  "important_conflicts": [
+    {
+      "id": "walter_double_life",
+      "name": "Walter's double life",
+      "description": "Walter hides a criminal enterprise from a family that includes a DEA agent.",
+      "party_ids": ["walter_white", "hank_schrader"],
+      "stakes": "Exposure would destroy his family and his freedom.",
+      "classification": "inferred",
+      "source_refs": ["wikipedia:en:1001"]
+    }
+  ],
+  "player_role": {
+    "title": "Forensic accountant",
+    "description": "A freelance accountant hired to tidy the car wash's books before a sale.",
+    "reason_for_presence": "The owner wants clean accounts, so the player spends days on site.",
+    "capabilities": ["Reading financial records", "Spotting inconsistencies", "Asking careful questions"],
+    "connections": [
+      {
+        "character_id": "walter_white",
+        "description": "Walter works the register and is the last person to handle the cash."
+      }
+    ],
+    "classification": "generated",
+    "source_refs": ["wikipedia:en:1001"]
+  },
+  "starting_location": {
+    "location_id": "a1a_car_wash",
+    "rationale": "A small, enclosed workplace where the player naturally meets Walter."
+  },
+  "opening_conflict": {
+    "title": "Cash That Does Not Add Up",
+    "summary": "The register is short again and Walter was the last one on shift. Hank drops by to see his brother-in-law just as the player finds the gap.",
+    "location_id": "a1a_car_wash",
+    "involved_character_ids": ["walter_white", "hank_schrader", "marisol_vega"],
+    "immediate_goal": "Decide what to do with the discrepancy before Hank leaves.",
+    "decision_options": [
+      "Confront Walter privately",
+      "Mention it in front of Hank",
+      "Quietly keep digging"
+    ],
+    "stakes": "The player can earn Walter's trust or draw the attention of a DEA agent.",
+    "estimated_minutes": 15,
+    "classification": "generated",
+    "source_refs": ["wikipedia:en:1001"]
+  }
+}

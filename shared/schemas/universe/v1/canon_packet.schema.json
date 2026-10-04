@@ -1,0 +1,394 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rift://schemas/universe/v1/canon_packet",
+  "$comment": "Generated from canon/src/rift_canon/canon_packet.py by rift_canon.schema_export. Do not edit.",
+  "$defs": {
+    "CanonDocument": {
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "pattern": "^[a-z0-9][a-z0-9:_.-]{0,95}$",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "source_type": {
+          "$ref": "#/$defs/SourceType"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "source_url": {
+          "title": "Source Url",
+          "type": "string"
+        },
+        "retrieved_at": {
+          "format": "date-time",
+          "title": "Retrieved At",
+          "type": "string"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "metadata": {
+          "additionalProperties": true,
+          "default": {},
+          "title": "Metadata",
+          "type": "object"
+        }
+      },
+      "required": [
+        "source_id",
+        "source_type",
+        "title",
+        "source_url",
+        "retrieved_at",
+        "text"
+      ],
+      "title": "CanonDocument",
+      "type": "object"
+    },
+    "CanonFact": {
+      "additionalProperties": false,
+      "properties": {
+        "fact_id": {
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "subject": {
+          "title": "Subject",
+          "type": "string"
+        },
+        "predicate": {
+          "title": "Predicate",
+          "type": "string"
+        },
+        "object": {
+          "title": "Object",
+          "type": "string"
+        },
+        "classification": {
+          "$ref": "#/$defs/Classification",
+          "default": "canon"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        }
+      },
+      "required": [
+        "fact_id",
+        "subject",
+        "predicate",
+        "object",
+        "source_ids",
+        "confidence"
+      ],
+      "title": "CanonFact",
+      "type": "object"
+    },
+    "Classification": {
+      "description": "Where a statement comes from. Only retrieved evidence is ``canon``.",
+      "enum": [
+        "canon",
+        "inferred",
+        "generated"
+      ],
+      "title": "Classification",
+      "type": "string"
+    },
+    "MediaType": {
+      "enum": [
+        "movie",
+        "tv"
+      ],
+      "title": "MediaType",
+      "type": "string"
+    },
+    "PacketProvenance": {
+      "additionalProperties": false,
+      "properties": {
+        "pipeline_version": {
+          "title": "Pipeline Version",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceSummary"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "limits": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "default": {},
+          "title": "Limits",
+          "type": "object"
+        },
+        "notes": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Notes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "pipeline_version",
+        "sources"
+      ],
+      "title": "PacketProvenance",
+      "type": "object"
+    },
+    "ResolvedUniverse": {
+      "additionalProperties": false,
+      "properties": {
+        "universe_id": {
+          "pattern": "^[a-z0-9_]{1,96}$",
+          "title": "Universe Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "media_type": {
+          "$ref": "#/$defs/MediaType"
+        },
+        "release_year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Release Year"
+        },
+        "tmdb_id": {
+          "title": "Tmdb Id",
+          "type": "integer"
+        },
+        "overview": {
+          "title": "Overview",
+          "type": "string"
+        },
+        "original_language": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Original Language"
+        },
+        "provider_metadata": {
+          "additionalProperties": true,
+          "default": {},
+          "title": "Provider Metadata",
+          "type": "object"
+        },
+        "query": {
+          "title": "Query",
+          "type": "string"
+        },
+        "match": {
+          "enum": [
+            "exact",
+            "partial",
+            "fallback"
+          ],
+          "title": "Match",
+          "type": "string"
+        },
+        "ambiguous": {
+          "title": "Ambiguous",
+          "type": "boolean"
+        },
+        "candidates": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TitleCandidate"
+          },
+          "title": "Candidates",
+          "type": "array"
+        }
+      },
+      "required": [
+        "universe_id",
+        "title",
+        "media_type",
+        "release_year",
+        "tmdb_id",
+        "overview",
+        "original_language",
+        "query",
+        "match",
+        "ambiguous"
+      ],
+      "title": "ResolvedUniverse",
+      "type": "object"
+    },
+    "SourceSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "$ref": "#/$defs/SourceType"
+        },
+        "endpoint": {
+          "title": "Endpoint",
+          "type": "string"
+        },
+        "license": {
+          "title": "License",
+          "type": "string"
+        },
+        "documents": {
+          "title": "Documents",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "provider",
+        "endpoint",
+        "license",
+        "documents"
+      ],
+      "title": "SourceSummary",
+      "type": "object"
+    },
+    "SourceType": {
+      "enum": [
+        "tmdb",
+        "wikipedia"
+      ],
+      "title": "SourceType",
+      "type": "string"
+    },
+    "TitleCandidate": {
+      "additionalProperties": false,
+      "description": "One TMDB match, kept so a future UI can offer disambiguation.",
+      "properties": {
+        "tmdb_id": {
+          "title": "Tmdb Id",
+          "type": "integer"
+        },
+        "media_type": {
+          "$ref": "#/$defs/MediaType"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "release_year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Release Year"
+        },
+        "overview": {
+          "default": "",
+          "title": "Overview",
+          "type": "string"
+        },
+        "original_language": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Original Language"
+        },
+        "popularity": {
+          "default": 0.0,
+          "title": "Popularity",
+          "type": "number"
+        },
+        "vote_count": {
+          "default": 0,
+          "title": "Vote Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "tmdb_id",
+        "media_type",
+        "title"
+      ],
+      "title": "TitleCandidate",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "universe": {
+      "$ref": "#/$defs/ResolvedUniverse"
+    },
+    "documents": {
+      "items": {
+        "$ref": "#/$defs/CanonDocument"
+      },
+      "minItems": 1,
+      "title": "Documents",
+      "type": "array"
+    },
+    "facts": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/CanonFact"
+      },
+      "title": "Facts",
+      "type": "array"
+    },
+    "retrieved_at": {
+      "format": "date-time",
+      "title": "Retrieved At",
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "#/$defs/PacketProvenance"
+    }
+  },
+  "required": [
+    "universe",
+    "documents",
+    "retrieved_at",
+    "provenance"
+  ],
+  "title": "CanonPacket",
+  "type": "object"
+}

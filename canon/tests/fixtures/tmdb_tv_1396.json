@@ -1,0 +1,46 @@
+{
+  "adult": false,
+  "created_by": [{"id": 66633, "name": "Vince Gilligan"}],
+  "first_air_date": "2008-01-20",
+  "genres": [{"id": 18, "name": "Drama"}, {"id": 80, "name": "Crime"}],
+  "id": 1396,
+  "in_production": false,
+  "last_air_date": "2013-09-29",
+  "name": "Breaking Bad",
+  "networks": [{"id": 174, "name": "AMC"}],
+  "number_of_episodes": 62,
+  "number_of_seasons": 5,
+  "origin_country": ["US"],
+  "original_language": "en",
+  "original_name": "Breaking Bad",
+  "overview": "A chemistry teacher diagnosed with cancer starts making methamphetamine to provide for his family.",
+  "popularity": 169.5259,
+  "status": "Ended",
+  "tagline": "Change the equation.",
+  "type": "Scripted",
+  "vote_count": 18745,
+  "external_ids": {
+    "imdb_id": "tt0903747",
+    "tvdb_id": 81189,
+    "wikidata_id": "Q1079"
+  },
+  "aggregate_credits": {
+    "cast": [
+      {"id": 17419, "name": "Bryan Cranston", "order": 0, "total_episode_count": 62,
+       "roles": [{"character": "Walter White", "episode_count": 62}]},
+      {"id": 84497, "name": "Aaron Paul", "order": 1, "total_episode_count": 62,
+       "roles": [{"character": "Jesse Pinkman", "episode_count": 62}]},
+      {"id": 134531, "name": "Anna Gunn", "order": 2, "total_episode_count": 62,
+       "roles": [{"character": "Skyler White", "episode_count": 62}]},
+      {"id": 209674, "name": "RJ Mitte", "order": 3, "total_episode_count": 62,
+       "roles": [{"character": "Walter White Jr.", "episode_count": 62}]},
+      {"id": 14329, "name": "Dean Norris", "order": 4, "total_episode_count": 62,
+       "roles": [{"character": "Hank Schrader", "episode_count": 62}]},
+      {"id": 4808, "name": "Giancarlo Esposito", "order": 6, "total_episode_count": 28,
+       "roles": [{"character": "Gustavo Fring", "episode_count": 28}]},
+      {"id": 59410, "name": "Bob Odenkirk", "order": 7, "total_episode_count": 43,
+       "roles": [{"character": "Saul Goodman", "episode_count": 43}]}
+    ],
+    "crew": []
+  }
+}
