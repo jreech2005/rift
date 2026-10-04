@@ -30,6 +30,7 @@ public class Rift : ModuleRules
 		PublicIncludePaths.AddRange(new string[] {
 			"Rift",
 			"Rift/Network",
+			"Rift/Presentation",
 			"Rift/Variant_Horror",
 			"Rift/Variant_Horror/UI",
 			"Rift/Variant_Shooter",

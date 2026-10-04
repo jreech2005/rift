@@ -71,6 +71,18 @@ The WebSocket client itself is Phase 3 work — don't write it yet.
 - [ ] Project builds with `"WebSockets"` in `Rift.Build.cs`
 - [ ] `make doctor` shows `Unreal Engine PASS` and `Unreal project PASS`
 
+## Presentation layer (Phase 3)
+
+`Source/Rift/Presentation/` turns backend `world_event`s into visible behavior: HUD text
+(`RiftHUD`), NPCs that turn and walk (`RiftNPC`, `RiftLocationMarker`), and the `Rift Entity`
+component that gives any actor a backend id and an **E** interaction. Networking
+(`Source/Rift/Network/`) is unchanged and knows nothing about it.
+
+- Assemble the demo level: `docs/UNREAL_HOSPITAL_DEMO.md`
+- Console: `Rift.NetSmoke`, `Rift.Speak <npc_id> <text>`, `Rift.Interact <rift_id>`,
+  `Rift.FakeEvent <event_type> <target or -> [key=value ...]`
+- Test: `Automation RunTests Rift.Presentation`
+
 ## 8 GB RAM tips
 
 - Close browsers/other apps while the editor runs.
