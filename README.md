@@ -31,6 +31,7 @@ make doctor       # toolchain + provider status
 - [CLAUDE.md](CLAUDE.md) — rules for contributors and agents
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - [docs/PROTOCOL.md](docs/PROTOCOL.md)
+- [docs/SCENARIO_BUILDER.md](docs/SCENARIO_BUILDER.md) — title -> WorldBible -> playable scenario
 - [docs/SETUP.md](docs/SETUP.md)
 - [docs/MILESTONES.md](docs/MILESTONES.md)
 - [game/README.md](game/README.md) — Unreal setup

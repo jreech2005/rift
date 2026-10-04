@@ -1,0 +1,162 @@
+{
+  "plan": {
+    "schema_version": 1,
+    "plan_id": "breaking_bad_tv_1396.entry",
+    "universe_id": "breaking_bad_tv_1396",
+    "missions": [
+      {
+        "mission_id": "opening_conflict",
+        "title": "The Hospital Slip",
+        "description": "During a routine late-night check-in, the player catches Walter White fully alert, whispering frantically into a hidden burner cell phone. Before Walter can react, footsteps echo down the corridor—Hank Schrader is arriving for an unscheduled late-night family visit to check on Walt's recovery. Walter desperately needs the player to help him hide the phone and maintain his facade of a confused, semi-conscious patient.",
+        "canon_relation": "generated",
+        "importance": "critical",
+        "related_characters": [
+          "walter_white",
+          "hank_schrader"
+        ],
+        "related_locations": [
+          "albuquerque_hospital"
+        ],
+        "prerequisites": [
+          {
+            "condition": {
+              "type": "location_available",
+              "location_id": "albuquerque_hospital"
+            }
+          },
+          {
+            "condition": {
+              "type": "character_alive",
+              "character_id": "walter_white"
+            }
+          },
+          {
+            "condition": {
+              "type": "character_alive",
+              "character_id": "hank_schrader"
+            }
+          }
+        ],
+        "metadata": {
+          "source": "world_bible.opening_conflict",
+          "giver_npc_id": "walter_white",
+          "player_role": "Hospital Night Orderly",
+          "stakes": "If Walter's faked fugue state is exposed to Hank, the DEA will immediately link him to the investigation, bringing his entire criminal enterprise to a premature end.",
+          "decision_option_1": "Help Walter hide the burner phone under his mattress and tell Hank that Walter has been sleeping peacefully all night.",
+          "decision_option_2": "Subtly draw Hank's attention to the hidden phone, exposing Walter's active state of mind and putting his cover at immediate risk.",
+          "decision_option_3": "Quietly confiscate the phone yourself, promising Walter you will keep his secret in exchange for future leverage or financial compensation."
+        },
+        "objectives": [
+          {
+            "objective_id": "opening_conflict.resolve",
+            "description": "Decide how to handle Walter's hidden phone and the sudden arrival of his DEA brother-in-law.",
+            "completes_when": {
+              "type": "any",
+              "conditions": [
+                {
+                  "type": "flag_is",
+                  "flag": "interacted:choice_1",
+                  "value": true
+                },
+                {
+                  "type": "flag_is",
+                  "flag": "opening_conflict.choice_1",
+                  "value": true
+                },
+                {
+                  "type": "flag_is",
+                  "flag": "interacted:choice_2",
+                  "value": true
+                },
+                {
+                  "type": "flag_is",
+                  "flag": "opening_conflict.choice_2",
+                  "value": true
+                },
+                {
+                  "type": "flag_is",
+                  "flag": "interacted:choice_3",
+                  "value": true
+                },
+                {
+                  "type": "flag_is",
+                  "flag": "opening_conflict.choice_3",
+                  "value": true
+                }
+              ]
+            },
+            "success_effects": [
+              {
+                "type": "set_flag",
+                "flag": "opening_conflict.resolved",
+                "value": true
+              }
+            ]
+          },
+          {
+            "objective_id": "opening_conflict.report",
+            "description": "Report to Walter White.",
+            "prerequisites": [
+              {
+                "condition": {
+                  "type": "objective_is",
+                  "objective_id": "opening_conflict.resolve",
+                  "status": "completed"
+                }
+              }
+            ],
+            "completes_when": {
+              "type": "flag_is",
+              "flag": "interacted:walter_white",
+              "value": true
+            }
+          }
+        ]
+      }
+    ],
+    "checkpoints": [
+      {
+        "checkpoint_id": "opening_conflict_resolved",
+        "title": "The Hospital Slip resolved",
+        "description": "If Walter's faked fugue state is exposed to Hank, the DEA will immediately link him to the investigation, bringing his entire criminal enterprise to a premature end.",
+        "canon_relation": "generated",
+        "importance": "critical",
+        "reached_when": {
+          "type": "mission_is",
+          "mission_id": "opening_conflict",
+          "status": "completed"
+        }
+      }
+    ]
+  },
+  "world": {
+    "locations": [
+      "albuquerque_hospital"
+    ],
+    "characters": {
+      "walter_white": {
+        "location": "albuquerque_hospital"
+      },
+      "hank_schrader": {
+        "location": "albuquerque_hospital"
+      }
+    },
+    "player_location": "albuquerque_hospital",
+    "flags": {
+      "opening_conflict.resolved": false
+    },
+    "truths": {
+      "world_rule_1": {
+        "statement": "High-purity methamphetamine production relies on advanced chemistry, utilizing specialized equipment and hard-to-acquire chemical precursors like methylamine to bypass standard restrictions.",
+        "holds": true,
+        "canon_relation": "canon"
+      },
+      "world_rule_2": {
+        "statement": "The local drug market is highly volatile, drawing immediate and lethal attention from violent street gangs, regional distributors, Mexican cartels, and the Drug Enforcement Administration.",
+        "holds": true,
+        "canon_relation": "canon"
+      }
+    }
+  },
+  "secrets": []
+}

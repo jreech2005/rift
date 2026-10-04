@@ -1,0 +1,177 @@
+{
+  "plan": {
+    "schema_version": 1,
+    "plan_id": "harry_potter_and_the_philosopher_s_stone_movie_671.entry",
+    "universe_id": "harry_potter_and_the_philosopher_s_stone_movie_671",
+    "missions": [
+      {
+        "mission_id": "opening_conflict",
+        "title": "The Crowded Threshold",
+        "description": "As Hagrid escorts Harry Potter into Ollivanders, a cluster of curious onlookers gathers outside the storefront, threatening to overwhelm the small shop and disrupt Harry's wand selection.",
+        "canon_relation": "generated",
+        "importance": "critical",
+        "related_characters": [
+          "mr_ollivander",
+          "rubeus_hagrid",
+          "harry_potter"
+        ],
+        "related_locations": [
+          "ollivanders"
+        ],
+        "prerequisites": [
+          {
+            "condition": {
+              "type": "location_available",
+              "location_id": "ollivanders"
+            }
+          },
+          {
+            "condition": {
+              "type": "character_alive",
+              "character_id": "mr_ollivander"
+            }
+          },
+          {
+            "condition": {
+              "type": "character_alive",
+              "character_id": "rubeus_hagrid"
+            }
+          },
+          {
+            "condition": {
+              "type": "character_alive",
+              "character_id": "harry_potter"
+            }
+          }
+        ],
+        "metadata": {
+          "source": "world_bible.opening_conflict",
+          "giver_npc_id": "mr_ollivander",
+          "player_role": "Wandmaker's Assistant",
+          "stakes": "If the crowd pushes in, privacy and delicate wand stock will be compromised; if handled smoothly, Harry can be fitted safely and Ollivanders retains order.",
+          "decision_option_1": "Bolt the shop door and politely post the private consultation sign to keep gawkers out on Diagon Alley.",
+          "decision_option_2": "Ask Hagrid to stand guard at the entryway to shield Harry from the crowding street while you retrieve wand boxes for Ollivander.",
+          "decision_option_3": "Direct the gathered crowd towards nearby shops while quickly escorting Harry to the quiet rear alcove of the shop."
+        },
+        "objectives": [
+          {
+            "objective_id": "opening_conflict.resolve",
+            "description": "Secure the shop entrance and assist Mr Ollivander in organizing the counter so Harry can safely begin testing wands without outside interference.",
+            "completes_when": {
+              "type": "any",
+              "conditions": [
+                {
+                  "type": "flag_is",
+                  "flag": "interacted:choice_1",
+                  "value": true
+                },
+                {
+                  "type": "flag_is",
+                  "flag": "opening_conflict.choice_1",
+                  "value": true
+                },
+                {
+                  "type": "flag_is",
+                  "flag": "interacted:choice_2",
+                  "value": true
+                },
+                {
+                  "type": "flag_is",
+                  "flag": "opening_conflict.choice_2",
+                  "value": true
+                },
+                {
+                  "type": "flag_is",
+                  "flag": "interacted:choice_3",
+                  "value": true
+                },
+                {
+                  "type": "flag_is",
+                  "flag": "opening_conflict.choice_3",
+                  "value": true
+                }
+              ]
+            },
+            "success_effects": [
+              {
+                "type": "set_flag",
+                "flag": "opening_conflict.resolved",
+                "value": true
+              }
+            ]
+          },
+          {
+            "objective_id": "opening_conflict.report",
+            "description": "Report to Mr Ollivander.",
+            "prerequisites": [
+              {
+                "condition": {
+                  "type": "objective_is",
+                  "objective_id": "opening_conflict.resolve",
+                  "status": "completed"
+                }
+              }
+            ],
+            "completes_when": {
+              "type": "flag_is",
+              "flag": "interacted:mr_ollivander",
+              "value": true
+            }
+          }
+        ]
+      }
+    ],
+    "checkpoints": [
+      {
+        "checkpoint_id": "opening_conflict_resolved",
+        "title": "The Crowded Threshold resolved",
+        "description": "If the crowd pushes in, privacy and delicate wand stock will be compromised; if handled smoothly, Harry can be fitted safely and Ollivanders retains order.",
+        "canon_relation": "generated",
+        "importance": "critical",
+        "reached_when": {
+          "type": "mission_is",
+          "mission_id": "opening_conflict",
+          "status": "completed"
+        }
+      }
+    ]
+  },
+  "world": {
+    "locations": [
+      "ollivanders"
+    ],
+    "characters": {
+      "mr_ollivander": {
+        "location": "ollivanders"
+      },
+      "rubeus_hagrid": {
+        "location": "ollivanders"
+      },
+      "harry_potter": {
+        "location": "ollivanders"
+      }
+    },
+    "player_location": "ollivanders",
+    "flags": {
+      "opening_conflict.resolved": false
+    },
+    "truths": {
+      "world_rule_1": {
+        "statement": "Young witches and wizards must acquire specialized equipment, robes, and wands from dedicated shops such as Ollivanders before attending Hogwarts School of Witchcraft and Wizardry.",
+        "holds": true,
+        "canon_relation": "canon"
+      },
+      "world_rule_2": {
+        "statement": "Gringotts Wizarding Bank is staffed by goblins such as Griphook and the Goblin Head Teller.",
+        "holds": true,
+        "canon_relation": "canon"
+      },
+      "world_rule_3": {
+        "statement": "Muggles are non-magical people who generally remain unaware of magic, while wizards celebrate Harry Potter for surviving the dark wizard Lord Voldemort as an infant.",
+        "holds": true,
+        "canon_relation": "canon"
+      }
+    }
+  },
+  "secrets": []
+}

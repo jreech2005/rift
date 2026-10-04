@@ -6,6 +6,7 @@ Pre-game canon/data pipeline for Rift.
 uv run python -m rift_canon.doctor          # config check, no network
 uv run python -m rift_canon.doctor --live   # + free read-only connectivity checks
 uv run python -m rift_canon.compile "Breaking Bad"   # title -> cached WorldBible
+uv run python -m rift_canon.scenario --world PATH --output PATH   # WorldBible -> runtime scenario
 uv run pytest -q
 ```
 
@@ -27,6 +28,7 @@ Flags: `--no-cache`, `--from-packet PATH`, `--output PATH`, `--json`, `--model I
 | `world_bible.py` | WorldBible V1 models and integrity rules |
 | `cache.py` | validated cache read/write |
 | `compile.py` | CLI |
+| `scenario.py` | `WorldBible` -> runtime scenario for `RIFT_SCENARIO`; deterministic, offline ([`docs/SCENARIO_BUILDER.md`](../docs/SCENARIO_BUILDER.md)) |
 | `schema_export.py` | regenerate `shared/schemas/universe/v1/*.schema.json` |
 | `providers/` | `tmdb_catalog`, `wikipedia`, `gemini_structured` behind the `Provider` interface |
 

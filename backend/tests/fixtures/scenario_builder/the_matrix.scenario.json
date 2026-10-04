@@ -1,0 +1,171 @@
+{
+  "plan": {
+    "schema_version": 1,
+    "plan_id": "the_matrix_movie_603.entry",
+    "universe_id": "the_matrix_movie_603",
+    "missions": [
+      {
+        "mission_id": "opening_conflict",
+        "title": "Power Surge in the Simulation Deck",
+        "description": "While Neo is plugged into a high-intensity combat program, a faulty power coupler in the ship's main drive begins to fail, sending a dangerous electricity spike toward the simulation deck. If the surge reaches Neo's neural console, it will fry his brain; but shutting down the power improperly risks overloading the ship's electromagnetic cloaking, exposing their location to nearby Sentinels.",
+        "canon_relation": "generated",
+        "importance": "critical",
+        "related_characters": [
+          "tank",
+          "dozer",
+          "neo"
+        ],
+        "related_locations": [
+          "nebuchadnezzar"
+        ],
+        "prerequisites": [
+          {
+            "condition": {
+              "type": "location_available",
+              "location_id": "nebuchadnezzar"
+            }
+          },
+          {
+            "condition": {
+              "type": "character_alive",
+              "character_id": "tank"
+            }
+          },
+          {
+            "condition": {
+              "type": "character_alive",
+              "character_id": "dozer"
+            }
+          },
+          {
+            "condition": {
+              "type": "character_alive",
+              "character_id": "neo"
+            }
+          }
+        ],
+        "metadata": {
+          "source": "world_bible.opening_conflict",
+          "giver_npc_id": "dozer",
+          "player_role": "Assistant Hovercraft Engineer",
+          "stakes": "Neo's life and the immediate safety of the Nebuchadnezzar from machine detection.",
+          "decision_option_1": "Manually route the surge into the secondary life-support batteries, preserving the ship's cloaking but temporarily shutting off heating and ventilation in the crew quarters.",
+          "decision_option_2": "Perform a hard emergency shutdown of the training deck, saving Neo's life instantly but releasing a massive electromagnetic pulse that might reveal the hovercraft's coordinates to Sentinels."
+        },
+        "objectives": [
+          {
+            "objective_id": "opening_conflict.resolve",
+            "description": "Isolate the power spike before it destroys Neo's neural connection while keeping the Nebuchadnezzar hidden.",
+            "completes_when": {
+              "type": "any",
+              "conditions": [
+                {
+                  "type": "flag_is",
+                  "flag": "interacted:choice_1",
+                  "value": true
+                },
+                {
+                  "type": "flag_is",
+                  "flag": "opening_conflict.choice_1",
+                  "value": true
+                },
+                {
+                  "type": "flag_is",
+                  "flag": "interacted:choice_2",
+                  "value": true
+                },
+                {
+                  "type": "flag_is",
+                  "flag": "opening_conflict.choice_2",
+                  "value": true
+                }
+              ]
+            },
+            "success_effects": [
+              {
+                "type": "set_flag",
+                "flag": "opening_conflict.resolved",
+                "value": true
+              }
+            ]
+          },
+          {
+            "objective_id": "opening_conflict.report",
+            "description": "Report to Dozer.",
+            "prerequisites": [
+              {
+                "condition": {
+                  "type": "objective_is",
+                  "objective_id": "opening_conflict.resolve",
+                  "status": "completed"
+                }
+              }
+            ],
+            "completes_when": {
+              "type": "flag_is",
+              "flag": "interacted:dozer",
+              "value": true
+            }
+          }
+        ]
+      }
+    ],
+    "checkpoints": [
+      {
+        "checkpoint_id": "opening_conflict_resolved",
+        "title": "Power Surge in the Simulation Deck resolved",
+        "description": "Neo's life and the immediate safety of the Nebuchadnezzar from machine detection.",
+        "canon_relation": "generated",
+        "importance": "critical",
+        "reached_when": {
+          "type": "mission_is",
+          "mission_id": "opening_conflict",
+          "status": "completed"
+        }
+      }
+    ]
+  },
+  "world": {
+    "locations": [
+      "nebuchadnezzar"
+    ],
+    "characters": {
+      "tank": {
+        "location": "nebuchadnezzar"
+      },
+      "dozer": {
+        "location": "nebuchadnezzar"
+      },
+      "neo": {
+        "location": "nebuchadnezzar"
+      }
+    },
+    "player_location": "nebuchadnezzar",
+    "flags": {
+      "opening_conflict.resolved": false
+    },
+    "truths": {
+      "world_rule_1": {
+        "statement": "The Matrix is a simulated reality modeled on human civilization at its peak, built to keep human captives pacified while the machines harvest their bioelectric energy.",
+        "holds": true,
+        "canon_relation": "canon"
+      },
+      "world_rule_2": {
+        "statement": "Natural-born humans from Zion lack the neural ports that machine-bred humans have, meaning they cannot enter the Matrix themselves but can serve as ship operators or support crew.",
+        "holds": true,
+        "canon_relation": "canon"
+      },
+      "world_rule_3": {
+        "statement": "Sentinels are lethal search-and-destroy machines that patrol the sewers of the real world looking for human hovercrafts.",
+        "holds": true,
+        "canon_relation": "canon"
+      },
+      "world_rule_4": {
+        "statement": "Death inside a virtual simulation or the Matrix itself results in physical death in the real world.",
+        "holds": true,
+        "canon_relation": "canon"
+      }
+    }
+  },
+  "secrets": []
+}

@@ -63,7 +63,9 @@ A session runs a story only if the backend was started with a world:
 The WorldBible seeds all three systems: `NpcDirectory::seed_from_world_bible`,
 `WorldSummary::from_world_bible` (the Director's digest) and `narrative::build_initial` (a minimal
 opening plan). A scenario replaces that plan with an authored `NarrativePlan` + `WorldFacts` and
-adds `secrets`. Example: `backend/tests/fixtures/runtime/scenario_burner_phone.json`.
+adds `secrets`. Example: `backend/tests/fixtures/runtime/scenario_burner_phone.json`. A scenario
+can be written by hand or generated from the WorldBible with `rift_canon.scenario`
+([SCENARIO_BUILDER.md](SCENARIO_BUILDER.md)).
 
 A world that is configured but does not load stops the backend at startup. A session without a
 world takes the plain protocol V1 path: `SessionStore::apply_action`, one `world_event`, nothing
