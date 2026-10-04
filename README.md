@@ -10,7 +10,7 @@ diverges based on what you do.
 - **Unreal Engine 5** (`game/`) — rendering and deterministic gameplay
 - **Rust** (`backend/`) — authoritative realtime game state over a persistent WebSocket (JSON protocol V1)
 - **Python** (`canon/`) — pre-game canon/data pipeline
-- Future providers: Gemini, TMDB, TiDB, ElevenLabs, World Labs — server-side only
+- Future providers: Claude, TMDB, TiDB, ElevenLabs, World Labs — server-side only
 
 ## Current phase
 

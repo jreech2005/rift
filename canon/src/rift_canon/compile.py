@@ -4,7 +4,7 @@
     uv run python -m rift_canon.compile "Breaking Bad" --no-cache
     uv run python -m rift_canon.compile --from-packet ../cache/universes/<id>.canon.json
 
-Title -> TMDB resolution -> canon retrieval (CanonPacket) -> Gemini structured
+Title -> TMDB resolution -> canon retrieval (CanonPacket) -> Claude structured
 compilation -> validation -> cache/universes/. Never prints secret values.
 """
 
@@ -32,14 +32,14 @@ from rift_canon.errors import (
     RiftCanonError,
 )
 from rift_canon.providers.base import make_client
-from rift_canon.providers.gemini_structured import GeminiStructured
+from rift_canon.providers.claude_structured import ClaudeStructured
 from rift_canon.providers.tmdb_catalog import TMDBCatalog
 from rift_canon.providers.wikipedia import WikipediaProvider
 from rift_canon.resolve import resolve_title
 from rift_canon.world_bible import WorldBible
 
 MAX_SHOWN_ERRORS = 10
-# Provider failures that usually clear on their own (seen live: Gemini 503 "high demand").
+# Provider failures that usually clear on their own (overload, rate limits).
 TRANSIENT_KINDS = frozenset({"timeout", "rate_limited", "unavailable"})
 Say = Callable[[str], None]
 
@@ -92,10 +92,14 @@ async def _canon_packet(
 
 
 async def _pipeline(
-    args: argparse.Namespace, settings: Settings, client: httpx.AsyncClient, say: Say
+    args: argparse.Namespace,
+    settings: Settings,
+    client: httpx.AsyncClient,
+    llm: ClaudeStructured | None,
+    say: Say,
 ) -> WorldBible:
-    gemini = GeminiStructured(settings)
-    model = args.model or settings.gemini_model
+    llm = llm or ClaudeStructured(settings)
+    model = args.model or settings.anthropic_model
     packet: CanonPacket | None = None
 
     if args.from_packet is not None:
@@ -132,8 +136,8 @@ async def _pipeline(
             say(f"Cache: {cached.status.upper()} ({cached.reason}) - recompiling")
 
     # Fail before any retrieval work if the compile step cannot run.
-    if settings.gemini_api_key is None:
-        raise ConfigurationError("GEMINI_API_KEY is not set")
+    if settings.anthropic_api_key is None:
+        raise ConfigurationError("ANTHROPIC_API_KEY is not set")
 
     say("")
     if packet is None:
@@ -147,7 +151,7 @@ async def _pipeline(
     say("")
     say(f"Compiling WorldBible... ({model})")
     try:
-        bible = await compile_world_bible(client, gemini, packet, model=model)
+        bible = await compile_world_bible(llm, packet, model=model)
     except CompilationError as exc:
         say("WorldBible validation: FAIL")
         saved = cache.save_failed_outputs(args.cache_dir, universe.universe_id, exc.raw_outputs)
@@ -176,7 +180,10 @@ def _written(
 
 
 async def _run(
-    args: argparse.Namespace, settings: Settings, client: httpx.AsyncClient | None
+    args: argparse.Namespace,
+    settings: Settings,
+    client: httpx.AsyncClient | None,
+    llm: ClaudeStructured | None,
 ) -> int:
     def say(line: str) -> None:
         # With --json, stdout carries only the WorldBible.
@@ -185,9 +192,9 @@ async def _run(
     try:
         if client is None:
             async with make_client() as owned:
-                bible = await _pipeline(args, settings, owned, say)
+                bible = await _pipeline(args, settings, owned, llm, say)
         else:
-            bible = await _pipeline(args, settings, client, say)
+            bible = await _pipeline(args, settings, client, llm, say)
     except ConfigurationError as exc:
         print(f"BLOCKED: {exc}. Add it to .env (see .env.example).", file=sys.stderr)
         return 2
@@ -233,7 +240,7 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="print the WorldBible JSON on stdout (progress on stderr)",
     )
-    parser.add_argument("--model", help="Gemini model id (default: GEMINI_MODEL or built-in)")
+    parser.add_argument("--model", help="Claude model id (default: ANTHROPIC_MODEL or built-in)")
     parser.add_argument(
         "--cache-dir",
         type=Path,
@@ -249,6 +256,7 @@ def main(
     *,
     client: httpx.AsyncClient | None = None,
     settings: Settings | None = None,
+    llm: ClaudeStructured | None = None,
 ) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -256,7 +264,7 @@ def main(
         parser.error("give a title or --from-packet PATH")
     # httpx logs request URLs at INFO, and a TMDB v3 key travels in the query string.
     logging.getLogger("httpx").setLevel(logging.WARNING)
-    return asyncio.run(_run(args, settings or load_settings(), client))
+    return asyncio.run(_run(args, settings or load_settings(), client, llm))
 
 
 if __name__ == "__main__":

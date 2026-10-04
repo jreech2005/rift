@@ -4,8 +4,8 @@ import httpx
 
 from rift_canon.config import Settings
 from rift_canon.providers import (
+    ClaudeProvider,
     ElevenLabsProvider,
-    GeminiProvider,
     TiDBProvider,
     TMDBProvider,
     WorldLabsProvider,
@@ -13,6 +13,7 @@ from rift_canon.providers import (
 )
 from rift_canon.providers.base import LiveResult
 from tests.conftest import FAKE_SECRETS, SECRET_VALUES
+from tests.support import sdk_client
 
 
 def test_all_configured(full_settings: Settings) -> None:
@@ -29,6 +30,9 @@ def test_tidb_requires_every_field() -> None:
 
 
 def _run(provider, handler) -> LiveResult:
+    if isinstance(provider, ClaudeProvider):
+        provider.http_client = sdk_client(handler)
+
     async def go() -> LiveResult:
         async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
             return await provider.run_live_check(client)
@@ -41,22 +45,22 @@ def test_live_checks_send_keys_in_expected_place(full_settings: Settings) -> Non
 
     def handler(request: httpx.Request) -> httpx.Response:
         seen[request.url.host] = request
-        return httpx.Response(200, json={"results": [], "models": []})
+        return httpx.Response(200, json={"results": [], "data": []})
 
-    for cls in (TMDBProvider, GeminiProvider, ElevenLabsProvider):
+    for cls in (TMDBProvider, ClaudeProvider, ElevenLabsProvider):
         result = _run(cls(full_settings), handler)
         assert result == LiveResult(True, "HTTP 200")
 
     tmdb = seen["api.themoviedb.org"]
     assert tmdb.method == "GET" and tmdb.url.path == "/3/search/movie"
     assert tmdb.url.params["api_key"] == FAKE_SECRETS["TMDB_API_KEY"]
-    assert seen["generativelanguage.googleapis.com"].method == "GET"
-    assert seen["generativelanguage.googleapis.com"].url.path == "/v1beta/models"
+    assert seen["api.anthropic.com"].method == "GET"
+    assert seen["api.anthropic.com"].url.path == "/v1/models"
     assert seen["api.elevenlabs.io"].method == "GET"
     assert seen["api.elevenlabs.io"].url.path == "/v1/user"
-    gemini = seen["generativelanguage.googleapis.com"]
-    assert gemini.headers["x-goog-api-key"] == FAKE_SECRETS["GEMINI_API_KEY"]
-    assert "key" not in gemini.url.params
+    claude = seen["api.anthropic.com"]
+    assert claude.headers["x-api-key"] == FAKE_SECRETS["ANTHROPIC_API_KEY"]
+    assert FAKE_SECRETS["ANTHROPIC_API_KEY"] not in str(claude.url)
     assert seen["api.elevenlabs.io"].headers["xi-api-key"] == FAKE_SECRETS["ELEVENLABS_API_KEY"]
 
 
@@ -81,7 +85,7 @@ def test_live_failure_does_not_leak_secrets(full_settings: Settings) -> None:
         raise httpx.ConnectError(f"cannot reach {request.url}")
 
     for handler in (unauthorized, boom):
-        for cls in (TMDBProvider, GeminiProvider, ElevenLabsProvider):
+        for cls in (TMDBProvider, ClaudeProvider, ElevenLabsProvider):
             result = _run(cls(full_settings), handler)
             assert result.ok is False
             assert all(secret not in result.detail for secret in SECRET_VALUES)
@@ -109,18 +113,21 @@ def test_unexpected_body_is_a_failure(full_settings: Settings) -> None:
     def not_json(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, text="<html>captive portal</html>")
 
-    for cls in (TMDBProvider, GeminiProvider):
-        assert _run(cls(full_settings), wrong_shape) == LiveResult(
-            False, "HTTP 200, unexpected response shape"
-        )
-        assert _run(cls(full_settings), not_json) == LiveResult(False, "HTTP 200, invalid JSON")
+    assert _run(TMDBProvider(full_settings), wrong_shape) == LiveResult(
+        False, "HTTP 200, unexpected response shape"
+    )
+    assert _run(TMDBProvider(full_settings), not_json) == LiveResult(
+        False, "HTTP 200, invalid JSON"
+    )
+    for handler in (wrong_shape, not_json):
+        assert _run(ClaudeProvider(full_settings), handler).ok is False
 
 
 def test_timeout_is_reported_cleanly(full_settings: Settings) -> None:
     def slow(request: httpx.Request) -> httpx.Response:
         raise httpx.ReadTimeout(f"timed out reading {request.url}")
 
-    for cls in (TMDBProvider, GeminiProvider, ElevenLabsProvider):
+    for cls in (TMDBProvider, ClaudeProvider, ElevenLabsProvider):
         assert _run(cls(full_settings), slow) == LiveResult(False, "timeout")
 
 

@@ -2,15 +2,15 @@
 
 from rift_canon.config import Settings
 from rift_canon.providers.base import LiveResult, Provider
+from rift_canon.providers.claude import ClaudeProvider
 from rift_canon.providers.elevenlabs import ElevenLabsProvider
-from rift_canon.providers.gemini import GeminiProvider
 from rift_canon.providers.tidb import TiDBProvider
 from rift_canon.providers.tmdb import TMDBProvider
 from rift_canon.providers.worldlabs import WorldLabsProvider
 
 PROVIDER_TYPES: tuple[type[Provider], ...] = (
     TMDBProvider,
-    GeminiProvider,
+    ClaudeProvider,
     TiDBProvider,
     ElevenLabsProvider,
     WorldLabsProvider,
@@ -23,8 +23,8 @@ def all_providers(settings: Settings) -> list[Provider]:
 
 __all__ = [
     "PROVIDER_TYPES",
+    "ClaudeProvider",
     "ElevenLabsProvider",
-    "GeminiProvider",
     "LiveResult",
     "Provider",
     "TMDBProvider",

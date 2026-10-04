@@ -14,7 +14,7 @@
              ┆
       Python Pipeline (uv)              pre-game: canon retrieval, WorldBible
              │                          writes cache/universes, cache/worlds, cache/audio
-       future providers                 TMDB · Gemini · TiDB · ElevenLabs · World Labs
+       future providers                 TMDB · Claude · TiDB · ElevenLabs · World Labs
 ```
 
 ## Ownership

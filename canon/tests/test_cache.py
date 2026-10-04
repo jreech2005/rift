@@ -41,7 +41,7 @@ def test_stored_metadata(tmp_path: Path) -> None:
     provenance = raw["provenance"]
     assert provenance["compiler_version"] == COMPILER_VERSION
     assert provenance["retrieved_at"] == "2026-10-03T12:00:00Z"
-    assert provenance["llm"]["provider"] == "gemini"
+    assert provenance["llm"]["provider"] == "anthropic"
     assert provenance["sources"][0] == {
         "source_id": "tmdb:tv:1396",
         "source_type": "tmdb",

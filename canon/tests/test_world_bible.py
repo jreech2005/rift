@@ -208,7 +208,7 @@ def test_provenance_records_every_source() -> None:
     assert provenance.canon_packet_sha256 == packet.sha256()
     assert provenance.retrieved_at == packet.retrieved_at
     assert provenance.compiler_version
-    assert provenance.llm.model == "gemini-3.8-flash"
+    assert provenance.llm.model == "claude-opus-5-5"
 
 
 def test_iter_attributed_reaches_nested_claims() -> None:

@@ -21,8 +21,8 @@ DEFAULT_ENV_FILE = REPO_ROOT / ".env"
 class Settings(BaseModel):
     model_config = ConfigDict(frozen=True, extra="ignore")
 
-    gemini_api_key: SecretStr | None = None
-    gemini_model: str = "gemini-3.8-flash"
+    anthropic_api_key: SecretStr | None = None
+    anthropic_model: str = "claude-opus-5-5"
     tmdb_api_key: SecretStr | None = None
     world_labs_api_key: SecretStr | None = None
     elevenlabs_api_key: SecretStr | None = None

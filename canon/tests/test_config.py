@@ -5,7 +5,7 @@ from tests.conftest import FAKE_SECRETS, SECRET_VALUES
 
 
 def test_empty_mapping_uses_defaults(empty_settings: Settings) -> None:
-    assert empty_settings.gemini_api_key is None
+    assert empty_settings.anthropic_api_key is None
     assert empty_settings.tidb_port is None
     assert empty_settings.backend_host == "127.0.0.1"
     assert empty_settings.backend_port == 3000
@@ -34,21 +34,21 @@ def test_load_settings_reads_env_file(tmp_path: Path, monkeypatch) -> None:
     for key in FAKE_SECRETS:
         monkeypatch.delenv(key, raising=False)
     env_file = tmp_path / ".env"
-    env_file.write_text("GEMINI_API_KEY=from-file\nBACKEND_PORT=4100\n")
+    env_file.write_text("ANTHROPIC_API_KEY=from-file\nBACKEND_PORT=4100\n")
     s = load_settings(env_file)
     assert s.env_file == env_file
-    assert s.gemini_api_key is not None
-    assert s.gemini_api_key.get_secret_value() == "from-file"
+    assert s.anthropic_api_key is not None
+    assert s.anthropic_api_key.get_secret_value() == "from-file"
     assert s.backend_port == 4100
 
 
 def test_process_env_overrides_file(tmp_path: Path, monkeypatch) -> None:
     env_file = tmp_path / ".env"
-    env_file.write_text("GEMINI_API_KEY=from-file\n")
-    monkeypatch.setenv("GEMINI_API_KEY", "from-env")
+    env_file.write_text("ANTHROPIC_API_KEY=from-file\n")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "from-env")
     s = load_settings(env_file)
-    assert s.gemini_api_key is not None
-    assert s.gemini_api_key.get_secret_value() == "from-env"
+    assert s.anthropic_api_key is not None
+    assert s.anthropic_api_key.get_secret_value() == "from-env"
 
 
 def test_missing_env_file(tmp_path: Path) -> None:

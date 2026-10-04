@@ -13,7 +13,7 @@ Unreal  = rendering + deterministic gameplay           (game/, UE5, C++ + Bluepr
 Rust    = realtime authoritative state + orchestration (backend/, Tokio + Axum)
 Python  = pre-game canon/data pipeline                 (canon/, uv + Pydantic + httpx)
 
-Future providers: Gemini, TiDB, TMDB, ElevenLabs, World Labs
+Future providers: Claude, TiDB, TMDB, ElevenLabs, World Labs
 ```
 
 Unreal <-> Rust: one persistent WebSocket, JSON protocol V1 (`docs/PROTOCOL.md`).

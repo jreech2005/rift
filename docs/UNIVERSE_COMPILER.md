@@ -4,7 +4,7 @@ Turns a title into a validated, cached `WorldBible` for one playable slice.
 Runs before gameplay, in Python (`canon/`). Nothing here is on the gameplay path.
 
 ```
-title ─► TMDB resolution ─► canon retrieval ─► CanonPacket V1 ─► Gemini (structured) ─► WorldBible V1 ─► validation ─► cache/universes/
+title ─► TMDB resolution ─► canon retrieval ─► CanonPacket V1 ─► Claude (structured) ─► WorldBible V1 ─► validation ─► cache/universes/
          resolve.py         acquire.py         canon_packet.py   compiler.py            world_bible.py                   cache.py
 ```
 
@@ -21,7 +21,7 @@ Retrieving canon...
 Documents: 8
 Facts: 42
 
-Compiling WorldBible... (gemini-3.8-flash)
+Compiling WorldBible... (claude-opus-5-5)
 WorldBible validation: PASS (attempts: 1)
 Classification: canon 24, inferred 6, generated 3
 Provenance note: locations[2]: name '...' not found in the cited sources; reclassified canon -> inferred
@@ -39,16 +39,16 @@ Written:
 | `--from-packet PATH` | Compile a saved CanonPacket: no TMDB or Wikipedia request |
 | `--output PATH` | Also write the WorldBible to `PATH` |
 | `--json` | WorldBible JSON on stdout, progress on stderr |
-| `--model ID` | Gemini model (default `GEMINI_MODEL`, else `gemini-3.8-flash`) |
+| `--model ID` | Claude model (default `ANTHROPIC_MODEL`, else `claude-opus-5-5`) |
 | `--cache-dir DIR` | Cache directory (default `<repo>/cache/universes`) |
 
 Exit codes: `0` success, `1` pipeline failure, `2` usage error or missing credentials.
-Needs `TMDB_API_KEY` and `GEMINI_API_KEY` in `.env`. Wikipedia needs no key.
+Needs `TMDB_API_KEY` and `ANTHROPIC_API_KEY` in `.env`. Wikipedia needs no key.
 
 ## The rule: evidence is canon, the LLM is not
 
 ```
-source evidence ─► CanonPacket ─► Gemini ─► WorldBible
+source evidence ─► CanonPacket ─► Claude ─► WorldBible
 ```
 
 Every claim-bearing object carries `classification` and `source_refs`.
@@ -125,23 +125,27 @@ Entity ids match `^[a-z0-9_]{1,64}$`, a subset of protocol V1 identifiers, so a 
 character id can later be used as a `target` or `current_location` unchanged. `player` is
 reserved.
 
-## Gemini
+## Claude
 
-`POST /v1beta/interactions` (Interactions API) over httpx, key in the `x-goog-api-key`
-header, `store: false`, schema-constrained JSON via `response_format`. 180 s read timeout.
+Messages API through the official `anthropic` SDK (streamed), key from `ANTHROPIC_API_KEY`,
+effort `medium`. 180 s read timeout per streamed chunk. The WorldBible schema is too large
+for server-side structured output (HTTP 400 "compiled grammar is too large", seen live), so
+the system prompt carries a compact outline of the draft shape, Claude replies with JSON
+text, and local Pydantic + integrity validation is the authority. A request declined by a safety classifier is re-run server-side on
+Anthropic's recommended fallback model (`fallbacks: "default"`); the model that actually
+answered is recorded in `provenance.llm.model`.
 
 - At most **two** generation calls per compile: the first attempt, plus exactly one repair
   call if the output fails JSON, schema or integrity validation. The repair request shows
   the model its rejected output and the error list.
-- Provider errors (timeout, HTTP errors, truncated generation) are reported and not retried.
+- Provider errors (timeout, HTTP errors, truncated generation, refusal) are reported and not
+  retried (SDK retries are off).
 - If both attempts fail, nothing is cached and the rejected output is saved under
   `cache/universes/_failed/` for diagnosis.
 
-Observed live (2026-10-03, free tier): nested arrays with `minItems`/`maxItems` make the
-constrained decoder reject the schema with HTTP 400, so size limits are sent in field
-descriptions and enforced by Pydantic. `gemini-3.8-flash` sometimes answers 503 "high
-demand"; rerun the command — the canon packet is already cached. Free tier allows 5
-requests per minute.
+Size limits and numeric bounds are stated in the outline's comments and enforced by
+Pydantic. On a transient failure (overload, rate
+limit) rerun the command — the canon packet is already cached.
 
 ## Cache
 
@@ -158,8 +162,8 @@ before the run reports success. Cache contents are git-ignored.
 
 ## Tests
 
-`cd canon && uv run pytest -q`. All offline: TMDB, MediaWiki and Gemini are replaced by
-`tests/support.FakeWeb` (httpx `MockTransport`) and fixtures in `tests/fixtures/`.
+`cd canon && uv run pytest -q`. All offline: TMDB, MediaWiki and Claude are replaced by
+`tests/support.FakeWeb` (httpx `MockTransport`, bridged to httpx2 for the SDK) and fixtures in `tests/fixtures/`.
 No test spends API credits.
 
 ## Not in Phase 1

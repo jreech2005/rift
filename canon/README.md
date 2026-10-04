@@ -12,10 +12,10 @@ uv run pytest -q
 ## Universe compiler (Phase 1)
 
 `rift_canon.compile` resolves a title with TMDB, retrieves a bounded set of canon documents
-(TMDB + Wikipedia), builds a `CanonPacket`, has Gemini compile it into a schema-constrained
+(TMDB + Wikipedia), builds a `CanonPacket`, has Claude compile it into a locally validated
 `WorldBible`, validates it and caches it under `../cache/universes/`.
 
-Needs `TMDB_API_KEY` and `GEMINI_API_KEY` in the repo-root `.env`. `GEMINI_MODEL` is optional.
+Needs `TMDB_API_KEY` and `ANTHROPIC_API_KEY` in the repo-root `.env`. `ANTHROPIC_MODEL` is optional.
 Flags: `--no-cache`, `--from-packet PATH`, `--output PATH`, `--json`, `--model ID`, `--cache-dir DIR`.
 
 | Module | Role |
@@ -23,12 +23,12 @@ Flags: `--no-cache`, `--from-packet PATH`, `--output PATH`, `--json`, `--model I
 | `resolve.py` | title -> `ResolvedUniverse` (TMDB) |
 | `acquire.py` | `ResolvedUniverse` -> `CanonPacket` (TMDB details + Wikipedia) |
 | `canon_packet.py` | CanonPacket V1 models |
-| `compiler.py` | `CanonPacket` -> `WorldBible` (Gemini, grounding, one repair retry) |
+| `compiler.py` | `CanonPacket` -> `WorldBible` (Claude, grounding, one repair retry) |
 | `world_bible.py` | WorldBible V1 models and integrity rules |
 | `cache.py` | validated cache read/write |
 | `compile.py` | CLI |
 | `schema_export.py` | regenerate `shared/schemas/universe/v1/*.schema.json` |
-| `providers/` | `tmdb_catalog`, `wikipedia`, `gemini_structured` behind the `Provider` interface |
+| `providers/` | `tmdb_catalog`, `wikipedia`, `claude_structured` behind the `Provider` interface |
 
 Design, contracts and provenance rules: [`docs/UNIVERSE_COMPILER.md`](../docs/UNIVERSE_COMPILER.md).
 

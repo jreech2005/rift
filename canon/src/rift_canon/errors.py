@@ -17,6 +17,7 @@ ProviderErrorKind = Literal[
     "http",  # any other non-success status
     "malformed",  # response was not the expected shape
     "incomplete",  # generation stopped before finishing
+    "refused",  # the model declined to answer
 ]
 
 

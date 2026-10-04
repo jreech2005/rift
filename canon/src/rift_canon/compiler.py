@@ -1,6 +1,7 @@
 """WorldBible compilation: a ``CanonPacket`` becomes a validated ``WorldBible``.
 
-The LLM proposes a draft constrained to a JSON Schema. Code then grounds the
+The LLM proposes a draft as JSON text, which is validated locally (the schema
+is too large for server-side constrained output). Code then grounds the
 draft against the evidence, assigns identity and provenance, and validates the
 result. The LLM is never the source of truth for canon.
 """
@@ -9,14 +10,17 @@ from __future__ import annotations
 
 from collections import Counter, defaultdict
 from datetime import UTC, datetime
-from typing import Any
 
-import httpx
 from pydantic import ValidationError
 
 from rift_canon.canon_packet import CanonPacket, Classification, MediaType
 from rift_canon.errors import CompilationError
-from rift_canon.providers.gemini_structured import GeminiStructured, to_gemini_schema
+from rift_canon.providers.claude_structured import (
+    ClaudeStructured,
+    extract_json,
+    shape_outline,
+    to_claude_schema,
+)
 from rift_canon.text import STOPWORDS, fold
 from rift_canon.world_bible import (
     Character,
@@ -38,6 +42,8 @@ COMPILER_VERSION = "1.0.0"
 MAX_ATTEMPTS = 2
 MAX_REPORTED_ERRORS = 25
 MAX_REPAIR_OUTPUT_CHARS = 60_000
+
+DRAFT_SHAPE = shape_outline(to_claude_schema(WorldBibleDraft.model_json_schema()))
 
 SYSTEM_INSTRUCTION = """\
 You are the Universe Compiler for Rift, a first-person game in which a player
@@ -85,26 +91,13 @@ Format:
     appear as a relationship end or a conflict party.
 12. Every id you reference must be defined in your own output.
 13. Write plain, specific prose. No markdown.
+14. Reply with exactly one JSON object and nothing else: no code fence, no
+    commentary. Use exactly the fields below, all of them, and no others. The
+    comments are guidance and are not part of the output. Every source_refs
+    entry must be one of the valid source_refs values given in the request.
+
 """
-
-
-def draft_schema(source_ids: list[str]) -> dict[str, Any]:
-    """Response schema for the LLM. ``source_refs`` can only name real sources."""
-    schema = to_gemini_schema(WorldBibleDraft.model_json_schema())
-
-    def constrain(node: Any) -> None:
-        if isinstance(node, dict):
-            properties = node.get("properties")
-            if isinstance(properties, dict) and "source_refs" in properties:
-                properties["source_refs"]["items"]["enum"] = source_ids
-            for value in node.values():
-                constrain(value)
-        elif isinstance(node, list):
-            for item in node:
-                constrain(item)
-
-    constrain(schema)
-    return schema
+SYSTEM_INSTRUCTION += DRAFT_SHAPE + "\n"
 
 
 def build_prompt(packet: CanonPacket) -> str:
@@ -251,7 +244,7 @@ def assemble(
                 for doc in packet.documents
             ],
             llm=LLMRecord(
-                provider="gemini", api="interactions", model=model, attempts=attempts, usage=usage
+                provider="anthropic", api="messages", model=model, attempts=attempts, usage=usage
             ),
             classification_counts={c.value: counts.get(c.value, 0) for c in Classification},
             validation_notes=notes,
@@ -270,8 +263,7 @@ def _format_errors(exc: ValidationError) -> list[str]:
 
 
 async def compile_world_bible(
-    client: httpx.AsyncClient,
-    gemini: GeminiStructured,
+    llm: ClaudeStructured,
     packet: CanonPacket,
     *,
     model: str,
@@ -282,24 +274,21 @@ async def compile_world_bible(
     Only a validation failure earns the repair attempt. Provider errors
     (timeouts, HTTP failures) propagate immediately and are not retried.
     """
-    schema = draft_schema(packet.source_ids())
     prompt = build_prompt(packet)
     request = prompt
     usage: Counter[str] = Counter()
     raw_outputs: list[str] = []
     errors: list[str] = []
     for attempt in range(1, MAX_ATTEMPTS + 1):
-        result = await gemini.generate_json(
-            client,
+        result = await llm.generate_json(
             model=model,
-            system_instruction=SYSTEM_INSTRUCTION,
+            system=SYSTEM_INSTRUCTION,
             prompt=request,
-            schema=schema,
         )
         raw_outputs.append(result.text)
         usage.update(result.usage)
         try:
-            draft = WorldBibleDraft.model_validate_json(result.text)
+            draft = WorldBibleDraft.model_validate_json(extract_json(result.text))
             notes = ground(draft, packet)
             return assemble(
                 draft,

@@ -3,7 +3,7 @@ import pytest
 from rift_canon.config import Settings
 
 FAKE_SECRETS = {
-    "GEMINI_API_KEY": "fake-gemini-secret-111",
+    "ANTHROPIC_API_KEY": "fake-anthropic-secret-111",
     "TMDB_API_KEY": "fake-tmdb-secret-222",
     "WORLD_LABS_API_KEY": "fake-worldlabs-secret-333",
     "ELEVENLABS_API_KEY": "fake-eleven-secret-444",

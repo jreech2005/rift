@@ -1,4 +1,4 @@
-"""Offline doubles for TMDB, Wikidata, Wikipedia and Gemini.
+"""Offline doubles for TMDB, Wikidata, Wikipedia and Claude.
 
 Every Phase 1 test runs against ``FakeWeb``; nothing touches the network or
 spends API credits. Wikipedia texts are short synthetic stand-ins.
@@ -15,10 +15,12 @@ from pathlib import Path
 from typing import Any
 
 import httpx
+import httpx2
 
 from rift_canon.canon_packet import CanonPacket
 from rift_canon.compiler import assemble, ground
 from rift_canon.config import Settings
+from rift_canon.providers.claude_structured import ClaudeStructured
 from rift_canon.world_bible import WorldBible, WorldBibleDraft
 from tests.conftest import FAKE_SECRETS
 
@@ -28,7 +30,7 @@ NOW = datetime(2026, 10, 3, 12, 0, tzinfo=UTC)
 TMDB_HOST = "api.themoviedb.org"
 WIKIDATA_HOST = "www.wikidata.org"
 WIKIPEDIA_HOST = "en.wikipedia.org"
-GEMINI_HOST = "generativelanguage.googleapis.com"
+CLAUDE_HOST = "api.anthropic.com"
 
 Handler = Callable[[httpx.Request], httpx.Response]
 
@@ -54,32 +56,70 @@ def valid_draft() -> dict[str, Any]:
     return copy.deepcopy(fixture("world_bible_draft_breaking_bad.json"))
 
 
-def interaction(text: str, status: str = "completed") -> dict[str, Any]:
-    """An Interactions API response whose model output is ``text``.
+def message_stream(text: str, stop_reason: str = "end_turn") -> httpx.Response:
+    """A streamed Messages API response whose model output is ``text``.
 
-    Same shape as a live ``store: false`` response: no id, a ``thought`` step
-    before the ``model_output`` step.
+    Same event sequence as a live response: a thinking block before the text.
     """
-    return {
-        "object": "interaction",
-        "model": "gemini-3.8-flash",
-        "status": status,
-        "created": "2026-10-03T12:00:00Z",
-        "updated": "2026-10-03T12:00:05Z",
-        "service_tier": "standard",
-        "steps": [
-            {"type": "thought", "signature": "opaque"},
-            {"type": "model_output", "content": [{"type": "text", "text": text}]},
-        ],
-        "usage": {
-            "total_input_tokens": 1200,
-            "total_output_tokens": 800,
-            "total_thought_tokens": 100,
-            "total_cached_tokens": 0,
-            "total_tool_use_tokens": 0,
-            "total_tokens": 2100,
-        },
+    message = {
+        "id": "msg_test",
+        "type": "message",
+        "role": "assistant",
+        "model": "claude-opus-5-5",
+        "content": [],
+        "stop_reason": None,
+        "stop_sequence": None,
+        "usage": {"input_tokens": 1200, "output_tokens": 1},
     }
+    thinking = {"type": "thinking", "thinking": "", "signature": ""}
+    events: list[dict[str, Any]] = [
+        {"type": "message_start", "message": message},
+        {"type": "content_block_start", "index": 0, "content_block": thinking},
+        {
+            "type": "content_block_delta",
+            "index": 0,
+            "delta": {"type": "signature_delta", "signature": "opaque"},
+        },
+        {"type": "content_block_stop", "index": 0},
+        {"type": "content_block_start", "index": 1, "content_block": {"type": "text", "text": ""}},
+        {"type": "content_block_delta", "index": 1, "delta": {"type": "text_delta", "text": text}},
+        {"type": "content_block_stop", "index": 1},
+        {
+            "type": "message_delta",
+            "delta": {"stop_reason": stop_reason, "stop_sequence": None},
+            "usage": {"output_tokens": 800},
+        },
+        {"type": "message_stop"},
+    ]
+    body = "".join(f"event: {event['type']}\ndata: {json.dumps(event)}\n\n" for event in events)
+    return httpx.Response(200, headers={"content-type": "text/event-stream"}, text=body)
+
+
+def sdk_client(handler: Handler) -> httpx2.AsyncClient:
+    """An httpx2 client for the Anthropic SDK, answered by an httpx ``handler``."""
+
+    def bridge(request: httpx2.Request) -> httpx2.Response:
+        try:
+            response = handler(
+                httpx.Request(
+                    request.method,
+                    str(request.url),
+                    headers=list(request.headers.items()),
+                    content=request.content,
+                    extensions=request.extensions,
+                )
+            )
+        except httpx.TimeoutException as exc:
+            raise httpx2.ReadTimeout(str(exc)) from None
+        except httpx.HTTPError as exc:
+            raise httpx2.ConnectError(str(exc)) from None
+        return httpx2.Response(
+            response.status_code,
+            headers={"content-type": response.headers.get("content-type", "")},
+            content=response.content,
+        )
+
+    return httpx2.AsyncClient(transport=httpx2.MockTransport(bridge))
 
 
 SEARCHES = {
@@ -219,20 +259,20 @@ def wiki_page(title: str | None) -> dict[str, Any]:
 
 
 class FakeWeb:
-    """Routes requests by host and records them. ``gemini`` is a queue of replies."""
+    """Routes requests by host and records them. ``claude`` is a queue of replies."""
 
     def __init__(
         self,
-        gemini: list[httpx.Response | dict[str, Any] | str] | None = None,
+        claude: list[httpx.Response | dict[str, Any] | str] | None = None,
         **overrides: Handler,
     ) -> None:
         self.requests: list[httpx.Request] = []
-        self.gemini = list(gemini or [])
+        self.claude = list(claude or [])
         self.routes: dict[str, Handler] = {
             TMDB_HOST: overrides.get("tmdb", self._tmdb),
             WIKIDATA_HOST: overrides.get("wikidata", self._wikidata),
             WIKIPEDIA_HOST: overrides.get("wikipedia", self._wikipedia),
-            GEMINI_HOST: overrides.get("gemini_handler", self._gemini),
+            CLAUDE_HOST: overrides.get("claude_handler", self._claude),
         }
 
     def __call__(self, request: httpx.Request) -> httpx.Response:
@@ -245,8 +285,12 @@ class FakeWeb:
     def sent_to(self, host: str) -> list[httpx.Request]:
         return [request for request in self.requests if request.url.host == host]
 
-    def gemini_bodies(self) -> list[dict[str, Any]]:
-        return [json.loads(request.content) for request in self.sent_to(GEMINI_HOST)]
+    def llm(self, settings: Settings | None = None) -> ClaudeStructured:
+        """The Claude provider, with its SDK answered by this fake."""
+        return ClaudeStructured(settings or fake_settings(), http_client=sdk_client(self))
+
+    def claude_bodies(self) -> list[dict[str, Any]]:
+        return [json.loads(request.content) for request in self.sent_to(CLAUDE_HOST)]
 
     @staticmethod
     def _tmdb(request: httpx.Request) -> httpx.Response:
@@ -275,15 +319,13 @@ class FakeWeb:
             return httpx.Response(200, json=wiki_page(WIKI_SEARCH.get(params["gsrsearch"])))
         return httpx.Response(200, json=wiki_page(params["titles"]))
 
-    def _gemini(self, request: httpx.Request) -> httpx.Response:
-        if not self.gemini:
-            raise AssertionError("unexpected Gemini call")
-        reply = self.gemini.pop(0)
+    def _claude(self, request: httpx.Request) -> httpx.Response:
+        if not self.claude:
+            raise AssertionError("unexpected Claude call")
+        reply = self.claude.pop(0)
         if isinstance(reply, httpx.Response):
             return reply
-        if isinstance(reply, str):
-            return httpx.Response(200, json=interaction(reply))
-        return httpx.Response(200, json=interaction(json.dumps(reply)))
+        return message_stream(reply if isinstance(reply, str) else json.dumps(reply))
 
 
 def valid_bible(draft: dict[str, Any] | None = None) -> WorldBible:
@@ -294,9 +336,9 @@ def valid_bible(draft: dict[str, Any] | None = None) -> WorldBible:
     return assemble(
         model,
         packet,
-        model="gemini-3.8-flash",
+        model="claude-opus-5-5",
         attempts=1,
-        usage={"total_tokens": 2100},
+        usage={"total_tokens": 2000},
         notes=notes,
         compiled_at=NOW,
     )

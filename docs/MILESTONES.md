@@ -21,7 +21,7 @@ Verified 2026-10-03 on macOS 15.2 / Apple M3.
       — engine is installed; not yet verified by QA (owner: Unreal engineer)
 
 ## Phase 1 — Universe Compiler
-Python: resolve a title (TMDB), retrieve canon, generate a `WorldBible` (Gemini),
+Python: resolve a title (TMDB), retrieve canon, generate a `WorldBible` (Claude),
 cache it under `cache/universes/`. Optional TiDB persistence.
 
 ## Phase 2 — Director Engine

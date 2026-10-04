@@ -4,6 +4,7 @@ import pytest
 from rift_canon import doctor
 from rift_canon.config import Settings
 from tests.conftest import FAKE_SECRETS, SECRET_VALUES
+from tests.support import sdk_client
 
 
 def _status(lines: list[str], label: str) -> str:
@@ -16,13 +17,13 @@ def test_reports_missing(empty_settings: Settings) -> None:
     assert healthy
     assert _status(lines, "Python") == "PASS"
     assert _status(lines, "Environment") == "WARN"
-    for name in ("TMDB", "Gemini", "TiDB", "ElevenLabs", "World Labs"):
+    for name in ("TMDB", "Claude", "TiDB", "ElevenLabs", "World Labs"):
         assert _status(lines, name) == "MISSING"
 
 
 def test_reports_configured_without_secrets(full_settings: Settings) -> None:
     lines, _ = doctor.report(full_settings)
-    for name in ("TMDB", "Gemini", "TiDB", "ElevenLabs", "World Labs"):
+    for name in ("TMDB", "Claude", "TiDB", "ElevenLabs", "World Labs"):
         assert _status(lines, name) == "CONFIGURED"
     output = "\n".join(lines)
     for secret in SECRET_VALUES:
@@ -41,13 +42,14 @@ def test_main_never_prints_secrets(monkeypatch, capsys: pytest.CaptureFixture[st
 
 def _live_report(monkeypatch, settings: Settings, handler) -> tuple[list[str], bool]:
     """Run the live doctor against a mock transport (TiDB's TCP check is stubbed)."""
-    from rift_canon.providers import TiDBProvider
+    from rift_canon.providers import ClaudeProvider, TiDBProvider
     from rift_canon.providers.base import LiveResult
 
     async def tidb_ok(self, client) -> LiveResult:
         return LiveResult(True, "TCP reachable (auth not tested)")
 
     monkeypatch.setattr(TiDBProvider, "live_check", tidb_ok)
+    monkeypatch.setattr(ClaudeProvider, "http_client", sdk_client(handler))
     monkeypatch.setattr(
         doctor, "make_client", lambda: httpx.AsyncClient(transport=httpx.MockTransport(handler))
     )
@@ -56,11 +58,11 @@ def _live_report(monkeypatch, settings: Settings, handler) -> tuple[list[str], b
 
 def test_live_success_reports_tested(monkeypatch, full_settings: Settings) -> None:
     def ok(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200, json={"results": [], "models": []})
+        return httpx.Response(200, json={"results": [], "models": [], "data": []})
 
     lines, healthy = _live_report(monkeypatch, full_settings, ok)
     assert healthy
-    for name in ("TMDB", "Gemini", "TiDB", "ElevenLabs"):
+    for name in ("TMDB", "Claude", "TiDB", "ElevenLabs"):
         assert _status(lines, name) == "TESTED"
     # No free endpoint: World Labs is never live-tested, so it stays CONFIGURED.
     assert _status(lines, "World Labs") == "CONFIGURED"
@@ -74,7 +76,7 @@ def test_live_failure_reports_failed_without_secrets(monkeypatch, full_settings:
 
     lines, healthy = _live_report(monkeypatch, full_settings, failing)
     assert not healthy
-    for name in ("TMDB", "Gemini", "ElevenLabs"):
+    for name in ("TMDB", "Claude", "ElevenLabs"):
         assert _status(lines, name) == "FAILED"
     output = "\n".join(lines)
     assert "timeout" in next(line for line in lines if line.startswith("TMDB"))
@@ -89,7 +91,7 @@ def test_live_missing_providers_make_no_requests(monkeypatch, empty_settings: Se
 
     lines, healthy = _live_report(monkeypatch, empty_settings, handler)
     assert healthy
-    for name in ("TMDB", "Gemini", "TiDB", "ElevenLabs", "World Labs"):
+    for name in ("TMDB", "Claude", "TiDB", "ElevenLabs", "World Labs"):
         assert _status(lines, name) == "MISSING"
 
 

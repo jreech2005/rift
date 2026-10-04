@@ -80,7 +80,7 @@ See `.env.example`. Provider keys are read only by server-side code.
 
 | Variable | Used by | Notes |
 |---|---|---|
-| `GEMINI_API_KEY` | canon | live check: list models (free, no generation) |
+| `ANTHROPIC_API_KEY` | canon | live check: list models (free, no generation) |
 | `TMDB_API_KEY` | canon | v3 key or v4 read token; live check: one `/3/search/movie` request |
 | `ELEVENLABS_API_KEY` | canon | live check: `/v1/user` account lookup (no credits) |
 | `WORLD_LABS_API_KEY` | canon | configuration only — no live check (avoids paid generation) |
