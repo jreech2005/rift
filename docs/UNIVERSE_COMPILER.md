@@ -42,6 +42,8 @@ Written:
 | `--model ID` | Gemini model (default `GEMINI_MODEL`, else `gemini-3.8-flash`) |
 | `--cache-dir DIR` | Cache directory (default `<repo>/cache/universes`) |
 
+Next step: [SCENARIO_BUILDER.md](SCENARIO_BUILDER.md) turns the WorldBible into a runtime scenario.
+
 Exit codes: `0` success, `1` pipeline failure, `2` usage error or missing credentials.
 Needs `TMDB_API_KEY` and `GEMINI_API_KEY` in `.env`. Wikipedia needs no key.
 

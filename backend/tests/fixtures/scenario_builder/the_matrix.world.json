@@ -1,0 +1,498 @@
+{
+  "schema_version": 1,
+  "universe": {
+    "universe_id": "the_matrix_movie_603",
+    "title": "The Matrix",
+    "media_type": "movie",
+    "release_year": 1999,
+    "tmdb_id": 603,
+    "genres": [
+      "Action",
+      "Science Fiction"
+    ],
+    "era": {
+      "text": "The late twenty-second century, approximately the year 2199, long after humanity lost a war against artificially intelligent machines.",
+      "classification": "canon",
+      "source_refs": [
+        "tmdb:movie:603",
+        "wikipedia:en:30007"
+      ]
+    },
+    "setting": {
+      "text": "The real world, a devastated wasteland where the surviving free humans live underground in the city of Zion and operate hovercrafts through the cold sewers of the ruined Earth.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:30007",
+        "wikipedia:en:343432"
+      ]
+    }
+  },
+  "world_rules": [
+    {
+      "text": "The Matrix is a simulated reality modeled on human civilization at its peak, built to keep human captives pacified while the machines harvest their bioelectric energy.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:30007"
+      ]
+    },
+    {
+      "text": "Natural-born humans from Zion lack the neural ports that machine-bred humans have, meaning they cannot enter the Matrix themselves but can serve as ship operators or support crew.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:4329900"
+      ]
+    },
+    {
+      "text": "Sentinels are lethal search-and-destroy machines that patrol the sewers of the real world looking for human hovercrafts.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:30007",
+        "wikipedia:en:4329900"
+      ]
+    },
+    {
+      "text": "Death inside a virtual simulation or the Matrix itself results in physical death in the real world.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:30007"
+      ]
+    }
+  ],
+  "locations": [
+    {
+      "id": "nebuchadnezzar",
+      "name": "Nebuchadnezzar",
+      "description": "A real-world hovercraft captained by Morpheus, heavily armored and equipped with neural broadcast technology, serving as a mobile home and staging ground for the rebel crew.",
+      "importance": "primary",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:30007",
+        "wikipedia:en:343432"
+      ]
+    },
+    {
+      "id": "matrix_simulation_deck",
+      "name": "Matrix Simulation Deck",
+      "description": "The compartment on the Nebuchadnezzar containing the operator console, computer core, and padded chairs where crew members connect their neural ports to enter training simulations or the Matrix.",
+      "importance": "secondary",
+      "classification": "inferred",
+      "source_refs": [
+        "wikipedia:en:4329900",
+        "wikipedia:en:231242"
+      ]
+    }
+  ],
+  "characters": [
+    {
+      "id": "morpheus",
+      "name": "Morpheus",
+      "role": "Captain of the Nebuchadnezzar",
+      "personality_traits": [
+        "inspirational",
+        "leader",
+        "rational",
+        "faithful"
+      ],
+      "goals": [
+        {
+          "text": "Find and guide the One to end the war between humanity and the machines.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:343432"
+          ]
+        }
+      ],
+      "known_facts": [
+        {
+          "text": "He spent years searching the Matrix for Thomas Anderson after receiving a prophecy from the Oracle.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:343432"
+          ]
+        }
+      ],
+      "status": "Aboard the Nebuchadnezzar, supervising Neo's integration and training.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:231242",
+        "wikipedia:en:343432"
+      ],
+      "relationships": [
+        {
+          "other_id": "neo",
+          "direction": "outgoing",
+          "kind": "mentor",
+          "description": "Morpheus firmly believes Neo is the prophesied One who will free humanity, risking everything to rescue him.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:30007",
+            "wikipedia:en:343432"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "neo",
+      "name": "Neo",
+      "role": "The newly freed computer hacker believed to be the One",
+      "personality_traits": [
+        "disillusioned",
+        "searching",
+        "quiet",
+        "determined"
+      ],
+      "goals": [
+        {
+          "text": "Learn the truth about the Matrix and understand his predicted role.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:30007",
+            "wikipedia:en:231242"
+          ]
+        }
+      ],
+      "known_facts": [
+        {
+          "text": "He was formerly Thomas A. Anderson, a programmer for Meta Cortex and an illicit hacker.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:231242"
+          ]
+        }
+      ],
+      "status": "Recovering from muscular atrophy and undergoing combat training via direct software uploads.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:231242"
+      ],
+      "relationships": [
+        {
+          "other_id": "morpheus",
+          "direction": "incoming",
+          "kind": "mentor",
+          "description": "Morpheus firmly believes Neo is the prophesied One who will free humanity, risking everything to rescue him.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:30007",
+            "wikipedia:en:343432"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dozer",
+      "name": "Dozer",
+      "role": "Pilot and chef of the Nebuchadnezzar",
+      "personality_traits": [
+        "practical",
+        "protective",
+        "hardworking"
+      ],
+      "goals": [
+        {
+          "text": "Keep the Nebuchadnezzar running smoothly and keep the crew healthy.",
+          "classification": "inferred",
+          "source_refs": [
+            "wikipedia:en:4329900"
+          ]
+        }
+      ],
+      "known_facts": [
+        {
+          "text": "He was born free in Zion and lacks the physical ports required to ever enter the Matrix.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:4329900"
+          ]
+        }
+      ],
+      "status": "Managing the ship's engines, flight systems, and physical maintenance.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:4329900"
+      ],
+      "relationships": [
+        {
+          "other_id": "tank",
+          "direction": "incoming",
+          "kind": "brother",
+          "description": "Brothers born in the free city of Zion who work together to keep the Nebuchadnezzar and its crew operating.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:4329900"
+          ]
+        },
+        {
+          "other_id": "player",
+          "direction": "incoming",
+          "kind": "apprentice",
+          "description": "Dozer is the player's direct supervisor and mentor in hovercraft maintenance.",
+          "classification": "generated",
+          "source_refs": []
+        }
+      ]
+    },
+    {
+      "id": "tank",
+      "name": "Tank",
+      "role": "Operator of the Nebuchadnezzar",
+      "personality_traits": [
+        "enthusiastic",
+        "loyal",
+        "skilled"
+      ],
+      "goals": [
+        {
+          "text": "Safely guide the crew through their simulation programs and operations inside the Matrix.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:4329900"
+          ]
+        }
+      ],
+      "known_facts": [
+        {
+          "text": "He is Dozer's brother, also born free in Zion without neural ports.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:4329900"
+          ]
+        }
+      ],
+      "status": "Seated at the operator console, monitoring Neo's training programs.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:4329900"
+      ],
+      "relationships": [
+        {
+          "other_id": "dozer",
+          "direction": "outgoing",
+          "kind": "brother",
+          "description": "Brothers born in the free city of Zion who work together to keep the Nebuchadnezzar and its crew operating.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:4329900"
+          ]
+        },
+        {
+          "other_id": "player",
+          "direction": "incoming",
+          "kind": "colleague",
+          "description": "The player helps Tank manage the power flow to the operator station during heavy training loads.",
+          "classification": "generated",
+          "source_refs": []
+        }
+      ]
+    }
+  ],
+  "factions": [
+    {
+      "id": "nebuchadnezzar_crew",
+      "name": "Nebuchadnezzar Crew",
+      "description": "A tightly knit group of underground human rebels operating a hovercraft to hack into the Matrix and free human minds.",
+      "member_ids": [
+        "morpheus",
+        "neo",
+        "dozer",
+        "tank"
+      ],
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:30007",
+        "wikipedia:en:4329900"
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "from_id": "morpheus",
+      "to_id": "neo",
+      "kind": "mentor",
+      "description": "Morpheus firmly believes Neo is the prophesied One who will free humanity, risking everything to rescue him.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:30007",
+        "wikipedia:en:343432"
+      ]
+    },
+    {
+      "from_id": "tank",
+      "to_id": "dozer",
+      "kind": "brother",
+      "description": "Brothers born in the free city of Zion who work together to keep the Nebuchadnezzar and its crew operating.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:4329900"
+      ]
+    },
+    {
+      "from_id": "player",
+      "to_id": "dozer",
+      "kind": "apprentice",
+      "description": "Dozer is the player's direct supervisor and mentor in hovercraft maintenance.",
+      "classification": "generated",
+      "source_refs": []
+    },
+    {
+      "from_id": "player",
+      "to_id": "tank",
+      "kind": "colleague",
+      "description": "The player helps Tank manage the power flow to the operator station during heavy training loads.",
+      "classification": "generated",
+      "source_refs": []
+    }
+  ],
+  "important_conflicts": [
+    {
+      "id": "machine_war",
+      "name": "The Machine War",
+      "description": "The ongoing existential conflict between the free humans of Zion and the artificially intelligent machines that hunt them in the real world and enslave them in the Matrix.",
+      "party_ids": [
+        "nebuchadnezzar_crew"
+      ],
+      "stakes": "The survival of the human race and the liberation of billions of enslaved human minds.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:30007"
+      ]
+    }
+  ],
+  "player_role": {
+    "title": "Assistant Hovercraft Engineer",
+    "description": "A natural-born human from Zion who, like Dozer and Tank, was born without neural ports. You serve as Dozer's mechanical apprentice aboard the Nebuchadnezzar, ensuring the physical vessel remains functional.",
+    "reason_for_presence": "You are stationed on the hovercraft's lower decks, assisting with manual repairs and monitoring the power grid while the crew is occupied with training the newly rescued Neo.",
+    "capabilities": [
+      "diagnosing mechanical failures on the hovercraft",
+      "operating Zion power routers and battery cells",
+      "performing emergency manual system overrides"
+    ],
+    "connections": [
+      {
+        "character_id": "dozer",
+        "description": "Dozer is your supervisor who teaches you how to maintain the hovercraft's engines and life support systems."
+      },
+      {
+        "character_id": "tank",
+        "description": "Tank relies on you to ensure that the heavy power draws from the simulation training consoles do not blow the ship's breakers."
+      }
+    ],
+    "classification": "generated",
+    "source_refs": [
+      "wikipedia:en:4329900"
+    ]
+  },
+  "starting_location": {
+    "location_id": "nebuchadnezzar",
+    "rationale": "The player is on duty in the engineering bay of the Nebuchadnezzar when a critical system failure occurs."
+  },
+  "opening_conflict": {
+    "title": "Power Surge in the Simulation Deck",
+    "summary": "While Neo is plugged into a high-intensity combat program, a faulty power coupler in the ship's main drive begins to fail, sending a dangerous electricity spike toward the simulation deck. If the surge reaches Neo's neural console, it will fry his brain; but shutting down the power improperly risks overloading the ship's electromagnetic cloaking, exposing their location to nearby Sentinels.",
+    "location_id": "nebuchadnezzar",
+    "involved_character_ids": [
+      "tank",
+      "dozer",
+      "neo"
+    ],
+    "immediate_goal": "Isolate the power spike before it destroys Neo's neural connection while keeping the Nebuchadnezzar hidden.",
+    "decision_options": [
+      "Manually route the surge into the secondary life-support batteries, preserving the ship's cloaking but temporarily shutting off heating and ventilation in the crew quarters.",
+      "Perform a hard emergency shutdown of the training deck, saving Neo's life instantly but releasing a massive electromagnetic pulse that might reveal the hovercraft's coordinates to Sentinels."
+    ],
+    "stakes": "Neo's life and the immediate safety of the Nebuchadnezzar from machine detection.",
+    "estimated_minutes": 15,
+    "classification": "generated",
+    "source_refs": [
+      "wikipedia:en:30007",
+      "wikipedia:en:4329900",
+      "wikipedia:en:231242"
+    ]
+  },
+  "timeline_context": {
+    "canon_cutoff": "After Neo is unplugged from the Matrix, during his early training on the Nebuchadnezzar.",
+    "summary": "Thomas Anderson, operating as the hacker Neo, was contacted by Trinity and Morpheus. After choosing the red pill, he was unplugged from his pod, rescued by the crew of the Nebuchadnezzar, and has just begun recovering from physical atrophy to begin training.",
+    "classification": "inferred",
+    "source_refs": [
+      "wikipedia:en:30007",
+      "wikipedia:en:231242"
+    ]
+  },
+  "provenance": {
+    "compiler_version": "1.0.0",
+    "compiled_at": "2026-10-04T14:11:25.891095Z",
+    "retrieved_at": "2026-10-04T14:10:19.711007Z",
+    "canon_packet_sha256": "7038399a7ab024c850604470fee6ef3bfbdf20a2a28ab7f70a9c3fccb94fae13",
+    "sources": [
+      {
+        "source_id": "tmdb:movie:603",
+        "source_type": "tmdb",
+        "title": "The Matrix",
+        "source_url": "https://www.themoviedb.org/movie/603",
+        "retrieved_at": "2026-10-04T14:10:19.711007Z"
+      },
+      {
+        "source_id": "wikipedia:en:30007",
+        "source_type": "wikipedia",
+        "title": "The Matrix",
+        "source_url": "https://en.wikipedia.org/wiki/The_Matrix",
+        "retrieved_at": "2026-10-04T14:10:19.711007Z"
+      },
+      {
+        "source_id": "wikipedia:en:4329900",
+        "source_type": "wikipedia",
+        "title": "List of Matrix series characters",
+        "source_url": "https://en.wikipedia.org/wiki/List_of_Matrix_series_characters",
+        "retrieved_at": "2026-10-04T14:10:19.711007Z"
+      },
+      {
+        "source_id": "wikipedia:en:231242",
+        "source_type": "wikipedia",
+        "title": "Neo (The Matrix)",
+        "source_url": "https://en.wikipedia.org/wiki/Neo_(The_Matrix)",
+        "retrieved_at": "2026-10-04T14:10:19.711007Z"
+      },
+      {
+        "source_id": "wikipedia:en:343432",
+        "source_type": "wikipedia",
+        "title": "Morpheus (The Matrix)",
+        "source_url": "https://en.wikipedia.org/wiki/Morpheus_(The_Matrix)",
+        "retrieved_at": "2026-10-04T14:10:19.711007Z"
+      },
+      {
+        "source_id": "wikipedia:en:487845",
+        "source_type": "wikipedia",
+        "title": "Trinity (The Matrix)",
+        "source_url": "https://en.wikipedia.org/wiki/Trinity_(The_Matrix)",
+        "retrieved_at": "2026-10-04T14:10:19.711007Z"
+      },
+      {
+        "source_id": "wikipedia:en:477591",
+        "source_type": "wikipedia",
+        "title": "The Oracle (The Matrix)",
+        "source_url": "https://en.wikipedia.org/wiki/The_Oracle_(The_Matrix)",
+        "retrieved_at": "2026-10-04T14:10:19.711007Z"
+      }
+    ],
+    "llm": {
+      "provider": "gemini",
+      "api": "interactions",
+      "model": "gemini-3.5-flash",
+      "attempts": 1,
+      "usage": {
+        "total_tokens": 17965,
+        "total_input_tokens": 12175,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 3386,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 2404
+      }
+    },
+    "classification_counts": {
+      "canon": 22,
+      "inferred": 3,
+      "generated": 4
+    },
+    "validation_notes": []
+  }
+}

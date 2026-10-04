@@ -1,0 +1,529 @@
+{
+  "schema_version": 1,
+  "universe": {
+    "universe_id": "harry_potter_and_the_philosopher_s_stone_movie_671",
+    "title": "Harry Potter and the Philosopher's Stone",
+    "media_type": "movie",
+    "release_year": 2001,
+    "tmdb_id": 671,
+    "genres": [
+      "Adventure",
+      "Fantasy"
+    ],
+    "era": {
+      "text": "Harry Potter's first year of formal wizarding education at Hogwarts School of Witchcraft and Wizardry.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:667361",
+        "tmdb:movie:671"
+      ]
+    },
+    "setting": {
+      "text": "Diagon Alley, a bustling magical shopping street in London where Hogwarts students purchase their supplies, wands, and school equipment.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:667361",
+        "wikipedia:en:68781355"
+      ]
+    }
+  },
+  "world_rules": [
+    {
+      "text": "Young witches and wizards must acquire specialized equipment, robes, and wands from dedicated shops such as Ollivanders before attending Hogwarts School of Witchcraft and Wizardry.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:667361",
+        "wikipedia:en:68781355"
+      ]
+    },
+    {
+      "text": "Gringotts Wizarding Bank is staffed by goblins such as Griphook and the Goblin Head Teller.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:667361",
+        "wikipedia:en:68781355"
+      ]
+    },
+    {
+      "text": "Muggles are non-magical people who generally remain unaware of magic, while wizards celebrate Harry Potter for surviving the dark wizard Lord Voldemort as an infant.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:667361",
+        "wikipedia:en:68781355"
+      ]
+    }
+  ],
+  "locations": [
+    {
+      "id": "ollivanders",
+      "name": "Ollivanders",
+      "description": "A celebrated wand shop in Diagon Alley owned and operated by the esteemed wandmaker Mr. Ollivander.",
+      "importance": "primary",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:667361",
+        "wikipedia:en:68781355"
+      ]
+    },
+    {
+      "id": "diagon_alley",
+      "name": "Diagon Alley",
+      "description": "A cobblestone wizarding thoroughfare in London lined with magical establishments, wand shops, robe makers, and Gringotts Wizarding Bank.",
+      "importance": "secondary",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:667361",
+        "wikipedia:en:68781355"
+      ]
+    },
+    {
+      "id": "the_leaky_cauldron",
+      "name": "The Leaky Cauldron",
+      "description": "A wizarding inn and pub kept by Tom, serving as an entrance and bridge between the non-magical world and Diagon Alley.",
+      "importance": "background",
+      "classification": "inferred",
+      "source_refs": [
+        "wikipedia:en:667361"
+      ]
+    },
+    {
+      "id": "gringotts_wizarding_bank",
+      "name": "Gringotts Wizarding Bank",
+      "description": "The wizarding bank located in Diagon Alley, staffed by goblin tellers including Griphook.",
+      "importance": "background",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:667361",
+        "wikipedia:en:68781355"
+      ]
+    }
+  ],
+  "characters": [
+    {
+      "id": "mr_ollivander",
+      "name": "Mr Ollivander",
+      "role": "Wandmaker and owner of Ollivanders shop.",
+      "personality_traits": [
+        "Wise",
+        "Perceptive",
+        "Solemn",
+        "Meticulous"
+      ],
+      "goals": [
+        {
+          "text": "Provide incoming and practicing witches and wizards with precisely matched wands suited to their abilities.",
+          "classification": "inferred",
+          "source_refs": [
+            "wikipedia:en:667361",
+            "wikipedia:en:68781355"
+          ]
+        }
+      ],
+      "known_facts": [
+        {
+          "text": "He is a highly regarded wandmaker whose shop is situated in Diagon Alley.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:667361",
+            "wikipedia:en:68781355"
+          ]
+        }
+      ],
+      "status": "Attending to customers and inventory inside his shop as incoming students arrive for supplies.",
+      "classification": "canon",
+      "source_refs": [
+        "tmdb:movie:671",
+        "wikipedia:en:667361",
+        "wikipedia:en:68781355"
+      ],
+      "relationships": [
+        {
+          "other_id": "harry_potter",
+          "direction": "outgoing",
+          "kind": "wand supplier",
+          "description": "Mr Ollivander fits new students with their first wands when they arrive in Diagon Alley.",
+          "classification": "inferred",
+          "source_refs": [
+            "wikipedia:en:667361",
+            "wikipedia:en:68781355"
+          ]
+        },
+        {
+          "other_id": "rubeus_hagrid",
+          "direction": "incoming",
+          "kind": "acquaintance",
+          "description": "Hagrid knows the wandmaker through Hogwarts duties and regular visits to Diagon Alley.",
+          "classification": "inferred",
+          "source_refs": [
+            "wikipedia:en:667361"
+          ]
+        },
+        {
+          "other_id": "player",
+          "direction": "incoming",
+          "kind": "apprentice assistant",
+          "description": "The player assists Mr Ollivander with sorting shipments of wand boxes and organizing delicate stock.",
+          "classification": "generated",
+          "source_refs": [
+            "wikipedia:en:667361"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rubeus_hagrid",
+      "name": "Rubeus Hagrid",
+      "role": "Gamekeeper and Keeper of Keys and Grounds at Hogwarts.",
+      "personality_traits": [
+        "Loyal",
+        "Good-natured",
+        "Protective"
+      ],
+      "goals": [
+        {
+          "text": "Safely guide Harry Potter through Diagon Alley and ensure he purchases all required school supplies for Hogwarts.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:667361"
+          ]
+        }
+      ],
+      "known_facts": [
+        {
+          "text": "He is a half-giant sent by Albus Dumbledore to fetch Harry from the Dursleys and bring him to the wizarding world.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:667361",
+            "wikipedia:en:68781355"
+          ]
+        }
+      ],
+      "status": "Accompanying Harry Potter through Diagon Alley to gather equipment.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:667361",
+        "wikipedia:en:68781355"
+      ],
+      "relationships": [
+        {
+          "other_id": "harry_potter",
+          "direction": "outgoing",
+          "kind": "guardian and guide",
+          "description": "Hagrid was tasked with rescuing Harry from his relatives, introducing him to magic, and guiding him through Diagon Alley to buy supplies.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:667361"
+          ]
+        },
+        {
+          "other_id": "mr_ollivander",
+          "direction": "outgoing",
+          "kind": "acquaintance",
+          "description": "Hagrid knows the wandmaker through Hogwarts duties and regular visits to Diagon Alley.",
+          "classification": "inferred",
+          "source_refs": [
+            "wikipedia:en:667361"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "harry_potter",
+      "name": "Harry Potter",
+      "role": "Eleven-year-old wizard entering his first year at Hogwarts.",
+      "personality_traits": [
+        "Curious",
+        "Modest",
+        "Observant"
+      ],
+      "goals": [
+        {
+          "text": "Collect his required school items and learn about his past and place in the wizarding world.",
+          "classification": "canon",
+          "source_refs": [
+            "tmdb:movie:671",
+            "wikipedia:en:667361"
+          ]
+        }
+      ],
+      "known_facts": [
+        {
+          "text": "He survived an attack by Lord Voldemort as an infant, which left him with a lightning bolt-shaped scar and made him famous across the wizarding world.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:667361",
+            "wikipedia:en:68781355"
+          ]
+        }
+      ],
+      "status": "Experiencing Diagon Alley for the first time while purchasing supplies alongside Hagrid.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:667361"
+      ],
+      "relationships": [
+        {
+          "other_id": "rubeus_hagrid",
+          "direction": "incoming",
+          "kind": "guardian and guide",
+          "description": "Hagrid was tasked with rescuing Harry from his relatives, introducing him to magic, and guiding him through Diagon Alley to buy supplies.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:667361"
+          ]
+        },
+        {
+          "other_id": "mr_ollivander",
+          "direction": "incoming",
+          "kind": "wand supplier",
+          "description": "Mr Ollivander fits new students with their first wands when they arrive in Diagon Alley.",
+          "classification": "inferred",
+          "source_refs": [
+            "wikipedia:en:667361",
+            "wikipedia:en:68781355"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "griphook",
+      "name": "Griphook",
+      "role": "Goblin bank employee at Gringotts Wizarding Bank.",
+      "personality_traits": [
+        "Professional",
+        "Strict",
+        "Formal"
+      ],
+      "goals": [
+        {
+          "text": "Conduct banking business and maintain security at Gringotts.",
+          "classification": "inferred",
+          "source_refs": [
+            "wikipedia:en:667361",
+            "wikipedia:en:68781355"
+          ]
+        }
+      ],
+      "known_facts": [
+        {
+          "text": "He is a goblin employed at Gringotts Wizarding Bank in Diagon Alley.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:667361",
+            "wikipedia:en:68781355"
+          ]
+        }
+      ],
+      "status": "Conducting daily banking affairs in Diagon Alley.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:667361",
+        "wikipedia:en:68781355"
+      ],
+      "relationships": []
+    }
+  ],
+  "factions": [
+    {
+      "id": "hogwarts_staff",
+      "name": "Hogwarts Staff",
+      "description": "The faculty, key keeper, and administrative staff charged with running Hogwarts School of Witchcraft and Wizardry and protecting its students.",
+      "member_ids": [
+        "rubeus_hagrid"
+      ],
+      "classification": "inferred",
+      "source_refs": [
+        "wikipedia:en:667361",
+        "wikipedia:en:68781355"
+      ]
+    },
+    {
+      "id": "gringotts_goblins",
+      "name": "Gringotts Goblins",
+      "description": "The goblin administrators and staff who manage the vaults and monetary transactions at Gringotts Wizarding Bank.",
+      "member_ids": [
+        "griphook"
+      ],
+      "classification": "inferred",
+      "source_refs": [
+        "wikipedia:en:667361",
+        "wikipedia:en:68781355"
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "from_id": "rubeus_hagrid",
+      "to_id": "harry_potter",
+      "kind": "guardian and guide",
+      "description": "Hagrid was tasked with rescuing Harry from his relatives, introducing him to magic, and guiding him through Diagon Alley to buy supplies.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:667361"
+      ]
+    },
+    {
+      "from_id": "mr_ollivander",
+      "to_id": "harry_potter",
+      "kind": "wand supplier",
+      "description": "Mr Ollivander fits new students with their first wands when they arrive in Diagon Alley.",
+      "classification": "inferred",
+      "source_refs": [
+        "wikipedia:en:667361",
+        "wikipedia:en:68781355"
+      ]
+    },
+    {
+      "from_id": "rubeus_hagrid",
+      "to_id": "mr_ollivander",
+      "kind": "acquaintance",
+      "description": "Hagrid knows the wandmaker through Hogwarts duties and regular visits to Diagon Alley.",
+      "classification": "inferred",
+      "source_refs": [
+        "wikipedia:en:667361"
+      ]
+    },
+    {
+      "from_id": "player",
+      "to_id": "mr_ollivander",
+      "kind": "apprentice assistant",
+      "description": "The player assists Mr Ollivander with sorting shipments of wand boxes and organizing delicate stock.",
+      "classification": "generated",
+      "source_refs": [
+        "wikipedia:en:667361"
+      ]
+    }
+  ],
+  "important_conflicts": [
+    {
+      "id": "rush_for_supplies",
+      "name": "The School Supply Rush",
+      "description": "With new Hogwarts acceptance letters delivered, a sudden influx of first-year students and guardians fills Diagon Alley and creates a bottleneck at Ollivanders.",
+      "party_ids": [
+        "mr_ollivander",
+        "rubeus_hagrid",
+        "harry_potter",
+        "player"
+      ],
+      "stakes": "First-year students need their wands and supplies before term begins, while maintaining discretion around high-profile arrivals.",
+      "classification": "inferred",
+      "source_refs": [
+        "wikipedia:en:667361",
+        "wikipedia:en:68781355"
+      ]
+    }
+  ],
+  "player_role": {
+    "title": "Wandmaker's Assistant",
+    "description": "An apprentice working the front counter and stockroom at Ollivanders, responsible for cataloguing boxed wands and attending to patron requests.",
+    "reason_for_presence": "The player is on duty managing stock shelves and assisting customers inside Ollivanders during the peak back-to-school rush.",
+    "capabilities": [
+      "Identifying wand core materials and box classifications",
+      "Handling fragile magical items safely",
+      "Managing shop queues and interacting with prominent magical patrons"
+    ],
+    "connections": [
+      {
+        "character_id": "mr_ollivander",
+        "description": "Employed and trained by Mr Ollivander in the basic handling of wand boxes and shop inventory."
+      },
+      {
+        "character_id": "rubeus_hagrid",
+        "description": "Knows Hagrid as a frequent visitor to Diagon Alley who collects supplies for Hogwarts."
+      }
+    ],
+    "classification": "generated",
+    "source_refs": [
+      "wikipedia:en:667361",
+      "wikipedia:en:68781355"
+    ]
+  },
+  "starting_location": {
+    "location_id": "ollivanders",
+    "rationale": "Ollivanders provides an intimate interior space where the player works directly alongside Mr Ollivander when Hagrid and Harry Potter step through the door."
+  },
+  "opening_conflict": {
+    "title": "The Crowded Threshold",
+    "summary": "As Hagrid escorts Harry Potter into Ollivanders, a cluster of curious onlookers gathers outside the storefront, threatening to overwhelm the small shop and disrupt Harry's wand selection.",
+    "location_id": "ollivanders",
+    "involved_character_ids": [
+      "mr_ollivander",
+      "rubeus_hagrid",
+      "harry_potter"
+    ],
+    "immediate_goal": "Secure the shop entrance and assist Mr Ollivander in organizing the counter so Harry can safely begin testing wands without outside interference.",
+    "decision_options": [
+      "Bolt the shop door and politely post the private consultation sign to keep gawkers out on Diagon Alley.",
+      "Ask Hagrid to stand guard at the entryway to shield Harry from the crowding street while you retrieve wand boxes for Ollivander.",
+      "Direct the gathered crowd towards nearby shops while quickly escorting Harry to the quiet rear alcove of the shop."
+    ],
+    "stakes": "If the crowd pushes in, privacy and delicate wand stock will be compromised; if handled smoothly, Harry can be fitted safely and Ollivanders retains order.",
+    "estimated_minutes": 15,
+    "classification": "generated",
+    "source_refs": [
+      "wikipedia:en:667361",
+      "wikipedia:en:68781355"
+    ]
+  },
+  "timeline_context": {
+    "canon_cutoff": "Shortly before Harry Potter's first term at Hogwarts, while Harry and Hagrid are shopping for school supplies in Diagon Alley.",
+    "summary": "Harry Potter learned on his eleventh birthday from Rubeus Hagrid that he is a wizard and has been accepted to Hogwarts. Hagrid brought Harry from his Muggle aunt and uncle's home to London to acquire his required supplies in Diagon Alley.",
+    "classification": "canon",
+    "source_refs": [
+      "tmdb:movie:671",
+      "wikipedia:en:667361"
+    ]
+  },
+  "provenance": {
+    "compiler_version": "1.0.0",
+    "compiled_at": "2026-10-04T14:15:28.236663Z",
+    "retrieved_at": "2026-10-04T14:15:07.212229Z",
+    "canon_packet_sha256": "96a837d8cc4ca4ceee4c9de68e4781b34e05d85540c8e226d5407bcb608d5033",
+    "sources": [
+      {
+        "source_id": "tmdb:movie:671",
+        "source_type": "tmdb",
+        "title": "Harry Potter and the Philosopher's Stone",
+        "source_url": "https://www.themoviedb.org/movie/671",
+        "retrieved_at": "2026-10-04T14:15:07.212229Z"
+      },
+      {
+        "source_id": "wikipedia:en:667361",
+        "source_type": "wikipedia",
+        "title": "Harry Potter and the Philosopher's Stone (film)",
+        "source_url": "https://en.wikipedia.org/wiki/Harry_Potter_and_the_Philosopher%27s_Stone_(film)",
+        "retrieved_at": "2026-10-04T14:15:07.212229Z"
+      },
+      {
+        "source_id": "wikipedia:en:68781355",
+        "source_type": "wikipedia",
+        "title": "Harry Potter (TV series)",
+        "source_url": "https://en.wikipedia.org/wiki/Harry_Potter_(TV_series)",
+        "retrieved_at": "2026-10-04T14:15:07.212229Z"
+      }
+    ],
+    "llm": {
+      "provider": "gemini",
+      "api": "interactions",
+      "model": "gemini-3.8-flash",
+      "attempts": 1,
+      "usage": {
+        "total_tokens": 9749,
+        "total_input_tokens": 5809,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 3940,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 0
+      }
+    },
+    "classification_counts": {
+      "canon": 20,
+      "inferred": 8,
+      "generated": 3
+    },
+    "validation_notes": [
+      "factions[0]: name 'Hogwarts Staff' not found in the cited sources; reclassified canon -> inferred",
+      "factions[1]: name 'Gringotts Goblins' not found in the cited sources; reclassified canon -> inferred"
+    ]
+  }
+}
