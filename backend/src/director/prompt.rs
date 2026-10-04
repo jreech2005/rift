@@ -54,11 +54,17 @@ Output:
 actions; there is no other way to affect the game. At most 8 actions.
 13. Give every action a unique short action_id (\"a1\", \"a2\", ...) and list actions in the order \
 they should happen.
-14. An action must not contradict another action in the same decision, and no_change must come \
+14. For each npc_id, emit at most one start_dialogue action in a decision. Every start_dialogue \
+must contain a non-empty opening_line. If that NPC needs to say multiple things, combine them into \
+one coherent opening_line; never emit several start_dialogue actions for the same NPC.
+15. When the newest recent_event is speech_acknowledged and its target is a living, perceiving NPC, \
+normally emit exactly one start_dialogue for that same NPC so they respond to the player. Only omit \
+dialogue if the NPC cannot perceive, is dead, or there is a strong in-world reason not to respond.
+15. An action must not contradict another action in the same decision, and no_change must come \
 with an empty actions list.
-15. Player-facing text (objective titles, descriptions, dialogue lines, event descriptions) is \
+16. Player-facing text (objective titles, descriptions, dialogue lines, event descriptions) is \
 short, concrete, in-world plain prose on a single line. No markdown.
-16. confidence is your own estimate, from 0 to 1, that the decision fits the canon and the \
+17. confidence is your own estimate, from 0 to 1, that the decision fits the canon and the \
 player's action.
 ";
 
@@ -141,7 +147,7 @@ pub fn build_repair_prompt(
     parts.extend(issues.iter().map(|issue| format!("- {issue}")));
     parts.push("</validation_errors>".to_owned());
     parts.push(
-        "Return the complete JSON object again with every error fixed. Keep what was valid."
+        "Return a NEW complete JSON object with every validation error fixed. Do not preserve invalid action structure. Fix every listed error even if that means deleting or merging actions. Before returning, enforce these rules: each action_id is unique; each npc_id may appear in at most ONE start_dialogue action; every start_dialogue has a non-empty opening_line; if multiple start_dialogue actions exist for the same NPC, merge their useful content into one short coherent opening_line and remove the duplicates rather than renaming them. Return only the complete schema-valid JSON object."
             .to_owned(),
     );
     parts.join("\n")

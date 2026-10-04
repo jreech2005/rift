@@ -288,10 +288,7 @@ impl<'a> Plan<'a> {
         // The one telemetry rule. A player who is under pressure, or who has
         // been playing by talking, gets a conversation here instead of another
         // escalation: same slot, lower intensity.
-        let speaker = told.or(giver).filter(|_| {
-            ctx.telemetry
-                .is_some_and(|telemetry| telemetry.prefers_dialogue())
-        });
+        let speaker = told.or(giver);
         match speaker {
             Some(npc_id) => {
                 let opening_line = if told == Some(npc_id) {

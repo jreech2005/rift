@@ -500,7 +500,8 @@ impl Runtime {
                 .as_ref()
                 .map(|(secret, listener)| (*secret, listener)),
             &changes,
-        );
+        )
+        .or_else(|| (action.action_type == ActionType::Speak).then_some(Trigger::PlayerAction));
         let context = trigger.map(|trigger| {
             Box::new(view::build_context(
                 world,
