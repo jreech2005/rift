@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "rift://schemas/v1/world_event",
   "title": "WorldEvent",
-  "description": "Payload of a world_event message. Validated, structured outcome the game client executes. The first four event types acknowledge a player_action; the rest are consequences produced by the Phase 2 runtime (docs/RUNTIME.md) and carry payload.source. Source of truth: backend/src/action.rs.",
+  "description": "Payload of a world_event message. Validated, structured outcome the game client executes. The first four event types acknowledge a player_action; the rest are consequences produced by the Phase 2 runtime (docs/RUNTIME.md) and carry payload.source. dialogue_started carries payload.npc_id, payload.text and, only when the line was voiced, payload.audio_url: a path on the backend HTTP origin (GET /audio/<uuid>, docs/VOICE.md). Source of truth: backend/src/action.rs.",
   "type": "object",
   "required": ["event_id", "session_id", "sequence", "event_type", "target", "payload", "timestamp"],
   "properties": {

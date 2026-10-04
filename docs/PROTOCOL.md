@@ -139,9 +139,13 @@ payload carries `"source": "narrative" | "director"`.
 | `information_revealed` | recipient id | `recipient_id`, `source_npc_id`, and `text` only when the recipient is `player` |
 | `world_flag_changed` | `null` | `flag`, `value` |
 | `world_event_triggered` | location id or `null` | `event`, `description`, `location_id`, `npc_ids` |
-| `dialogue_started` | NPC id | `npc_id`, `opening_line` |
+| `dialogue_started` | NPC id | `npc_id`, `text` (the line; also sent as `opening_line`), optional `audio_url` |
 
 Their `event_id` is a UUIDv5 of the action or decision that caused them.
+
+`audio_url` is present only when the line was voiced (`docs/VOICE.md`). It is a path on the
+backend's HTTP origin, e.g. `/audio/<uuid>`; `GET` it for the clip (`audio/mpeg` by default, `404`
+once expired). When it is absent, show `text` as a subtitle. Audio is never sent over the WebSocket.
 
 ### `error`
 ```json

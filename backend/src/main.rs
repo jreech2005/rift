@@ -6,6 +6,7 @@ use rift_backend::director::{DirectorEngine, FallbackDirector, GeminiDirector, P
 use rift_backend::npc::MemoryStore;
 use rift_backend::runtime::{Runtime, RuntimeWorld};
 use rift_backend::session::SessionStore;
+use rift_backend::voice::VoiceService;
 use rift_backend::{AppState, app};
 use tracing::{info, warn};
 use tracing_subscriber::EnvFilter;
@@ -66,7 +67,26 @@ async fn build_runtime() -> Result<Runtime, Box<dyn std::error::Error>> {
         }
         None => info!("{WORLD_BIBLE_ENV} is not set: sessions run without a world"),
     }
+    if let Some(voice) = voice() {
+        runtime = runtime.with_voice(voice);
+    }
     Ok(runtime)
+}
+
+/// ElevenLabs NPC voice when a key and at least one voice are configured.
+/// Otherwise dialogue is text only; that is never an error.
+fn voice() -> Option<VoiceService> {
+    match VoiceService::elevenlabs_from_env() {
+        Ok(voice) => {
+            let npcs: Vec<&str> = voice.voiced_npcs().collect();
+            info!(?npcs, "voice: elevenlabs");
+            Some(voice)
+        }
+        Err(err) => {
+            info!(reason = %err.detail, "voice: disabled, dialogue is text only");
+            None
+        }
+    }
 }
 
 /// Gemini with the deterministic rules as fallback when a key is configured,

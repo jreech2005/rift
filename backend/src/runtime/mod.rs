@@ -35,7 +35,7 @@ use chrono::Utc;
 use tracing::{error, info, warn};
 use uuid::Uuid;
 
-use crate::action::{self, ValidatedAction, WorldEvent};
+use crate::action::{self, ValidatedAction, WorldEvent, WorldEventType};
 use crate::director::{
     DirectorContext, DirectorDecision, DirectorEngine, DirectorError, Trigger, validate_actions,
 };
@@ -50,6 +50,7 @@ use crate::npc::{
 };
 use crate::protocol::{ErrorCode, ProtocolError};
 use crate::session::{GameSession, SessionStore};
+use crate::voice::VoiceService;
 
 pub use apply::{ApplyError, ReplanNote};
 pub use world::{MAX_SECRET_KEYWORDS, MAX_SECRETS, RuntimeWorld, Scenario, Secret, WorldError};
@@ -184,6 +185,8 @@ pub struct Runtime {
     memory: Arc<dyn MemoryStore>,
     director: DirectorEngine,
     world: Option<Arc<RuntimeWorld>>,
+    /// Optional NPC voice. Never needed for a decision to apply.
+    voice: Option<VoiceService>,
     /// One lock per session serialises every runtime write to it. Held for
     /// short synchronous sections only, never across an `.await`.
     stories: Arc<Mutex<HashMap<Uuid, Arc<Mutex<Story>>>>>,
@@ -213,6 +216,7 @@ impl Runtime {
             memory: Arc::new(InMemoryMemoryStore::new()),
             director: DirectorEngine::deterministic(),
             world: None,
+            voice: None,
             stories: Arc::default(),
         }
     }
@@ -231,6 +235,17 @@ impl Runtime {
     pub fn with_memory_store(mut self, memory: Arc<dyn MemoryStore>) -> Self {
         self.memory = memory;
         self
+    }
+
+    /// Speak NPC dialogue: `dialogue_started` events gain an `audio_url`
+    /// when synthesis succeeds.
+    pub fn with_voice(mut self, voice: VoiceService) -> Self {
+        self.voice = Some(voice);
+        self
+    }
+
+    pub fn voice(&self) -> Option<&VoiceService> {
+        self.voice.as_ref()
     }
 
     pub fn sessions(&self) -> &SessionStore {
@@ -501,6 +516,7 @@ impl Runtime {
                     "director decision applied"
                 );
                 outcome.events = applied.events;
+                self.voice_dialogue(&mut outcome.events).await;
                 outcome.director = DirectorReport::Applied {
                     decision: Box::new(decision),
                     deferred: applied.deferred,
@@ -533,6 +549,28 @@ impl Runtime {
             replan: applied.replan,
             follow_up,
         })
+    }
+
+    /// Give each `dialogue_started` event an `audio_url` when the line can
+    /// be voiced. Best-effort: on any failure the event goes out unchanged,
+    /// as text. Only the outgoing copy is decorated; session state is not
+    /// touched.
+    async fn voice_dialogue(&self, events: &mut [WorldEvent]) {
+        let Some(voice) = &self.voice else {
+            return;
+        };
+        for event in events
+            .iter_mut()
+            .filter(|event| event.event_type == WorldEventType::DialogueStarted)
+        {
+            let field = |key: &str| event.payload.get(key).and_then(|v| v.as_str());
+            let (Some(npc_id), Some(text)) = (field("npc_id"), field("text")) else {
+                continue;
+            };
+            if let Some(url) = voice.voice_line(npc_id, text).await {
+                event.payload["audio_url"] = url.into();
+            }
+        }
     }
 
     async fn persist(&self, memories: &[MemoryEntry], outcome: &mut FollowUpOutcome) {

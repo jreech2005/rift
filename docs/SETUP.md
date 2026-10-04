@@ -82,7 +82,9 @@ See `.env.example`. Provider keys are read only by server-side code.
 |---|---|---|
 | `GEMINI_API_KEY` | canon | live check: list models (free, no generation) |
 | `TMDB_API_KEY` | canon | v3 key or v4 read token; live check: one `/3/search/movie` request |
-| `ELEVENLABS_API_KEY` | canon | live check: `/v1/user` account lookup (no credits) |
+| `ELEVENLABS_API_KEY` | canon, backend | canon live check: `/v1/user` account lookup (no credits); backend: NPC voice |
+| `ELEVENLABS_VOICES` | backend | `npc_id=voice_id,...`; with the key, enables NPC voice (`docs/VOICE.md`) |
+| `ELEVENLABS_MODEL`, `ELEVENLABS_OUTPUT_FORMAT`, `ELEVENLABS_TIMEOUT_MS` | backend | optional voice tuning |
 | `WORLD_LABS_API_KEY` | canon | configuration only — no live check (avoids paid generation) |
 | `TIDB_*` | canon | live check: TCP reachability only, no auth |
 | `BACKEND_HOST`, `BACKEND_PORT` | backend | default `127.0.0.1:3000` |
