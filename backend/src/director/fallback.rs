@@ -47,6 +47,7 @@ impl DirectorProvider for FallbackDirector {
                 text,
                 model: RULES_VERSION.to_owned(),
                 usage: BTreeMap::new(),
+                provider: None,
             })
         })
     }

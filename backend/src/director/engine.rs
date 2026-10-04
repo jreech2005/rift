@@ -9,7 +9,9 @@
 //! The engine is async, holds no lock and touches no session state, so it can
 //! run in a spawned task while gameplay continues. It makes at most
 //! [`MAX_ATTEMPTS`] provider calls per decision and never retries a provider
-//! failure.
+//! failure itself: transport retry and model/provider failover belong to
+//! [`FailoverProvider`](super::failover::FailoverProvider), behind the
+//! provider interface, and are separate from the repair attempt here.
 
 use std::collections::BTreeMap;
 use std::sync::Arc;
@@ -48,7 +50,7 @@ pub enum DirectorError {
     /// The context itself is invalid. No provider was called.
     #[error("invalid director context: {}", summarize(.0))]
     InvalidContext(Vec<ValidationIssue>),
-    /// The provider failed (timeout, 429, 503, auth...). Not retried.
+    /// The provider failed (timeout, 429, 503, auth...). Not retried here.
     #[error(transparent)]
     Provider(#[from] ProviderError),
     /// The provider answered, but its output failed validation on every
@@ -170,7 +172,7 @@ impl DirectorEngine {
             match parse_proposal(ctx, &output.text) {
                 Ok(proposal) => {
                     let metadata = DecisionMetadata {
-                        provider: provider.name().to_owned(),
+                        provider: output.provider.unwrap_or(provider.name()).to_owned(),
                         model: output.model,
                         attempts: attempt,
                         repaired: attempt > 1,

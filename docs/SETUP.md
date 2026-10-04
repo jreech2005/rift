@@ -80,7 +80,10 @@ See `.env.example`. Provider keys are read only by server-side code.
 
 | Variable | Used by | Notes |
 |---|---|---|
-| `GEMINI_API_KEY` | canon | live check: list models (free, no generation) |
+| `GEMINI_API_KEY` | canon, backend | live check: list models (free, no generation) |
+| `GEMINI_MODEL`, `GEMINI_FALLBACK_MODEL`, `GEMINI_TIMEOUT_MS`, `GEMINI_TRANSIENT_RETRIES` | backend | Director failover chain, see `docs/DIRECTOR.md` |
+| `DIRECTOR_PRIMARY_PROVIDER`, `DIRECTOR_SECONDARY_PROVIDER`, `DIRECTOR_BUDGET_MS` | backend | `gemini` / `anthropic`; total time per Director pass |
+| `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `ANTHROPIC_TIMEOUT_MS`, `ANTHROPIC_EFFORT` | backend | optional second LLM; `make director-preflight` checks every model |
 | `TMDB_API_KEY` | canon | v3 key or v4 read token; live check: one `/3/search/movie` request |
 | `ELEVENLABS_API_KEY` | canon | live check: `/v1/user` account lookup (no credits) |
 | `WORLD_LABS_API_KEY` | canon | configuration only — no live check (avoids paid generation) |

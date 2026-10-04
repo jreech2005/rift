@@ -1,11 +1,12 @@
 # Rift developer commands. Cargo lives in ~/.cargo/bin (rustup) unless on PATH.
 CARGO ?= $(shell command -v cargo 2>/dev/null || echo $(HOME)/.cargo/bin/cargo)
 
-.PHONY: help doctor doctor-live canon-doctor canon-doctor-live backend test test-backend test-canon smoke format lint check
+.PHONY: help doctor doctor-live canon-doctor canon-doctor-live director-preflight backend test test-backend test-canon smoke format lint check
 
 help:
 	@echo "make doctor        system + provider status (doctor-live adds connectivity checks)"
 	@echo "make canon-doctor  provider configuration (add -live for connectivity)"
+	@echo "make director-preflight  one tiny live request per configured Director model"
 	@echo "make backend       run the Rust backend on BACKEND_HOST:BACKEND_PORT"
 	@echo "make test          Rust + Python tests"
 	@echo "make smoke         start backend, run WebSocket smoke client, stop"
@@ -25,12 +26,18 @@ canon-doctor:
 canon-doctor-live:
 	@cd canon && uv run python -m rift_canon.doctor --live
 
+director-preflight:
+	@$(CARGO) run -q --manifest-path backend/Cargo.toml --example director_preflight
+
 backend:
 	$(CARGO) run --manifest-path backend/Cargo.toml
 
 test: test-backend test-canon
 
-test-backend:
+test-director-preflight:
+	@$(CARGO) run -q --manifest-path backend/Cargo.toml --example director_preflight
+
+backend:
 	$(CARGO) test --manifest-path backend/Cargo.toml
 
 test-canon:

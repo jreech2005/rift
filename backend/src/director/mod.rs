@@ -4,7 +4,7 @@
 //!
 //! ```text
 //! WorldBible + session snapshot + history + narrative/NPC views
-//!     -> DirectorContext -> provider (Gemini | deterministic rules)
+//!     -> DirectorContext -> provider (LLM failover chain | deterministic rules)
 //!     -> proposal (untrusted JSON) -> Rust validation -> DirectorDecision
 //! ```
 //!
@@ -16,10 +16,12 @@
 //! See `docs/DIRECTOR.md`.
 
 pub mod actions;
+pub mod anthropic;
 pub mod canon;
 pub mod context;
 pub mod decision;
 pub mod engine;
+pub mod failover;
 pub mod fallback;
 pub mod gemini;
 pub mod prompt;
@@ -31,6 +33,7 @@ pub mod validate;
 pub(crate) mod testing;
 
 pub use actions::{DirectorAction, Disposition, WorldEventKind};
+pub use anthropic::{AnthropicConfig, AnthropicDirector};
 pub use canon::{CanonError, WorldBibleView};
 pub use context::{
     CharacterSummary, DirectorContext, EventView, FactionSummary, LocationSummary, MissionStatus,
@@ -39,6 +42,7 @@ pub use context::{
 };
 pub use decision::{DecisionMetadata, DirectorDecision, DirectorProposal, ReasonCode};
 pub use engine::{DEFAULT_CALL_TIMEOUT, DirectorEngine, DirectorError, MAX_ATTEMPTS};
+pub use failover::{DirectorSettings, FailoverPolicy, FailoverProvider, Leg, Llm};
 pub use fallback::FallbackDirector;
 pub use gemini::{GeminiConfig, GeminiDirector, Secret};
 pub use provider::{
