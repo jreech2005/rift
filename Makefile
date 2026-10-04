@@ -1,7 +1,7 @@
 # Rift developer commands. Cargo lives in ~/.cargo/bin (rustup) unless on PATH.
 CARGO ?= $(shell command -v cargo 2>/dev/null || echo $(HOME)/.cargo/bin/cargo)
 
-.PHONY: help doctor doctor-live canon-doctor canon-doctor-live backend test test-backend test-canon smoke format lint check
+.PHONY: help doctor doctor-live canon-doctor canon-doctor-live backend test test-backend test-canon smoke format lint lint-tiger tiger-live check
 
 help:
 	@echo "make doctor        system + provider status (doctor-live adds connectivity checks)"
@@ -12,6 +12,8 @@ help:
 	@echo "make format        cargo fmt + ruff format"
 	@echo "make lint          fmt --check, clippy -D warnings, ruff check"
 	@echo "make check         lint + test + smoke"
+	@echo "make lint-tiger    clippy + tests with the Tiger Data feature (offline)"
+	@echo "make tiger-live    live Tiger Data round trip (needs TIGER_DATABASE_URL)"
 
 doctor:
 	@./scripts/doctor.sh
@@ -47,5 +49,12 @@ lint:
 	$(CARGO) fmt --manifest-path backend/Cargo.toml --check
 	$(CARGO) clippy --manifest-path backend/Cargo.toml --all-targets -- -D warnings
 	cd canon && uv run ruff format --check . && uv run ruff check .
+
+lint-tiger:
+	$(CARGO) clippy --manifest-path backend/Cargo.toml --all-targets --features tiger -- -D warnings
+	$(CARGO) test --manifest-path backend/Cargo.toml --features tiger
+
+tiger-live:
+	$(CARGO) test --manifest-path backend/Cargo.toml --features tiger --test tiger_live -- --ignored --nocapture
 
 check: lint test smoke

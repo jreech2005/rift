@@ -46,6 +46,7 @@ The runtime adds no session model. It drives the existing stores and holds only 
 | NPC memories | `Arc<dyn MemoryStore>` (in-memory, or TiDB with `--features tidb`) |
 | missions, objectives, planned beats, world truths | `NarrativeState`, kept per session by `Runtime` |
 | NPCs on stage, Director replan requests | `Runtime`, per session |
+| gameplay telemetry (recent events) | `Arc<dyn TelemetrySink>` / `Arc<dyn TelemetryReader>` (in-memory, or Tiger Data with `--features tiger`); see [TELEMETRY.md](TELEMETRY.md) |
 
 One mutex per session serialises every runtime write to it. It is held for short synchronous
 sections and never across an `.await`.
@@ -137,6 +138,8 @@ and the drafts are committed only if all of them applied.
   its deterministic consequences stand and the session carries on.
 - **Memory store failure**: logged and reported in `FollowUpOutcome::memory_errors`. NPC state is
   authoritative in memory, so recall is lost, not state.
+- **Telemetry failure**: recording cannot fail or block (events are dropped). If the recent
+  summary cannot be read within 300 ms the Director decides without it. Never rejects an action.
 
 The Director is Gemini with `FallbackDirector` behind it when `GEMINI_API_KEY` is set, and the
 deterministic rules alone otherwise.

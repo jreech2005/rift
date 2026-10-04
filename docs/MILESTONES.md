@@ -32,6 +32,13 @@ them into `world_event`s. Gameplay never waits on it.
 Unreal C++ WebSocket client speaking protocol V1; executes `world_event`s;
 Blueprint hookups for presentation.
 
+### Phase 3 — Tiger Data behavioural telemetry (branch `phase3-tiger`)
+Gameplay events go to a `TelemetrySink` (in-memory, or a Tiger Data hypertable with
+`--features tiger`); a bounded `PlayerTelemetry` summary of the last five minutes enters
+`DirectorContext`, and one `FallbackDirector` rule acts on it. Offline acceptance test:
+`backend/tests/telemetry_divergence.rs`. Live Tiger Data check: not yet run (no credentials).
+See [TELEMETRY.md](TELEMETRY.md).
+
 ## Phase 4 — NPC Agents & Memory
 `CharacterState`, per-NPC memory and async agent proposals, validated by Rust.
 

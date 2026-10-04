@@ -9,6 +9,7 @@ pub mod npc;
 pub mod protocol;
 pub mod runtime;
 pub mod session;
+pub mod telemetry;
 pub mod ws;
 
 use axum::routing::get;

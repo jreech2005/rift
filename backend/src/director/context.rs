@@ -167,6 +167,69 @@ pub struct PlayerView {
     pub attributes: BTreeMap<String, String>,
 }
 
+/// What the player has been doing recently: a few bounded scores computed
+/// from gameplay telemetry (`crate::telemetry`). Never raw events.
+///
+/// Scores run from 0 (none) to [`limits::MAX_TELEMETRY_SCORE`].
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PlayerTelemetry {
+    /// Length of the window the scores cover.
+    pub window_seconds: u32,
+    /// Damage taken and enemies killed.
+    #[serde(default)]
+    pub combat_intensity: u8,
+    /// Player deaths, counted.
+    #[serde(default)]
+    pub recent_deaths: u8,
+    /// Conversations and interactions with NPCs.
+    #[serde(default)]
+    pub npc_engagement: u8,
+    /// Distinct places entered.
+    #[serde(default)]
+    pub exploration_activity: u8,
+}
+
+impl PlayerTelemetry {
+    /// `combat_intensity` from which the player is under pressure.
+    pub const HIGH_COMBAT: u8 = 60;
+    /// `recent_deaths` from which the player is under pressure.
+    pub const HIGH_DEATHS: u8 = 2;
+    /// `npc_engagement` from which the player is playing socially.
+    pub const HIGH_ENGAGEMENT: u8 = 60;
+
+    /// The same summary with every value cut to its bound, so a misbehaving
+    /// telemetry backend cannot make a context invalid.
+    pub fn clamped(self) -> Self {
+        let score = |value: u8| value.min(limits::MAX_TELEMETRY_SCORE);
+        Self {
+            window_seconds: self
+                .window_seconds
+                .clamp(1, limits::MAX_TELEMETRY_WINDOW_SECONDS),
+            combat_intensity: score(self.combat_intensity),
+            recent_deaths: score(self.recent_deaths),
+            npc_engagement: score(self.npc_engagement),
+            exploration_activity: score(self.exploration_activity),
+        }
+    }
+
+    /// The player has been fighting hard or dying.
+    pub fn under_pressure(&self) -> bool {
+        self.combat_intensity >= Self::HIGH_COMBAT || self.recent_deaths >= Self::HIGH_DEATHS
+    }
+
+    /// The player has been talking to people.
+    pub fn socially_engaged(&self) -> bool {
+        self.npc_engagement >= Self::HIGH_ENGAGEMENT
+    }
+
+    /// A conversation serves this player better than another escalation:
+    /// they need breathing room, or talking is how they are playing.
+    pub fn prefers_dialogue(&self) -> bool {
+        self.under_pressure() || self.socially_engaged()
+    }
+}
+
 /// One entry of recent history, derived from a `WorldEvent`.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -288,6 +351,10 @@ pub struct DirectorContext {
     /// Only a universe whose rules allow it may bring the dead back.
     #[serde(default)]
     pub allow_character_revival: bool,
+    /// Recent player behaviour, when telemetry is available. Absent means
+    /// unknown, not quiet.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub telemetry: Option<PlayerTelemetry>,
 }
 
 /// Keep the first `max` distinct ids, `first` taking priority over `rest`.
@@ -507,6 +574,7 @@ impl DirectorContext {
             narrative: None,
             npcs: Vec::new(),
             allow_character_revival: false,
+            telemetry: None,
         }
     }
 
@@ -574,6 +642,7 @@ impl DirectorContext {
         let objectives = self.validate_narrative(&mut issues, &characters);
         self.validate_npcs(&mut issues, &characters);
         self.validate_trigger(&mut issues, &characters, objectives.as_ref());
+        self.validate_telemetry(&mut issues);
 
         if issues.is_empty() {
             let bytes = serde_json::to_vec(self)
@@ -779,6 +848,35 @@ impl DirectorContext {
         }
 
         characters
+    }
+
+    fn validate_telemetry(&self, issues: &mut Issues) {
+        let Some(telemetry) = &self.telemetry else {
+            return;
+        };
+        if telemetry.window_seconds == 0
+            || telemetry.window_seconds > limits::MAX_TELEMETRY_WINDOW_SECONDS
+        {
+            issues.push(
+                "telemetry.window_seconds",
+                IssueCode::InvalidValue,
+                format!("must be 1-{} seconds", limits::MAX_TELEMETRY_WINDOW_SECONDS),
+            );
+        }
+        for (name, value) in [
+            ("combat_intensity", telemetry.combat_intensity),
+            ("recent_deaths", telemetry.recent_deaths),
+            ("npc_engagement", telemetry.npc_engagement),
+            ("exploration_activity", telemetry.exploration_activity),
+        ] {
+            if value > limits::MAX_TELEMETRY_SCORE {
+                issues.push(
+                    format!("telemetry.{name}"),
+                    IssueCode::InvalidValue,
+                    format!("must be 0-{}", limits::MAX_TELEMETRY_SCORE),
+                );
+            }
+        }
     }
 
     fn validate_player_and_history(&self, issues: &mut Issues) {
@@ -1021,6 +1119,79 @@ mod tests {
         let text = serde_json::to_string(&ctx).unwrap();
         let back: DirectorContext = serde_json::from_str(&text).unwrap();
         assert_eq!(back, ctx);
+    }
+
+    #[test]
+    fn telemetry_is_optional_bounded_and_round_trips() {
+        let mut ctx = sample_context();
+        assert_eq!(ctx.telemetry, None);
+        let without = serde_json::to_value(&ctx).unwrap();
+        assert!(without.get("telemetry").is_none());
+
+        ctx.telemetry = Some(PlayerTelemetry {
+            window_seconds: 300,
+            combat_intensity: 70,
+            recent_deaths: 2,
+            npc_engagement: 40,
+            exploration_activity: 100,
+        });
+        assert_eq!(ctx.validate(), Ok(()));
+        let json = serde_json::to_string(&ctx).unwrap();
+        assert_eq!(serde_json::from_str::<DirectorContext>(&json).unwrap(), ctx);
+        // A summary, not a history: a handful of numbers.
+        let added = json.len() - serde_json::to_string(&without).unwrap().len();
+        assert!(added < 160, "telemetry adds {added} bytes");
+
+        ctx.telemetry = Some(PlayerTelemetry {
+            window_seconds: 0,
+            combat_intensity: 101,
+            recent_deaths: 255,
+            npc_engagement: 0,
+            exploration_activity: 0,
+        });
+        let issues = ctx.validate().unwrap_err();
+        let paths: Vec<&str> = issues.iter().map(|i| i.path.as_str()).collect();
+        assert_eq!(
+            paths,
+            [
+                "telemetry.window_seconds",
+                "telemetry.combat_intensity",
+                "telemetry.recent_deaths"
+            ]
+        );
+        assert!(issues.iter().all(|i| i.code == IssueCode::InvalidValue));
+
+        // Raw events cannot be smuggled in.
+        let mut raw = serde_json::to_value(sample_context()).unwrap();
+        raw["telemetry"] = serde_json::json!({ "window_seconds": 300, "events": [] });
+        assert!(serde_json::from_value::<DirectorContext>(raw).is_err());
+    }
+
+    #[test]
+    fn player_telemetry_thresholds() {
+        let quiet = PlayerTelemetry::default();
+        assert!(!quiet.prefers_dialogue());
+        let fighting = PlayerTelemetry {
+            combat_intensity: PlayerTelemetry::HIGH_COMBAT,
+            ..quiet
+        };
+        let dying = PlayerTelemetry {
+            recent_deaths: PlayerTelemetry::HIGH_DEATHS,
+            ..quiet
+        };
+        let talking = PlayerTelemetry {
+            npc_engagement: PlayerTelemetry::HIGH_ENGAGEMENT,
+            ..quiet
+        };
+        assert!(fighting.under_pressure() && fighting.prefers_dialogue());
+        assert!(dying.under_pressure() && dying.prefers_dialogue());
+        assert!(!talking.under_pressure() && talking.socially_engaged());
+        assert!(talking.prefers_dialogue());
+        let exploring = PlayerTelemetry {
+            exploration_activity: 100,
+            ..quiet
+        };
+        assert!(!exploring.prefers_dialogue());
     }
 
     #[test]

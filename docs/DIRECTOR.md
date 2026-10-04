@@ -50,6 +50,7 @@ before any provider is called.
 | `narrative` | optional `NarrativeView`: `summary`, ≤ 4 `missions`, ≤ 12 `objectives` |
 | `npcs` | ≤ 12 `NpcView`s: `npc_id, location, active, alive, disposition, status` |
 | `allow_character_revival` | default `false`; only then may a dead character act |
+| `telemetry` | optional `PlayerTelemetry`: `window_seconds` and four 0–100 scores (`combat_intensity`, `recent_deaths`, `npc_engagement`, `exploration_activity`). A summary of recent play, never raw events. See [TELEMETRY.md](TELEMETRY.md) |
 
 **Bounded.** The raw WorldBible is never put in a prompt. `WorldSummary::from_world_bible` keeps
 ≤ 12 locations and characters (the starting location and the opening conflict's cast first), caps
@@ -196,6 +197,11 @@ It reads only structured fields and knows nothing about any universe.
 | `objective_refused`, `player_disclosure` | fail the objective, invalidate its mission, set a flag, change dispositions, trigger a world event, set a replacement objective, request a replan |
 | `objective_completed`, `objective_failed` | resolve the objective, request a replan |
 | `player_action`, `idle` | no actions |
+
+One rule reads `telemetry`: in the divergence response, when the player is under pressure
+(`combat_intensity ≥ 60` or `recent_deaths ≥ 2`) or socially engaged (`npc_engagement ≥ 60`), the
+world event is replaced by a `start_dialogue` from the NPC involved. Without telemetry the
+proposal is unchanged. See [TELEMETRY.md](TELEMETRY.md).
 
 It exists for tests, offline development and demo resilience, not to replace Gemini.
 

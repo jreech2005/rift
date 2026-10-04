@@ -35,7 +35,7 @@ pub use canon::{CanonError, WorldBibleView};
 pub use context::{
     CharacterSummary, DirectorContext, EventView, FactionSummary, LocationSummary, MissionStatus,
     MissionView, NarrativeView, NpcView, ObjectiveStatus, ObjectiveView, OpeningSummary,
-    PlayerRoleSummary, PlayerView, Trigger, WorldSummary,
+    PlayerRoleSummary, PlayerTelemetry, PlayerView, Trigger, WorldSummary,
 };
 pub use decision::{DecisionMetadata, DirectorDecision, DirectorProposal, ReasonCode};
 pub use engine::{DEFAULT_CALL_TIMEOUT, DirectorEngine, DirectorError, MAX_ATTEMPTS};
@@ -97,6 +97,10 @@ pub mod limits {
     pub const MAX_MISSIONS: usize = 4;
     pub const MAX_OBJECTIVES: usize = 12;
     pub const MAX_PLAYER_ATTRIBUTES: usize = 16;
+
+    // Player telemetry.
+    pub const MAX_TELEMETRY_SCORE: u8 = 100;
+    pub const MAX_TELEMETRY_WINDOW_SECONDS: u32 = 3600;
 
     // Context text.
     pub const MAX_NAME_CHARS: usize = 120;
