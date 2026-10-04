@@ -11,6 +11,7 @@ axum = { version = "0.8.9", features = ["ws"] }
 chrono = { version = "0.4.45", default-features = false, features = ["clock", "serde", "std"] }
 dotenvy = "0.15.7"
 futures-util = { version = "0.3.34", default-features = false, features = ["sink", "std"] }
+mysql_async = { version = "0.37", default-features = false, features = ["minimal-rust", "rustls-tls", "ring", "tls12"], optional = true }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"
 thiserror = "2.0.21"
@@ -22,3 +23,8 @@ uuid = { version = "1.27.0", features = ["serde", "v4", "v5"] }
 [dev-dependencies]
 tokio-tungstenite = "0.29.0"
 tower = { version = "0.5", features = ["util"] }
+
+[features]
+# TiDB (MySQL protocol) persistence for NPC memory/state. Off by default so the
+# default build and tests stay lean and fully offline.
+tidb = ["dep:mysql_async", "tokio/time"]
