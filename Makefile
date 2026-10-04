@@ -1,9 +1,12 @@
 # Rift developer commands. Cargo lives in ~/.cargo/bin (rustup) unless on PATH.
 CARGO ?= $(shell command -v cargo 2>/dev/null || echo $(HOME)/.cargo/bin/cargo)
 
+.PHONY: demo demo-new demo-breaking-bad demo-matrix demo-harry-potter demo-stop demo-status demo-logs demo-preflight
 .PHONY: help doctor doctor-live canon-doctor canon-doctor-live director-preflight backend test test-backend test-canon voice-live smoke format lint lint-tiger tiger-live check
 
 help:
+	@echo "make demo TITLE=\"The Matrix\"  one-command demo: backend + Unreal (docs/DEMO.md)"
+	@echo "make demo-stop | demo-status | demo-logs | demo-preflight"
 	@echo "make doctor        system + provider status (doctor-live adds connectivity checks)"
 	@echo "make canon-doctor  provider configuration (add -live for connectivity)"
 	@echo "make director-preflight  one tiny live request per configured Director model"
@@ -68,3 +71,39 @@ tiger-live:
 	$(CARGO) test --manifest-path backend/Cargo.toml --features tiger --test tiger_live -- --ignored --nocapture
 
 check: lint test smoke
+
+# --- Demo launcher (docs/DEMO.md) ---------------------------------------------
+# TITLE reaches the launcher through the environment, so quotes and
+# apostrophes in a title need no escaping. NO_UNREAL=1: backend only.
+DEMO := python3 scripts/rift_demo.py
+DEMO_FLAGS := $(if $(NO_UNREAL),--no-unreal)
+export TITLE
+
+demo:
+	@$(DEMO) start --title "$$TITLE" $(DEMO_FLAGS)
+
+# May call TMDB, Wikipedia and Gemini. Not the judge path.
+demo-new:
+	@$(DEMO) start --new --title "$$TITLE" $(DEMO_FLAGS)
+
+demo-breaking-bad:
+	@$(DEMO) start --title "Breaking Bad" $(DEMO_FLAGS)
+
+demo-matrix:
+	@$(DEMO) start --title "The Matrix" $(DEMO_FLAGS)
+
+demo-harry-potter:
+	@$(DEMO) start --title "Harry Potter and the Philosopher's Stone" $(DEMO_FLAGS)
+
+demo-stop:
+	@$(DEMO) stop
+
+demo-status:
+	@$(DEMO) status
+
+demo-logs:
+	@$(DEMO) logs
+
+# Offline: local prerequisites and PRESENT/MISSING configuration. No API calls.
+demo-preflight:
+	@$(DEMO) preflight
