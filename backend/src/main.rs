@@ -6,6 +6,7 @@ use rift_backend::director::{DirectorEngine, DirectorSettings};
 use rift_backend::npc::MemoryStore;
 use rift_backend::runtime::{Runtime, RuntimeWorld};
 use rift_backend::session::SessionStore;
+use rift_backend::telemetry::{InMemoryTelemetry, TelemetryReader, TelemetrySink};
 use rift_backend::{AppState, app};
 use tracing::{info, warn};
 use tracing_subscriber::EnvFilter;
@@ -48,11 +49,14 @@ fn env_path(key: &str) -> Option<PathBuf> {
 }
 
 /// Wire the Phase 2 runtime from the environment. A world that is configured
-/// but does not load is an error; a missing Gemini key or TiDB is not.
+/// but does not load is an error; a missing Gemini key, TiDB or Tiger Data
+/// is not.
 async fn build_runtime() -> Result<Runtime, Box<dyn std::error::Error>> {
+    let (sink, reader) = telemetry().await;
     let mut runtime = Runtime::new(SessionStore::new())
         .with_director(director())
-        .with_memory_store(memory_store().await);
+        .with_memory_store(memory_store().await)
+        .with_telemetry(sink, reader);
 
     match env_path(WORLD_BIBLE_ENV) {
         Some(bible) => {
@@ -121,6 +125,44 @@ async fn memory_store() -> Arc<dyn MemoryStore> {
 async fn memory_store() -> Arc<dyn MemoryStore> {
     info!("npc memory: in-memory store");
     Arc::new(rift_backend::npc::InMemoryMemoryStore::new())
+}
+
+type Telemetry = (Arc<dyn TelemetrySink>, Arc<dyn TelemetryReader>);
+
+fn in_memory_telemetry() -> Telemetry {
+    let telemetry = Arc::new(InMemoryTelemetry::new());
+    (telemetry.clone(), telemetry)
+}
+
+#[cfg(feature = "tiger")]
+async fn telemetry() -> Telemetry {
+    use rift_backend::telemetry::tiger::{TigerConfig, TigerTelemetry};
+
+    let config = match TigerConfig::from_env() {
+        Ok(config) => config,
+        Err(err) => {
+            info!(reason = %err, "telemetry: in-memory (Tiger Data is not configured)");
+            return in_memory_telemetry();
+        }
+    };
+    let tiger = TigerTelemetry::new(&config);
+    match tiger.ensure_schema().await {
+        Ok(aggregate) => {
+            info!(continuous_aggregate = aggregate, "telemetry: Tiger Data");
+            let tiger = Arc::new(tiger);
+            (tiger.clone(), tiger)
+        }
+        Err(err) => {
+            warn!(error = %err, "telemetry: Tiger Data unreachable, using in-memory");
+            in_memory_telemetry()
+        }
+    }
+}
+
+#[cfg(not(feature = "tiger"))]
+async fn telemetry() -> Telemetry {
+    info!("telemetry: in-memory");
+    in_memory_telemetry()
 }
 
 async fn shutdown_signal() {

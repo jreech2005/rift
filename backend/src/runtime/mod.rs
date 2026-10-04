@@ -30,14 +30,17 @@ mod world;
 use std::collections::{BTreeSet, HashMap, VecDeque};
 use std::fmt;
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
 
 use chrono::Utc;
+use serde_json::json;
 use tracing::{error, info, warn};
 use uuid::Uuid;
 
-use crate::action::{self, ValidatedAction, WorldEvent};
+use crate::action::{self, ActionType, ValidatedAction, WorldEvent};
 use crate::director::{
-    DirectorContext, DirectorDecision, DirectorEngine, DirectorError, Trigger, validate_actions,
+    DirectorContext, DirectorDecision, DirectorEngine, DirectorError, PlayerTelemetry, Trigger,
+    validate_actions,
 };
 use crate::narrative::{
     CheckpointChange, Effect, MissionChange, MissionStatus, NarrativeEngine, NarrativeError,
@@ -50,12 +53,19 @@ use crate::npc::{
 };
 use crate::protocol::{ErrorCode, ProtocolError};
 use crate::session::{GameSession, SessionStore};
+use crate::telemetry::{
+    InMemoryTelemetry, TelemetryEvent, TelemetryEventKind, TelemetryReader, TelemetrySink,
+};
 
 pub use apply::{ApplyError, ReplanNote};
 pub use world::{MAX_SECRET_KEYWORDS, MAX_SECRETS, RuntimeWorld, Scenario, Secret, WorldError};
 
 /// Number of Director replan requests kept per session.
 pub const REPLAN_NOTES_CAP: usize = 16;
+
+/// Longest the Director waits for the recent telemetry summary. Past it the
+/// decision is made without one.
+pub const TELEMETRY_READ_TIMEOUT: Duration = Duration::from_millis(300);
 
 /// Why a player action was rejected. Nothing was changed.
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
@@ -184,6 +194,10 @@ pub struct Runtime {
     memory: Arc<dyn MemoryStore>,
     director: DirectorEngine,
     world: Option<Arc<RuntimeWorld>>,
+    /// Where gameplay events go. Never blocks, never fails.
+    telemetry_sink: Arc<dyn TelemetrySink>,
+    /// Where the Director's recent summary comes from.
+    telemetry_reader: Arc<dyn TelemetryReader>,
     /// One lock per session serialises every runtime write to it. Held for
     /// short synchronous sections only, never across an `.await`.
     stories: Arc<Mutex<HashMap<Uuid, Arc<Mutex<Story>>>>>,
@@ -204,15 +218,19 @@ impl Default for Runtime {
 }
 
 impl Runtime {
-    /// A runtime with no world, the deterministic Director and an in-memory
-    /// memory store. Without a world every session takes the plain path.
+    /// A runtime with no world, the deterministic Director, an in-memory
+    /// memory store and in-memory telemetry. Without a world every session
+    /// takes the plain path.
     pub fn new(sessions: SessionStore) -> Self {
+        let telemetry = Arc::new(InMemoryTelemetry::new());
         Self {
             sessions,
             npcs: NpcDirectory::new(),
             memory: Arc::new(InMemoryMemoryStore::new()),
             director: DirectorEngine::deterministic(),
             world: None,
+            telemetry_sink: telemetry.clone(),
+            telemetry_reader: telemetry,
             stories: Arc::default(),
         }
     }
@@ -230,6 +248,18 @@ impl Runtime {
 
     pub fn with_memory_store(mut self, memory: Arc<dyn MemoryStore>) -> Self {
         self.memory = memory;
+        self
+    }
+
+    /// Send gameplay events to `sink` and read the recent summary from
+    /// `reader`. Usually the same object twice.
+    pub fn with_telemetry(
+        mut self,
+        sink: Arc<dyn TelemetrySink>,
+        reader: Arc<dyn TelemetryReader>,
+    ) -> Self {
+        self.telemetry_sink = sink;
+        self.telemetry_reader = reader;
         self
     }
 
@@ -361,6 +391,7 @@ impl Runtime {
         let session_id = action.session_id;
         let (Some(world), Some(story)) = (self.world.as_deref(), self.story(session_id)) else {
             let event = self.sessions.apply_action(action)?;
+            self.record_action(action, &event, None);
             return Ok(Applied {
                 event,
                 consequences: Vec::new(),
@@ -431,6 +462,21 @@ impl Runtime {
         let consequences = adapt::record(&mut session, event.event_id, emits, now);
         story.narrative = narrative;
         self.sessions.replace(session.clone());
+        self.record_action(action, &event, Some((&roster, disclosed.is_some())));
+        if let Some(replan) = &changes.replan {
+            self.telemetry_sink.record(
+                TelemetryEvent::new(session_id, TelemetryEventKind::NarrativeReplan, now)
+                    .actor("narrative")
+                    .target(
+                        replan
+                            .invalidated_missions
+                            .first()
+                            .map(|mission| mission.mission_id.clone()),
+                    )
+                    .location(session.current_location.clone())
+                    .metadata(json!({ "source": "narrative" })),
+            );
+        }
 
         // 5. The Director's view, from the state as it is now.
         let trigger = trigger_for(
@@ -478,17 +524,31 @@ impl Runtime {
         };
         self.persist(&follow_up.memories, &mut outcome).await;
 
-        let Some(context) = follow_up.context else {
+        let Some(mut context) = follow_up.context else {
             return outcome;
+        };
+        context.telemetry = self.player_telemetry(session_id).await;
+        let invoked = |result: &str, provider: Option<&str>| {
+            TelemetryEvent::new(session_id, TelemetryEventKind::DirectorInvoked, Utc::now())
+                .actor("director")
+                .location(context.player.location.clone())
+                .metadata(json!({
+                    "trigger": context.trigger.kind(),
+                    "result": result,
+                    "provider": provider,
+                    "with_telemetry": context.telemetry.is_some(),
+                }))
         };
         let decision = match self.director.decide(&context).await {
             Ok(decision) => decision,
             Err(err) => {
                 warn!(%session_id, error = %err, "director produced no decision");
+                self.telemetry_sink.record(invoked("failed", None));
                 outcome.director = DirectorReport::Failed(err);
                 return outcome;
             }
         };
+        let provider = decision.metadata.provider.clone();
         match self.apply_decision(&decision) {
             Ok(applied) => {
                 self.persist(&applied.memories, &mut outcome).await;
@@ -500,6 +560,22 @@ impl Runtime {
                     events = applied.events.len(),
                     "director decision applied"
                 );
+                self.telemetry_sink.record(
+                    invoked("applied", Some(&provider)).value(decision.actions.len() as f64),
+                );
+                for note in &applied.deferred {
+                    self.telemetry_sink.record(
+                        TelemetryEvent::new(
+                            session_id,
+                            TelemetryEventKind::NarrativeReplan,
+                            Utc::now(),
+                        )
+                        .actor("director")
+                        .target(note.mission_id.clone())
+                        .location(context.player.location.clone())
+                        .metadata(json!({ "source": "director" })),
+                    );
+                }
                 outcome.events = applied.events;
                 outcome.director = DirectorReport::Applied {
                     decision: Box::new(decision),
@@ -508,6 +584,8 @@ impl Runtime {
             }
             Err(error) => {
                 warn!(%session_id, decision_id = %decision.decision_id, %error, "director decision rejected");
+                self.telemetry_sink
+                    .record(invoked("rejected", Some(&provider)));
                 outcome.director = DirectorReport::Rejected {
                     decision: Box::new(decision),
                     error,
@@ -533,6 +611,73 @@ impl Runtime {
             replan: applied.replan,
             follow_up,
         })
+    }
+
+    /// The session's recent behaviour for the Director. Any failure, and a
+    /// reader slower than [`TELEMETRY_READ_TIMEOUT`], means no telemetry.
+    async fn player_telemetry(&self, session_id: Uuid) -> Option<PlayerTelemetry> {
+        let read = self.telemetry_reader.recent(session_id, Utc::now());
+        match tokio::time::timeout(TELEMETRY_READ_TIMEOUT, read).await {
+            Ok(Ok(telemetry)) => Some(telemetry.clamped()),
+            Ok(Err(err)) => {
+                warn!(%session_id, error = %err, "telemetry unavailable; director decides without it");
+                None
+            }
+            Err(_) => {
+                warn!(%session_id, "telemetry read timed out; director decides without it");
+                None
+            }
+        }
+    }
+
+    /// Telemetry for one applied player action. `npcs` is the session's
+    /// roster and whether the action disclosed a secret, when it runs a world.
+    fn record_action(
+        &self,
+        action: &ValidatedAction,
+        event: &WorldEvent,
+        npcs: Option<(&Roster, bool)>,
+    ) {
+        let session_id = action.session_id;
+        let location = self
+            .sessions
+            .get(session_id)
+            .and_then(|session| session.current_location);
+        let action_type = match action.action_type {
+            ActionType::Interact => "interact",
+            ActionType::Inspect => "inspect",
+            ActionType::Move => "move",
+            ActionType::Speak => "speak",
+        };
+        let base = |kind| {
+            TelemetryEvent::new(session_id, kind, event.timestamp)
+                .actor(action.actor_id.clone())
+                .target(action.target.clone())
+                .location(location.clone())
+        };
+        self.telemetry_sink.record(
+            base(TelemetryEventKind::PlayerAction)
+                .metadata(json!({ "action_type": action_type, "sequence": event.sequence })),
+        );
+        if action.action_type == ActionType::Move {
+            self.telemetry_sink
+                .record(base(TelemetryEventKind::LocationEntered));
+        }
+        let social = matches!(action.action_type, ActionType::Speak | ActionType::Interact);
+        let npc = action
+            .target
+            .as_deref()
+            .filter(|_| social)
+            .and_then(|target| CharacterId::new(target).ok())
+            .zip(npcs)
+            .filter(|(id, (roster, _))| roster.get(id).is_some_and(|npc| npc.can_perceive()));
+        if let Some((_, (_, disclosure))) = npc {
+            self.telemetry_sink.record(
+                base(TelemetryEventKind::NpcInteraction)
+                    .value(1.0)
+                    .metadata(json!({ "action_type": action_type, "disclosure": disclosure })),
+            );
+        }
     }
 
     async fn persist(&self, memories: &[MemoryEntry], outcome: &mut FollowUpOutcome) {

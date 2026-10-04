@@ -11,6 +11,7 @@
        in-memory state                  emits structured world_events
              ┆
              ┆  (future) async tasks: Director AI, NPC agents → proposals only
+             ┆  async, optional: TiDB (NPC memory) · Tiger Data (recent gameplay telemetry)
              ┆
       Python Pipeline (uv)              pre-game: canon retrieval, WorldBible
              │                          writes cache/universes, cache/worlds, cache/audio
@@ -62,6 +63,11 @@ server-originated events can be pushed later without changing the read path.
 
 - **In-memory state, no DB on the hot path.** Sessions vanish on restart; fine for
   a hackathon demo. TiDB is for pre-game canon data, accessed by Python.
+- **Two optional data layers, both off the hot path.** TiDB is persistent semantic memory
+  ("what should the world remember?", [NPC_MEMORY.md](NPC_MEMORY.md)). Tiger Data is
+  high-frequency recent behavioural telemetry ("what has the player been doing recently?",
+  [TELEMETRY.md](TELEMETRY.md)). Each sits behind a trait with an in-memory default; the
+  backend builds, tests and runs without either.
 - **Std `RwLock`, short critical sections.** No `.await` while locked.
 - **Deterministic events.** `event_id = UUIDv5(action_id)`; same state + action →
   same event. Duplicate `action_id`s are rejected.

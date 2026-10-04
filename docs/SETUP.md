@@ -88,6 +88,7 @@ See `.env.example`. Provider keys are read only by server-side code.
 | `ELEVENLABS_API_KEY` | canon | live check: `/v1/user` account lookup (no credits) |
 | `WORLD_LABS_API_KEY` | canon | configuration only — no live check (avoids paid generation) |
 | `TIDB_*` | canon | live check: TCP reachability only, no auth |
+| `TIGER_DATABASE_URL` | backend (`--features tiger`) | Tiger Data `postgres://` URL for gameplay telemetry; a secret as a whole. Unset: in-memory telemetry. See [TELEMETRY.md](TELEMETRY.md) |
 | `BACKEND_HOST`, `BACKEND_PORT` | backend | default `127.0.0.1:3000` |
 | `RUST_LOG` | backend | e.g. `info`, `rift_backend=debug` |
 

@@ -285,17 +285,38 @@ impl<'a> Plan<'a> {
             .as_deref()
             .filter(|id| ctx.world.location(id).is_some())
             .map(str::to_owned);
-        self.push(|action_id| DirectorAction::TriggerWorldEvent {
-            action_id,
-            event: if told.is_some() {
-                WorldEventKind::RumorSpreads
-            } else {
-                WorldEventKind::TensionEscalates
-            },
-            description: truncate_chars(&description, limits::MAX_TEXT_CHARS),
-            location_id: here,
-            npc_ids: involved,
+        // The one telemetry rule. A player who is under pressure, or who has
+        // been playing by talking, gets a conversation here instead of another
+        // escalation: same slot, lower intensity.
+        let speaker = told.or(giver).filter(|_| {
+            ctx.telemetry
+                .is_some_and(|telemetry| telemetry.prefers_dialogue())
         });
+        match speaker {
+            Some(npc_id) => {
+                let opening_line = if told == Some(npc_id) {
+                    "Slow down. Tell me exactly what you know, from the start."
+                } else {
+                    "Before this goes any further, you and I need to talk."
+                };
+                self.push(|action_id| DirectorAction::StartDialogue {
+                    action_id,
+                    npc_id: npc_id.to_owned(),
+                    opening_line: opening_line.to_owned(),
+                });
+            }
+            None => self.push(|action_id| DirectorAction::TriggerWorldEvent {
+                action_id,
+                event: if told.is_some() {
+                    WorldEventKind::RumorSpreads
+                } else {
+                    WorldEventKind::TensionEscalates
+                },
+                description: truncate_chars(&description, limits::MAX_TEXT_CHARS),
+                location_id: here,
+                npc_ids: involved,
+            }),
+        }
 
         let base = objective_id.or(told).unwrap_or("choice");
         if let Some(new_id) = self.fresh_objective_id("aftermath", base) {
@@ -371,6 +392,7 @@ impl<'a> Plan<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::director::PlayerTelemetry;
     use crate::director::testing::sample_context;
     use crate::director::validate::validate_proposal;
 
@@ -535,6 +557,89 @@ mod tests {
         assert_eq!(proposal.reason_code, ReasonCode::NoChange);
         assert!(proposal.actions.is_empty());
         assert_eq!(proposal.narrative_summary, None);
+    }
+
+    fn telemetry(combat: u8, deaths: u8, engagement: u8) -> PlayerTelemetry {
+        PlayerTelemetry {
+            window_seconds: 300,
+            combat_intensity: combat,
+            recent_deaths: deaths,
+            npc_engagement: engagement,
+            exploration_activity: 0,
+        }
+    }
+
+    #[test]
+    fn quiet_telemetry_changes_nothing() {
+        let baseline = propose(&sample_context());
+        for quiet in [telemetry(0, 0, 0), telemetry(59, 1, 59)] {
+            let mut ctx = sample_context();
+            ctx.telemetry = Some(quiet);
+            assert_eq!(valid(&ctx), baseline);
+        }
+    }
+
+    #[test]
+    fn pressure_or_engagement_swaps_the_escalation_for_a_conversation() {
+        for busy in [
+            telemetry(60, 0, 0),
+            telemetry(0, 2, 0),
+            telemetry(0, 0, 60),
+            telemetry(100, 100, 100),
+        ] {
+            let mut ctx = sample_context();
+            ctx.telemetry = Some(busy);
+            let proposal = valid(&ctx);
+            assert_eq!(proposal.reason_code, ReasonCode::PlayerDivergence);
+            assert_eq!(
+                types(&proposal),
+                [
+                    "fail_objective",
+                    "invalidate_mission",
+                    "set_world_flag",
+                    "set_npc_disposition",
+                    "set_npc_disposition",
+                    "start_dialogue",
+                    "set_objective",
+                    "request_replan",
+                ]
+            );
+            // The NPC the player told is the one who speaks.
+            assert!(proposal.actions.iter().any(|a| matches!(
+                a,
+                DirectorAction::StartDialogue { npc_id, .. } if npc_id == "captain_ines"
+            )));
+        }
+    }
+
+    #[test]
+    fn a_refusal_under_pressure_is_answered_by_the_giver() {
+        let mut ctx = sample_context();
+        ctx.trigger = Trigger::ObjectiveRefused {
+            objective_id: "hide_ledger".to_owned(),
+        };
+        assert!(types(&valid(&ctx)).contains(&"trigger_world_event"));
+
+        ctx.telemetry = Some(telemetry(80, 0, 0));
+        let proposal = valid(&ctx);
+        assert!(!types(&proposal).contains(&"trigger_world_event"));
+        assert!(proposal.actions.iter().any(|a| matches!(
+            a,
+            DirectorAction::StartDialogue { npc_id, .. } if npc_id == "keeper_tomas"
+        )));
+    }
+
+    #[test]
+    fn with_nobody_to_talk_to_the_world_event_stays() {
+        let mut ctx = sample_context();
+        ctx.telemetry = Some(telemetry(100, 5, 100));
+        ctx.trigger = Trigger::PlayerDisclosure {
+            npc_id: "old_marlow".to_owned(),
+            objective_id: None,
+        };
+        let proposal = valid(&ctx);
+        assert!(types(&proposal).contains(&"trigger_world_event"));
+        assert!(!types(&proposal).contains(&"start_dialogue"));
     }
 
     #[test]
