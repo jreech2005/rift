@@ -162,8 +162,8 @@ RIFT_SCENARIO=backend/tests/fixtures/runtime/scenario_burner_phone.json \
 make backend
 ```
 
-Press Play. Because the level holds Rift entities, a session is created automatically once the
-backend answers (`LogRiftPresentation: Level has Rift entities, requesting a game session`).
+Press Play. A session is created automatically once the backend answers
+(`LogRiftNet: Rift session creation requested`, then `LogRiftNet: Rift session ready: <id>`).
 
 Path A — keep the secret: look at the mattress, press **E** → `OBJECTIVE COMPLETE`.
 
