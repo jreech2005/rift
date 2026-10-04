@@ -36,5 +36,8 @@ cache/**/*
 !cache/**/
 !cache/**/.gitkeep
 
+# Demo launcher state (PID, backend log)
+.demo/
+
 # Logs
 *.log

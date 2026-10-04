@@ -20,6 +20,7 @@ done and tested. Unreal awaits manual install (`game/README.md`).
 ## Commands
 
 ```sh
+make demo-matrix  # one-command demo: backend + Unreal (docs/DEMO.md)
 make backend      # start backend on 127.0.0.1:3000
 make test         # Rust + Python tests
 make smoke        # end-to-end WebSocket smoke test
@@ -31,6 +32,7 @@ make doctor       # toolchain + provider status
 - [CLAUDE.md](CLAUDE.md) — rules for contributors and agents
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - [docs/PROTOCOL.md](docs/PROTOCOL.md)
+- [docs/DEMO.md](docs/DEMO.md) — one-command demo launcher
 - [docs/SCENARIO_BUILDER.md](docs/SCENARIO_BUILDER.md) — title -> WorldBible -> playable scenario
 - [docs/SETUP.md](docs/SETUP.md)
 - [docs/MILESTONES.md](docs/MILESTONES.md)
