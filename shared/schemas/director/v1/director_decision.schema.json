@@ -1,0 +1,681 @@
+{
+  "$comment": "Generated from backend/src/director/schema.rs. Do not edit; run RIFT_UPDATE_SCHEMAS=1 cargo test.",
+  "$id": "rift://schemas/director/v1/director_decision",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A validated Director decision: zero or more typed, allowlisted actions. Not a wire message. Source of truth: backend/src/director/.",
+  "properties": {
+    "actions": {
+      "description": "Typed actions in the order they should happen. May be empty.",
+      "items": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "description": "Give the player a new objective.",
+            "properties": {
+              "action_id": {
+                "description": "Unique within this decision, e.g. a1, a2.",
+                "maxLength": 32,
+                "pattern": "^[a-z0-9_]{1,32}$",
+                "type": "string"
+              },
+              "description": {
+                "description": "What the player should do and why.",
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              "mission_id": {
+                "description": "Active mission this objective belongs to. Omit for a stand-alone or replacement objective.",
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                "type": "string"
+              },
+              "objective_id": {
+                "description": "A new lowercase snake_case id. Must not reuse an existing objective id.",
+                "maxLength": 64,
+                "pattern": "^[a-z0-9_]{1,64}$",
+                "type": "string"
+              },
+              "title": {
+                "description": "Short imperative shown to the player.",
+                "maxLength": 80,
+                "minLength": 1,
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "set_objective"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "action_id",
+              "objective_id",
+              "title",
+              "description"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "description": "Mark an active objective as completed.",
+            "properties": {
+              "action_id": {
+                "description": "Unique within this decision, e.g. a1, a2.",
+                "maxLength": 32,
+                "pattern": "^[a-z0-9_]{1,32}$",
+                "type": "string"
+              },
+              "objective_id": {
+                "description": "An active objective.",
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "complete_objective"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "action_id",
+              "objective_id"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "description": "Mark an active objective as failed.",
+            "properties": {
+              "action_id": {
+                "description": "Unique within this decision, e.g. a1, a2.",
+                "maxLength": 32,
+                "pattern": "^[a-z0-9_]{1,32}$",
+                "type": "string"
+              },
+              "objective_id": {
+                "description": "An active objective.",
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                "type": "string"
+              },
+              "reason": {
+                "description": "Why, in one plain sentence.",
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "fail_objective"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "action_id",
+              "objective_id",
+              "reason"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "description": "Bring a known character who is not yet in play into the world at a location.",
+            "properties": {
+              "action_id": {
+                "description": "Unique within this decision, e.g. a1, a2.",
+                "maxLength": 32,
+                "pattern": "^[a-z0-9_]{1,32}$",
+                "type": "string"
+              },
+              "location_id": {
+                "description": "Where they appear.",
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                "type": "string"
+              },
+              "npc_id": {
+                "description": "A known, living character who is not active.",
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "activate_npc"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "action_id",
+              "npc_id",
+              "location_id"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "description": "Move an NPC to another location for a plausible in-world reason.",
+            "properties": {
+              "action_id": {
+                "description": "Unique within this decision, e.g. a1, a2.",
+                "maxLength": 32,
+                "pattern": "^[a-z0-9_]{1,32}$",
+                "type": "string"
+              },
+              "location_id": {
+                "description": "Where they go.",
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                "type": "string"
+              },
+              "npc_id": {
+                "description": "A known, living character.",
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                "type": "string"
+              },
+              "reason": {
+                "description": "Why, in one plain sentence.",
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "move_npc"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "action_id",
+              "npc_id",
+              "location_id",
+              "reason"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "description": "Change how an NPC feels about the player or another character.",
+            "properties": {
+              "action_id": {
+                "description": "Unique within this decision, e.g. a1, a2.",
+                "maxLength": 32,
+                "pattern": "^[a-z0-9_]{1,32}$",
+                "type": "string"
+              },
+              "disposition": {
+                "description": "The new disposition.",
+                "enum": [
+                  "hostile",
+                  "wary",
+                  "neutral",
+                  "friendly",
+                  "loyal"
+                ],
+                "type": "string"
+              },
+              "npc_id": {
+                "description": "The NPC whose feelings change.",
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                "type": "string"
+              },
+              "reason": {
+                "description": "Why, in one plain sentence.",
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "toward": {
+                "description": "Whom the feeling is about: \"player\" or a character id.",
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "set_npc_disposition"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "action_id",
+              "npc_id",
+              "toward",
+              "disposition",
+              "reason"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "description": "Let the player or an NPC learn something.",
+            "properties": {
+              "action_id": {
+                "description": "Unique within this decision, e.g. a1, a2.",
+                "maxLength": 32,
+                "pattern": "^[a-z0-9_]{1,32}$",
+                "type": "string"
+              },
+              "recipient_id": {
+                "description": "Who learns it: \"player\" or a character id.",
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                "type": "string"
+              },
+              "source_npc_id": {
+                "description": "The NPC it comes from, if any.",
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                "type": "string"
+              },
+              "text": {
+                "description": "The information, as plain in-world prose.",
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "reveal_information"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "action_id",
+              "recipient_id",
+              "text"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "description": "Record a lasting fact about this playthrough.",
+            "properties": {
+              "action_id": {
+                "description": "Unique within this decision, e.g. a1, a2.",
+                "maxLength": 32,
+                "pattern": "^[a-z0-9_]{1,32}$",
+                "type": "string"
+              },
+              "flag": {
+                "description": "Flag key such as disclosed_to:some_npc. Must not start with \"interacted:\".",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9_.:-]{1,128}$",
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "set_world_flag"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "action_id",
+              "flag"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "description": "Clear a flag that is currently set.",
+            "properties": {
+              "action_id": {
+                "description": "Unique within this decision, e.g. a1, a2.",
+                "maxLength": 32,
+                "pattern": "^[a-z0-9_]{1,32}$",
+                "type": "string"
+              },
+              "flag": {
+                "description": "A flag that is currently set.",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9_.:-]{1,128}$",
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "clear_world_flag"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "action_id",
+              "flag"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "description": "Stage one of the allowed world events.",
+            "properties": {
+              "action_id": {
+                "description": "Unique within this decision, e.g. a1, a2.",
+                "maxLength": 32,
+                "pattern": "^[a-z0-9_]{1,32}$",
+                "type": "string"
+              },
+              "description": {
+                "description": "What happens, as plain in-world prose.",
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              "event": {
+                "description": "What kind of event to stage.",
+                "enum": [
+                  "alarm_raised",
+                  "authorities_alerted",
+                  "reinforcements_arrive",
+                  "rumor_spreads",
+                  "communication_received",
+                  "confrontation_begins",
+                  "environment_changes",
+                  "tension_escalates"
+                ],
+                "type": "string"
+              },
+              "location_id": {
+                "description": "Where it happens, if anywhere specific.",
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                "type": "string"
+              },
+              "npc_ids": {
+                "description": "NPCs involved, without duplicates.",
+                "items": {
+                  "description": "An NPC involved.",
+                  "maxLength": 64,
+                  "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                  "type": "string"
+                },
+                "maxItems": 4,
+                "type": "array"
+              },
+              "type": {
+                "enum": [
+                  "trigger_world_event"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "action_id",
+              "event",
+              "description"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "description": "An NPC opens a conversation with the player.",
+            "properties": {
+              "action_id": {
+                "description": "Unique within this decision, e.g. a1, a2.",
+                "maxLength": 32,
+                "pattern": "^[a-z0-9_]{1,32}$",
+                "type": "string"
+              },
+              "npc_id": {
+                "description": "The NPC who speaks.",
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                "type": "string"
+              },
+              "opening_line": {
+                "description": "Their first line, in character.",
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "start_dialogue"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "action_id",
+              "npc_id",
+              "opening_line"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "description": "Declare a mission impossible or meaningless because of what the player did.",
+            "properties": {
+              "action_id": {
+                "description": "Unique within this decision, e.g. a1, a2.",
+                "maxLength": 32,
+                "pattern": "^[a-z0-9_]{1,32}$",
+                "type": "string"
+              },
+              "mission_id": {
+                "description": "An active mission.",
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                "type": "string"
+              },
+              "reason": {
+                "description": "Why, in one plain sentence.",
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "invalidate_mission"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "action_id",
+              "mission_id",
+              "reason"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "description": "Ask the narrative engine to plan again.",
+            "properties": {
+              "action_id": {
+                "description": "Unique within this decision, e.g. a1, a2.",
+                "maxLength": 32,
+                "pattern": "^[a-z0-9_]{1,32}$",
+                "type": "string"
+              },
+              "mission_id": {
+                "description": "Mission to replan; omit for the whole story.",
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                "type": "string"
+              },
+              "reason": {
+                "description": "Why, in one plain sentence.",
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "request_replan"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "action_id",
+              "reason"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "maxItems": 8,
+      "type": "array"
+    },
+    "confidence": {
+      "description": "How well this decision fits the canon and the player's action.",
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number"
+    },
+    "decision_id": {
+      "format": "uuid",
+      "type": "string"
+    },
+    "metadata": {
+      "additionalProperties": false,
+      "description": "Assigned by the engine, never by a model.",
+      "properties": {
+        "attempts": {
+          "maximum": 2,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "based_on_event_count": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "fallback_reason": {
+          "type": "string"
+        },
+        "latency_ms": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "model": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "repaired": {
+          "type": "boolean"
+        },
+        "usage": {
+          "additionalProperties": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "provider",
+        "model",
+        "attempts",
+        "repaired",
+        "latency_ms",
+        "created_at",
+        "based_on_event_count"
+      ],
+      "type": "object"
+    },
+    "narrative_summary": {
+      "description": "One or two sentences: what the player did and how the world responds.",
+      "maxLength": 400,
+      "minLength": 1,
+      "type": "string"
+    },
+    "reason_code": {
+      "description": "Why this decision. no_change requires an empty actions list.",
+      "enum": [
+        "story_setup",
+        "objective_progress",
+        "player_divergence",
+        "npc_reaction",
+        "world_reaction",
+        "no_change"
+      ],
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "session_id": {
+      "format": "uuid",
+      "type": "string"
+    },
+    "trigger": {
+      "additionalProperties": false,
+      "description": "Why the Director was consulted. Copied from the DirectorContext.",
+      "properties": {
+        "kind": {
+          "enum": [
+            "session_start",
+            "player_action",
+            "objective_refused",
+            "objective_completed",
+            "objective_failed",
+            "player_disclosure",
+            "idle"
+          ],
+          "type": "string"
+        },
+        "npc_id": {
+          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+          "type": "string"
+        },
+        "objective_id": {
+          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    "universe_id": {
+      "pattern": "^[a-z0-9_]{1,128}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "decision_id",
+    "session_id",
+    "universe_id",
+    "trigger",
+    "reason_code",
+    "actions",
+    "confidence",
+    "metadata"
+  ],
+  "title": "DirectorDecision",
+  "type": "object"
+}

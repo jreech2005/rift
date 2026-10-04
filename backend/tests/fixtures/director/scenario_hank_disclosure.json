@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "session_id": "7d9f0c1e-2b3a-4c5d-8e6f-0a1b2c3d4e5f",
+  "universe_id": "breaking_bad_tv_1396",
+  "event_count": 6,
+  "trigger": {
+    "kind": "player_disclosure",
+    "npc_id": "hank_schrader",
+    "objective_id": "hide_burner_phone"
+  },
+  "player": {
+    "location": "albuquerque_hospital",
+    "attributes": { "shift": "night" }
+  },
+  "recent_events": [
+    { "sequence": 3, "event_type": "location_changed", "actor_id": "player", "target": "albuquerque_hospital" },
+    {
+      "sequence": 4,
+      "event_type": "speech_acknowledged",
+      "actor_id": "player",
+      "target": "walter_white",
+      "text": "I'll keep it out of sight, Mr. White."
+    },
+    { "sequence": 5, "event_type": "interaction_acknowledged", "actor_id": "player", "target": "burner_phone" },
+    {
+      "sequence": 6,
+      "event_type": "speech_acknowledged",
+      "actor_id": "player",
+      "target": "hank_schrader",
+      "text": "Agent Schrader, check under his mattress. He has been making calls on a hidden phone all night."
+    }
+  ],
+  "world_flags": { "interacted:burner_phone": true },
+  "narrative": {
+    "summary": "Walter asked the night orderly to hide his burner phone before Hank's visit. The player agreed, then told Hank about it.",
+    "missions": [
+      {
+        "mission_id": "protect_walters_cover",
+        "title": "Protect Walter's cover",
+        "status": "active",
+        "summary": "Keep Walter's faked fugue state believable while Hank is in the room."
+      }
+    ],
+    "objectives": [
+      {
+        "objective_id": "hide_burner_phone",
+        "title": "Hide the burner phone",
+        "status": "active",
+        "description": "Get Walter's phone out of sight before Hank sees it.",
+        "mission_id": "protect_walters_cover",
+        "giver_npc_id": "walter_white"
+      }
+    ]
+  },
+  "npcs": [
+    {
+      "npc_id": "walter_white",
+      "location": "albuquerque_hospital",
+      "active": true,
+      "disposition": "friendly",
+      "status": "In his hospital bed, pretending to be confused."
+    },
+    {
+      "npc_id": "hank_schrader",
+      "location": "albuquerque_hospital",
+      "active": true,
+      "disposition": "neutral",
+      "status": "Visiting his brother-in-law."
+    },
+    { "npc_id": "jesse_pinkman", "location": "pinkman_residence", "active": false }
+  ]
+}
