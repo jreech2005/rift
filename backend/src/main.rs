@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use rift_backend::config::Config;
-use rift_backend::director::{DirectorEngine, FallbackDirector, GeminiDirector, ProviderErrorKind};
+use rift_backend::director::{DirectorEngine, DirectorSettings};
 use rift_backend::npc::MemoryStore;
 use rift_backend::runtime::{Runtime, RuntimeWorld};
 use rift_backend::session::SessionStore;
@@ -69,26 +69,22 @@ async fn build_runtime() -> Result<Runtime, Box<dyn std::error::Error>> {
     Ok(runtime)
 }
 
-/// Gemini with the deterministic rules as fallback when a key is configured,
-/// the deterministic rules alone otherwise.
+/// The configured LLM failover chain with the deterministic rules behind it,
+/// or the deterministic rules alone when no LLM key is set. Reads the
+/// environment only: no request is made at startup.
 fn director() -> DirectorEngine {
-    match GeminiDirector::from_env() {
-        Ok(gemini) => {
-            info!(
-                model = gemini.model(),
-                "director: gemini with deterministic fallback"
-            );
-            DirectorEngine::new(Arc::new(gemini)).with_fallback(Arc::new(FallbackDirector))
-        }
-        Err(err) => {
-            if err.kind == ProviderErrorKind::NotConfigured {
-                info!("director: deterministic rules (no GEMINI_API_KEY)");
-            } else {
-                warn!(error = %err, "director: gemini unavailable, using deterministic rules");
-            }
-            DirectorEngine::deterministic()
-        }
+    let settings = DirectorSettings::from_env();
+    if settings.llms.is_empty() {
+        info!("director: deterministic rules (no LLM configured)");
+    } else {
+        info!(
+            chain = %settings.labels().join(" -> "),
+            transient_retries = settings.transient_retries,
+            budget_ms = settings.budget.as_millis() as u64,
+            "director: LLM failover chain with deterministic fallback"
+        );
     }
+    settings.into_engine()
 }
 
 #[cfg(feature = "tidb")]

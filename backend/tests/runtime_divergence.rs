@@ -4,12 +4,14 @@
 //! memory is the in-memory store.
 
 use std::sync::Arc;
+use std::time::Duration;
 
 use rift_backend::action::{ActionType, ValidatedAction, WorldEventType};
 use rift_backend::director::{
-    DirectorAction, DirectorEngine, DirectorError, FallbackDirector, IssueCode,
-    MissionStatus as ViewMissionStatus, ObjectiveStatus as ViewObjectiveStatus, ProviderError,
-    ProviderErrorKind, ScriptedProvider, ScriptedResponse, Trigger,
+    DirectorAction, DirectorEngine, DirectorError, FailoverPolicy, FailoverProvider,
+    FallbackDirector, IssueCode, Leg, MissionStatus as ViewMissionStatus,
+    ObjectiveStatus as ViewObjectiveStatus, ProviderError, ProviderErrorKind, ScriptedProvider,
+    ScriptedResponse, Trigger,
 };
 use rift_backend::narrative::{
     CanonPolicy, MissionStatus, NarrativeState, ObjectiveStatus, ReplanReason,
@@ -533,6 +535,48 @@ async fn provider_failure_falls_back_without_corrupting_state() {
     assert_eq!(
         rig.session().world_flags.get("disclosed_to:hank_schrader"),
         Some(&true)
+    );
+}
+
+/// The whole chain down: one player action is one Director invocation, one
+/// bounded pass over the legs and one deterministic decision. Applying that
+/// decision does not invoke the Director again.
+#[tokio::test]
+async fn a_failed_llm_chain_is_bounded_and_never_reinvokes_the_director() {
+    let leg = || Arc::new(ScriptedProvider::new(vec![unavailable(); 8]));
+    let (primary, backup, other) = (leg(), leg(), leg());
+    let timeout = Duration::from_secs(1);
+    let chain = FailoverProvider::new(vec![
+        Leg::new(primary.clone(), "primary", timeout).with_retries(1),
+        Leg::new(backup.clone(), "backup", timeout),
+        Leg::new(other.clone(), "other", timeout),
+    ])
+    .with_policy(FailoverPolicy {
+        backoff: Duration::from_millis(5),
+        max_backoff: Duration::from_millis(5),
+        budget: timeout,
+    });
+    let rig = rig(DirectorEngine::new(Arc::new(chain)).with_fallback(Arc::new(FallbackDirector)));
+
+    let outcome = rig
+        .runtime
+        .process_player_action(&tell_hank(rig.session_id))
+        .await
+        .unwrap();
+    let DirectorReport::Applied { decision, .. } = outcome.director() else {
+        panic!("fallback should apply: {:?}", outcome.director());
+    };
+    assert_eq!(decision.metadata.provider, "fallback");
+    assert_eq!(decision.metadata.attempts, 1);
+    assert_eq!(rig.objective(OBJECTIVE), ObjectiveStatus::Failed);
+    assert_eq!(
+        (
+            primary.call_count(),
+            backup.call_count(),
+            other.call_count()
+        ),
+        (2, 1, 1),
+        "one pass: applying the decision must not call the Director again"
     );
 }
 

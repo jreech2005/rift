@@ -34,6 +34,7 @@ const CONNECT_TIMEOUT: Duration = Duration::from_secs(5);
 /// A decision is a few hundred tokens; the rest is headroom for thinking.
 const MAX_OUTPUT_TOKENS: u32 = 8_192;
 const THINKING_LEVEL: &str = "low";
+const PING_MAX_OUTPUT_TOKENS: u32 = 64;
 const MAX_PROVIDER_MESSAGE_CHARS: usize = 300;
 const REDACTED: &str = "[redacted]";
 
@@ -94,7 +95,9 @@ impl GeminiConfig {
         Self::from_lookup(|key| std::env::var(key).ok())
     }
 
-    fn from_lookup(lookup: impl Fn(&str) -> Option<String>) -> Result<Self, ProviderError> {
+    pub(crate) fn from_lookup(
+        lookup: impl Fn(&str) -> Option<String>,
+    ) -> Result<Self, ProviderError> {
         // Unset and blank values both count as missing.
         let non_empty = |key: &str| {
             lookup(key)
@@ -148,6 +151,29 @@ impl GeminiDirector {
         &self.config.model
     }
 
+    /// The same provider (key, endpoint, timeout, connection pool) asking a
+    /// different model. Used for the `GEMINI_FALLBACK_MODEL` failover leg.
+    pub fn with_model(&self, model: impl Into<String>) -> Self {
+        let mut other = self.clone();
+        other.config.model = model.into();
+        other
+    }
+
+    /// Health check: one tiny generation, no schema, nothing stored. `Ok`
+    /// means the model answered with HTTP 200. Never part of gameplay.
+    pub async fn ping(&self) -> Result<(), ProviderError> {
+        let body = json!({
+            "model": self.config.model,
+            "input": "Reply with the single word OK.",
+            "generation_config": {
+                "max_output_tokens": PING_MAX_OUTPUT_TOKENS,
+                "thinking_level": THINKING_LEVEL,
+            },
+            "store": false,
+        });
+        self.post(body).await.map(|_| ())
+    }
+
     /// The request body for one decision. Contains no secret.
     pub fn request_body(&self, request: ProviderRequest<'_>) -> Value {
         let prompt = build_prompt(request.context);
@@ -173,6 +199,12 @@ impl GeminiDirector {
     }
 
     async fn generate(&self, body: Value) -> Result<ProviderOutput, ProviderError> {
+        let data = self.post(body).await?;
+        parse_interaction(&data, &self.config.model)
+    }
+
+    /// One HTTP request. Returns the JSON body of a successful response.
+    async fn post(&self, body: Value) -> Result<Value, ProviderError> {
         let error = |kind, detail: &str| ProviderError::new(PROVIDER, kind, detail);
 
         let mut key = HeaderValue::from_str(self.config.api_key.expose()).map_err(|_| {
@@ -219,11 +251,10 @@ impl GeminiDirector {
             return Err(error(kind, &detail).with_status(status.as_u16()));
         }
 
-        let data = parsed.ok_or_else(|| {
+        parsed.ok_or_else(|| {
             error(ProviderErrorKind::Malformed, "response was not JSON")
                 .with_status(status.as_u16())
-        })?;
-        parse_interaction(&data, &self.config.model)
+        })
     }
 }
 
@@ -344,6 +375,7 @@ pub fn parse_interaction(
         text,
         model: model.to_owned(),
         usage,
+        provider: None,
     })
 }
 

@@ -132,14 +132,16 @@ and the drafts are committed only if all of them applied.
 - **Rejected player action** (invalid, unknown session, duplicate `action_id`): no session, NPC or
   narrative change, no memory, no Director call.
 - **Provider failure** (unavailable/503, rate-limited/429, timeout, output still invalid after the
-  one repair): handled by `DirectorEngine` as before. With Gemini configured, `FallbackDirector`
-  answers instead. If nothing produces a decision the report is `Failed`; the player action and
+  one repair): transient failures get one short retry, then the next configured model/provider
+  is tried once (`docs/DIRECTOR.md`, "Failover"), all inside a fixed time budget. If no LLM
+  answers, `FallbackDirector` answers instead. If nothing produces a decision the report is `Failed`; the player action and
   its deterministic consequences stand and the session carries on.
 - **Memory store failure**: logged and reported in `FollowUpOutcome::memory_errors`. NPC state is
   authoritative in memory, so recall is lost, not state.
 
-The Director is Gemini with `FallbackDirector` behind it when `GEMINI_API_KEY` is set, and the
-deterministic rules alone otherwise.
+The Director is the configured LLM chain (Gemini, optionally a second Gemini model and Anthropic)
+with `FallbackDirector` behind it when a key is set, and the deterministic rules alone otherwise.
+`make director-preflight` checks the chain before a demo.
 
 ## NPC privacy
 

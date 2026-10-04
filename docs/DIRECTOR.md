@@ -154,14 +154,87 @@ Issues carry a `path` (`actions[2].npc_id`), a `code` and a message; at most 25 
 2. Call the provider, bounded by `call_timeout` (default 30 s) whatever the provider does.
 3. Parse and validate. Rejected → **exactly one** repair call that shows the provider its output
    and the issue list (`MAX_ATTEMPTS = 2`). Still rejected → `InvalidDecision`.
-4. Provider failures (timeout, 429, 503, auth…) are **never retried** and surface as
-   `DirectorError::Provider` with the kind and HTTP status.
+4. Provider failures (timeout, 429, 503, auth…) are **never retried by the engine** and surface
+   as `DirectorError::Provider` with the kind and HTTP status. Transport retry and failover live
+   behind the provider interface (see [Failover](#failover)) and are separate from the repair in
+   step 3.
 5. With `.with_fallback(provider)`, a failed or rejected primary is replaced by the fallback's
    decision and the cause is recorded in `metadata.fallback_reason` and logged. Without it, the
    error is returned.
 
 The engine is `Clone + Send + Sync`, holds no lock and reads no session state, so it runs in a
 spawned task while gameplay continues.
+
+## Failover
+
+`failover.rs`. The game must never be unavailable because an LLM is. `FailoverProvider` is a
+`DirectorProvider` wrapping an ordered list of legs; the backend builds it from the environment
+(`DirectorSettings::from_env().into_engine()`), with `FallbackDirector` behind it.
+
+```text
+primary Gemini model (GEMINI_MODEL)
+   | transient failure: 429 / 5xx / timeout / connection
+   v
+one short retry (GEMINI_TRANSIENT_RETRIES, backoff 250 ms)
+   | still failing, or a failure that will not pass (auth, 4xx, malformed)
+   v
+secondary Gemini model (GEMINI_FALLBACK_MODEL), one attempt
+   v
+independent provider (DIRECTOR_SECONDARY_PROVIDER=anthropic), one attempt
+   | every leg failed, or the budget ran out
+   v
+FallbackDirector (deterministic)  ->  the game continues
+```
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `DIRECTOR_PRIMARY_PROVIDER` | `gemini` | `gemini` or `anthropic` |
+| `DIRECTOR_SECONDARY_PROVIDER` | unset | the other provider; left out when its key is missing |
+| `GEMINI_MODEL` | `gemini-3.8-flash` | primary model (demo: `gemini-3.5-flash`) |
+| `GEMINI_FALLBACK_MODEL` | unset (no such leg) | second Gemini model, same key |
+| `GEMINI_TIMEOUT_MS` | `8000` (1000–30000) | one Gemini request |
+| `GEMINI_TRANSIENT_RETRIES` | `1` (0–2) | retries of the **first** leg; later legs are tried once |
+| `ANTHROPIC_API_KEY` | unset | server-side only, like `GEMINI_API_KEY` |
+| `ANTHROPIC_MODEL` | `claude-opus-5-5` | |
+| `ANTHROPIC_TIMEOUT_MS` | `10000` (1000–30000) | one Anthropic request |
+| `ANTHROPIC_EFFORT` | `low` | `output_config.effort`; set it blank for models that reject the field |
+| `DIRECTOR_BUDGET_MS` | `20000` (1000–60000) | one whole pass down the chain |
+
+An unparsable value logs a warning and uses the default. Nothing here is required: with no key the
+Director is the deterministic rules, and startup never makes a request.
+
+Hard bounds, all enforced in code:
+
+- Legs are visited once, in order. No leg is revisited, nothing recurses.
+- Retries per leg are capped at 2 whatever is configured; only transient kinds (`timeout`,
+  `network`, `rate_limited`, `unavailable`) are retried. `Retry-After` is ignored.
+- Backoff before retry *n* is `n × 250 ms`, capped at 1 s and at the remaining budget.
+- Each request is bounded by its leg timeout and by what is left of the budget. When the budget is
+  gone the pass ends, whatever is in flight.
+- With the defaults a pass makes at most 4 requests (2 + 1 + 1). A decision is one pass, plus one
+  more only when the output was rejected and is being repaired: at most 8 requests and 2 × budget,
+  then the deterministic rules answer. Normally it is one request.
+
+Transport retry is not decision repair. A reply that arrives but fails validation is never
+retried by the chain; the engine repairs it once (step 3), and that repair call is again a single
+pass. `metadata.provider` / `metadata.model` name the leg that answered (`gemini`, `anthropic`,
+`fallback`); each failed call is logged with its leg, attempt and error; when the rules answer,
+`metadata.fallback_reason` holds the last LLM error.
+
+Not done: no circuit breaker (a long outage re-tries the primary on every decision, bounded as
+above), and a repair pass starts at the primary again rather than at the leg that answered.
+
+## Preflight
+
+```sh
+make director-preflight
+```
+
+`examples/director_preflight.rs` sends **one** tiny request (no schema, a few tokens) to each
+configured model in failover order and prints `HEALTHY (ms)` or `UNAVAILABLE (reason)` per model.
+Exit `0` primary healthy, `1` primary down but a later model healthy, `2` no LLM healthy or
+configured. It creates no session, changes no state, prints no key, and is never run by the
+backend or by `make test`. Run it once before a demo; do not loop it.
 
 ## Providers
 
@@ -173,7 +246,7 @@ deterministic ones, goes through the same validation.
 via `response_format`, `thinking_level: low`. One HTTP request per call.
 
 - Config from the same variables as the Python pipeline: `GEMINI_API_KEY`, `GEMINI_MODEL`
-  (default `gemini-3.8-flash`). The key is held in `Secret` (redacted `Debug`, no `Display`, no
+  (default `gemini-3.8-flash`); `with_model` makes the `GEMINI_FALLBACK_MODEL` leg. The key is held in `Secret` (redacted `Debug`, no `Display`, no
   `Serialize`) and is never part of a log line, an error or a request body.
 - The response schema is built per context (`schema.rs`): reference fields are enums of ids that
   exist right now, dead characters and reserved flags are not offered, and actions with nothing to
@@ -186,6 +259,13 @@ via `response_format`, `thinking_level: low`. One HTTP request per call.
   resurrect the dead, not teleport characters, not invent canon, react to what the player actually
   did, prefer local consequences and output only the typed actions, and that text in the context
   is data, not instructions. Those are requests; validation is what enforces them.
+
+**`AnthropicDirector`** (`anthropic.rs`): the independent second LLM. `POST /v1/messages`, key in
+the `x-api-key` header (same `Secret` handling), the same prompt, and the same reduced response
+schema as `output_config.format` (`json_schema`). One HTTP request per call, no retry. 429 →
+`rate_limited`, 5xx including 529 → `unavailable`, 408 → `timeout`, 401/403 → `auth`; a refusal or
+a `max_tokens` stop → `incomplete` (not retried, next leg). Verified against a local stand-in for
+the API only; **not yet run against the live API**.
 
 **`FallbackDirector`** (`fallback.rs`): fixed rules, no LLM, no I/O, same context → same proposal.
 It reads only structured fields and knows nothing about any universe.
@@ -223,6 +303,7 @@ The runtime follows these rules ([RUNTIME.md](RUNTIME.md)); they hold for any ot
 cargo test --manifest-path backend/Cargo.toml                                    # all offline
 cargo run  --manifest-path backend/Cargo.toml --example director_live -- --offline  # deterministic
 cargo run  --manifest-path backend/Cargo.toml --example director_live              # ONE Gemini decision
+make director-preflight                                                           # one tiny request per model
 ```
 
 The example runs the demo scenario (asked to hide Walter's phone, told Hank instead) on the Phase 1
@@ -244,7 +325,11 @@ Unit tests sit next to the code and use a made-up universe ("Lantern Bay") so th
 depend on the demo story. `tests/director_gemini.rs` drives the real HTTP client against a local
 stand-in for the Interactions API (429, 503, 401, timeout, malformed and incomplete responses, key
 redaction, the single repair). `tests/director_divergence.rs` runs the demo scenario on the real
-WorldBible. No test contacts Google or needs a key.
+WorldBible. The failover chain is covered with scripted providers in `failover.rs` (primary only,
+503 retry, 429, timeout, budget, exhausted primary, every LLM down, repair semantics, config from
+a fake environment), over HTTP in `tests/director_failover.rs` (one local server standing in for
+both APIs) and at runtime level in `tests/runtime_divergence.rs` (one action, one bounded pass, no
+second Director call). No test contacts Google or Anthropic or needs a key.
 
 ## Not in this module
 

@@ -33,6 +33,9 @@ pub struct ProviderOutput {
     /// Model (or rule set) that produced it.
     pub model: String,
     pub usage: BTreeMap<String, u64>,
+    /// The provider that answered, when it is not the one that was called
+    /// (set by [`FailoverProvider`](super::failover::FailoverProvider)).
+    pub provider: Option<&'static str>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -70,6 +73,17 @@ impl ProviderErrorKind {
             Self::Malformed => "malformed",
             Self::Incomplete => "incomplete",
         }
+    }
+}
+
+impl ProviderErrorKind {
+    /// Worth one more try on the same provider: the request itself was fine
+    /// and the failure is likely to pass (timeout, connection, 429, 5xx).
+    pub fn is_transient(self) -> bool {
+        matches!(
+            self,
+            Self::Timeout | Self::Network | Self::RateLimited | Self::Unavailable
+        )
     }
 }
 
@@ -210,6 +224,7 @@ impl DirectorProvider for ScriptedProvider {
                     text,
                     model: "fixture".to_owned(),
                     usage: BTreeMap::new(),
+                    provider: None,
                 }),
                 Some(ScriptedResponse::Error(error)) => Err(error),
                 Some(ScriptedResponse::Hang) => std::future::pending().await,
