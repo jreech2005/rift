@@ -238,9 +238,12 @@ The live test creates disposable tables `rift_test_<random>_npc_*`, runs a
 store/query/invalidate/state round trip and drops them. Without credentials it
 **fails with `BLOCKED`**; it never reports a connection it did not make.
 
-**Status: `TiDbStore` compiles and is linted, and its config, DDL and row
-encoding are unit-tested, but it has not been run against a live TiDB — the
-`TIDB_*` variables were empty when this was written.**
+**Status: verified live on 2026-10-03 against TiDB Cloud Serverless
+(`8.0.11-TiDB-v8.5.3-serverless`, TLS): connect, create tables, store, get,
+recent and relevant queries, owner-conflict rejection, invalidation, character
+state save/load, drop tables.** `TIDB_DATABASE` must name a database the user
+can create tables in (e.g. the default `test`); system schemas such as `sys`
+reject `CREATE TABLE`.
 
 Tables (`TableNames::create_statements`, created by `ensure_schema()`):
 

@@ -317,7 +317,8 @@ mod client {
         /// A store whose tables are named `<prefix>npc_*`.
         pub fn with_table_prefix(config: &TiDbConfig, prefix: &str) -> Result<Self, StoreError> {
             let tables = TableNames::new(prefix)?;
-            let constraints = PoolConstraints::new(0, 4).expect("0 <= 4");
+            // Keep one connection warm: reconnecting costs a TLS handshake per call.
+            let constraints = PoolConstraints::new(1, 4).expect("1 <= 4");
             let opts = OptsBuilder::default()
                 .ip_or_hostname(config.host.clone())
                 .tcp_port(config.port)
