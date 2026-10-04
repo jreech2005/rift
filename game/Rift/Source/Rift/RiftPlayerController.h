@@ -7,6 +7,7 @@
 #include "RiftPlayerController.generated.h"
 
 class UInputMappingContext;
+class URiftEntityComponent;
 class UUserWidget;
 
 /**
@@ -24,7 +25,19 @@ public:
 	/** Constructor */
 	ARiftPlayerController();
 
+	/** Returns the interactable Rift entity the player is looking at within reach, null when there is none */
+	UFUNCTION(BlueprintCallable, Category="Rift")
+	URiftEntityComponent* GetFocusedRiftEntity() const;
+
+	/** Sends the focused entity's player action to the backend. Bound to the E key */
+	UFUNCTION(BlueprintCallable, Category="Rift")
+	void InteractWithFocused();
+
 protected:
+
+	/** How far the player can reach to interact, in cm */
+	UPROPERTY(EditAnywhere, Category="Rift")
+	float InteractDistance = 350.0f;
 
 	/** Input Mapping Contexts */
 	UPROPERTY(EditAnywhere, Category="Input|Input Mappings")

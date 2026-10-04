@@ -8,6 +8,9 @@
 #include "RiftCameraManager.h"
 #include "Blueprint/UserWidget.h"
 #include "Rift.h"
+#include "RiftEntityComponent.h"
+#include "Engine/World.h"
+#include "InputCoreTypes.h"
 #include "Widgets/Input/SVirtualJoystick.h"
 
 ARiftPlayerController::ARiftPlayerController()
@@ -65,8 +68,49 @@ void ARiftPlayerController::SetupInputComponent()
 				}
 			}
 		}
+
+		// a plain key binding: interacting needs no input asset
+		InputComponent->BindKey(EKeys::E, IE_Pressed, this, &ARiftPlayerController::InteractWithFocused);
 	}
 	
+}
+
+URiftEntityComponent* ARiftPlayerController::GetFocusedRiftEntity() const
+{
+	FVector ViewLocation;
+	FRotator ViewRotation;
+	GetPlayerViewPoint(ViewLocation, ViewRotation);
+
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(RiftInteract), false, GetPawn());
+
+	// by object type: character capsules ignore the visibility channel
+	FCollisionObjectQueryParams ObjectTypes;
+	ObjectTypes.AddObjectTypesToQuery(ECC_Pawn);
+	ObjectTypes.AddObjectTypesToQuery(ECC_WorldStatic);
+	ObjectTypes.AddObjectTypesToQuery(ECC_WorldDynamic);
+	ObjectTypes.AddObjectTypesToQuery(ECC_PhysicsBody);
+
+	FHitResult Hit;
+	const FVector End = ViewLocation + ViewRotation.Vector() * InteractDistance;
+
+	// a thin sphere is easier to aim than a line
+	if (!GetWorld()->SweepSingleByObjectType(Hit, ViewLocation, End, FQuat::Identity, ObjectTypes, FCollisionShape::MakeSphere(12.0f), Params))
+	{
+		return nullptr;
+	}
+
+	const AActor* HitActor = Hit.GetActor();
+	URiftEntityComponent* Entity = HitActor ? HitActor->FindComponentByClass<URiftEntityComponent>() : nullptr;
+
+	return Entity && Entity->bInteractable ? Entity : nullptr;
+}
+
+void ARiftPlayerController::InteractWithFocused()
+{
+	if (URiftEntityComponent* Entity = GetFocusedRiftEntity())
+	{
+		Entity->Interact();
+	}
 }
 
 bool ARiftPlayerController::ShouldUseTouchControls() const
