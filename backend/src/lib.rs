@@ -5,6 +5,7 @@ pub mod action;
 pub mod config;
 pub mod npc;
 pub mod director;
+pub mod narrative;
 pub mod protocol;
 pub mod session;
 pub mod ws;
