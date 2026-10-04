@@ -2,15 +2,19 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "rift://schemas/v1/world_event",
   "title": "WorldEvent",
-  "description": "Payload of a world_event message. Validated, structured outcome the game client executes. Source of truth: backend/src/action.rs.",
+  "description": "Payload of a world_event message. Validated, structured outcome the game client executes. The first four event types acknowledge a player_action; the rest are consequences produced by the Phase 2 runtime (docs/RUNTIME.md) and carry payload.source. Source of truth: backend/src/action.rs.",
   "type": "object",
   "required": ["event_id", "session_id", "sequence", "event_type", "target", "payload", "timestamp"],
   "properties": {
-    "event_id": { "type": "string", "format": "uuid", "description": "UUIDv5 derived from action_id: deterministic." },
+    "event_id": { "type": "string", "format": "uuid", "description": "UUIDv5 derived from action_id (or, for runtime consequences, from the causing action or Director decision): deterministic." },
     "session_id": { "type": "string", "format": "uuid" },
     "sequence": { "type": "integer", "minimum": 1, "description": "Monotonic per session." },
     "event_type": {
-      "enum": ["interaction_acknowledged", "inspection_acknowledged", "location_changed", "speech_acknowledged"]
+      "enum": [
+        "interaction_acknowledged", "inspection_acknowledged", "location_changed", "speech_acknowledged",
+        "objective_updated", "mission_updated", "npc_activated", "npc_moved", "npc_disposition_changed",
+        "information_revealed", "world_flag_changed", "world_event_triggered", "dialogue_started"
+      ]
     },
     "target": { "type": ["string", "null"] },
     "payload": { "type": "object" },

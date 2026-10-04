@@ -9,8 +9,9 @@ It answers three questions:
 2. What does that depend on? → prerequisites
 3. What happens when the player breaks those dependencies? → invalidation and a typed `ReplanRequest`
 
-**Status: not wired into the live path.** Nothing in `ws.rs` or `session.rs` calls it and no
-`player_action` reaches it yet. That is a later integration pass (see [Integration](#integration)).
+**Status: wired in by the Phase 2 runtime** (`backend/src/runtime/`, [RUNTIME.md](RUNTIME.md)),
+which feeds it player actions and Director decisions. This module itself still knows nothing about
+sessions, NPCs or the protocol.
 
 ```
 WorldBible ─► build_initial ─► NarrativePlan + WorldFacts ─► NarrativeEngine::start ─► NarrativeState
@@ -142,7 +143,10 @@ They cannot kill, create or revive anything.
 Events (`NarrativeEvent`): `flag_set`, `character_died`, `character_availability_changed`,
 `character_moved`, `player_moved`, `location_lost`, `object_destroyed`, `fact_revealed`,
 `relationship_changed`, `truth_ended`, `truth_established`, `objective_completed`,
-`objective_failed`, `checkpoint_reached`, `checkpoint_skipped`.
+`objective_failed`, `mission_invalidated`, `checkpoint_reached`, `checkpoint_skipped`.
+
+`mission_invalidated` reports that an active mission's premise is gone (cause `reported`). Like
+every invalidation it fires no effects.
 
 An event that contradicts the world is rejected: a dead character cannot move, become available
 or learn anything; a beat cannot be declared reached unless its prerequisites hold.

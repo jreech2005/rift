@@ -122,6 +122,27 @@ Envelope `session_id` is the new session. Payload is the session snapshot:
 `event_id` is a UUIDv5 of `action_id`, so the same action always maps to the
 same event. `sequence` increases by 1 per session.
 
+The reply to a `player_action` is always exactly one `world_event` with
+`reply_to` set, and it is sent first. In a session that runs a world
+(`docs/RUNTIME.md`) further `world_event`s may follow without `reply_to`: the
+consequences the narrative layer and the Director derived from the action.
+They can arrive at any later time; order them by `sequence`. Every such
+payload carries `"source": "narrative" | "director"`.
+
+| `event_type` | `target` | Payload (besides `source`) |
+|---|---|---|
+| `objective_updated` | objective id | `objective_id`, `mission_id`, `status` (`active`, `completed`, `failed`, `invalidated`), `title`, `description`, `cause` |
+| `mission_updated` | mission id | `mission_id`, `status`, `title`, `cause` |
+| `npc_activated` | NPC id | `npc_id`, `location_id` |
+| `npc_moved` | NPC id | `npc_id`, `location_id`, `reason` |
+| `npc_disposition_changed` | NPC id | `npc_id`, `toward`, `disposition` (`hostile`, `wary`, `neutral`, `friendly`, `loyal`), `reason` |
+| `information_revealed` | recipient id | `recipient_id`, `source_npc_id`, and `text` only when the recipient is `player` |
+| `world_flag_changed` | `null` | `flag`, `value` |
+| `world_event_triggered` | location id or `null` | `event`, `description`, `location_id`, `npc_ids` |
+| `dialogue_started` | NPC id | `npc_id`, `opening_line` |
+
+Their `event_id` is a UUIDv5 of the action or decision that caused them.
+
 ### `error`
 ```json
 { "code": "session_not_found", "message": "session … does not exist" }

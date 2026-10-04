@@ -286,6 +286,27 @@ fn apply(
             );
         }
 
+        NarrativeEvent::MissionInvalidated { mission_id } => {
+            let mi = state
+                .plan
+                .missions
+                .iter()
+                .position(|m| m.mission_id == *mission_id)
+                .ok_or_else(|| unknown(IdKind::Mission, mission_id))?;
+            if state.plan.missions[mi].status != MissionStatus::Active {
+                return Err(rejected(format!(
+                    "mission {mission_id:?} is not active and cannot be invalidated"
+                )));
+            }
+            end_mission(
+                state,
+                mi,
+                MissionStatus::Invalidated,
+                Some(Cause::Reported),
+                out,
+            );
+        }
+
         NarrativeEvent::CheckpointReached { checkpoint_id } => {
             let ci = pending_checkpoint(&state.plan, checkpoint_id)?;
             let beat = assess_checkpoint(&state.plan.checkpoints[ci], &state.plan, &state.world);

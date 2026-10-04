@@ -7,7 +7,8 @@
 use serde::{Deserialize, Serialize};
 
 use super::model::{
-    ActorId, CharacterId, CheckpointId, FactId, FlagId, LocationId, ObjectId, ObjectiveId, TruthId,
+    ActorId, CharacterId, CheckpointId, FactId, FlagId, LocationId, MissionId, ObjectId,
+    ObjectiveId, TruthId,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -67,6 +68,11 @@ pub enum NarrativeEvent {
     },
     ObjectiveFailed {
         objective_id: ObjectiveId,
+    },
+    /// The premise of an active mission is reported gone. Permanent; like
+    /// every invalidation it fires no effects.
+    MissionInvalidated {
+        mission_id: MissionId,
     },
     /// A planned beat happened. Rejected unless its prerequisites hold.
     CheckpointReached {

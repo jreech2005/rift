@@ -3,8 +3,10 @@
 Persistent-agent foundation for NPCs: identity, current state, relationships,
 explicit knowledge, episodic memories and bounded retrieved context.
 
-Code: `backend/src/npc/`. **Not wired into the WebSocket path** — `ws.rs`,
-`GameSession` and the `PlayerAction` flow are untouched. No dialogue
+Code: `backend/src/npc/`. Driven by the Phase 2 runtime
+(`backend/src/runtime/`, [RUNTIME.md](RUNTIME.md)), which turns accepted player
+actions and Director decisions into `NpcEvent`s; this module itself reads no
+`GameSession`. No dialogue
 generation, no LLM, no ElevenLabs.
 
 ```

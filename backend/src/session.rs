@@ -91,6 +91,22 @@ impl SessionStore {
         self.len() == 0
     }
 
+    /// Commit an updated snapshot of an existing session. Returns `false`,
+    /// storing nothing, if the session no longer exists.
+    ///
+    /// For callers that compute a change on a snapshot and commit it whole
+    /// (`runtime`); they are responsible for serialising their own writers.
+    pub fn replace(&self, session: GameSession) -> bool {
+        let mut sessions = self.inner.write().expect("session store lock poisoned");
+        match sessions.get_mut(&session.session_id) {
+            Some(slot) => {
+                *slot = session;
+                true
+            }
+            None => false,
+        }
+    }
+
     /// Apply a validated action to its session, returning the world event.
     pub fn apply_action(&self, action: &ValidatedAction) -> Result<WorldEvent, ProtocolError> {
         let mut sessions = self.inner.write().expect("session store lock poisoned");

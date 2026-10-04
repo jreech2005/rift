@@ -1,0 +1,102 @@
+{
+  "plan": {
+    "schema_version": 1,
+    "plan_id": "hospital_slip",
+    "universe_id": "breaking_bad_tv_1396",
+    "missions": [
+      {
+        "mission_id": "protect_walters_cover",
+        "title": "Protect Walter's cover",
+        "description": "Walter White needs his hidden phone to stay hidden from his DEA brother-in-law.",
+        "canon_relation": "generated",
+        "importance": "major",
+        "metadata": { "giver_npc_id": "walter_white" },
+        "objectives": [
+          {
+            "objective_id": "hide_burner_phone",
+            "description": "Hide Walter's burner phone under the mattress before Hank sees it.",
+            "completes_when": { "type": "flag_is", "flag": "interacted:mattress", "value": true },
+            "fails_when": { "type": "fact_known", "fact_id": "secret:burner_phone", "by": "hank_schrader" },
+            "failure_effects": [
+              { "type": "set_flag", "flag": "hank_suspects_walter", "value": true },
+              {
+                "type": "establish_truth",
+                "truth_id": "hank_watching_walter",
+                "statement": "Hank Schrader is quietly watching his brother-in-law."
+              }
+            ]
+          },
+          {
+            "objective_id": "earn_walters_trust",
+            "description": "Earn Walter's trust now that his secret is safe.",
+            "prerequisites": [
+              {
+                "condition": {
+                  "type": "objective_is",
+                  "objective_id": "hide_burner_phone",
+                  "status": "completed"
+                }
+              }
+            ],
+            "completes_when": { "type": "flag_is", "flag": "walter_confided", "value": true }
+          }
+        ]
+      }
+    ],
+    "checkpoints": [
+      {
+        "checkpoint_id": "walter_keeps_his_cover",
+        "title": "Walter leaves the hospital with his cover intact",
+        "canon_relation": "canon",
+        "importance": "major",
+        "prerequisites": [
+          { "condition": { "type": "fact_secret", "fact_id": "secret:burner_phone", "from": "hank_schrader" } },
+          { "condition": { "type": "character_alive", "character_id": "walter_white" } }
+        ]
+      },
+      {
+        "checkpoint_id": "quiet_discharge",
+        "title": "An uneventful discharge",
+        "canon_relation": "generated",
+        "importance": "minor",
+        "prerequisites": [
+          { "condition": { "type": "fact_secret", "fact_id": "secret:burner_phone", "from": "hank_schrader" } }
+        ]
+      },
+      {
+        "checkpoint_id": "hank_investigates_walter",
+        "title": "Hank starts looking into Walter",
+        "canon_relation": "inferred",
+        "importance": "critical",
+        "prerequisites": [
+          { "condition": { "type": "fact_known", "fact_id": "secret:burner_phone", "by": "hank_schrader" } },
+          { "condition": { "type": "character_alive", "character_id": "hank_schrader" } }
+        ]
+      }
+    ]
+  },
+  "world": {
+    "locations": ["albuquerque_hospital", "pinkman_residence"],
+    "characters": {
+      "walter_white": { "location": "albuquerque_hospital" },
+      "hank_schrader": { "location": "albuquerque_hospital" },
+      "jesse_pinkman": { "location": "pinkman_residence" }
+    },
+    "player_location": "albuquerque_hospital",
+    "truths": {
+      "walter_double_life": {
+        "statement": "Walter White leads a double life as a drug manufacturer.",
+        "holds": true,
+        "canon_relation": "canon"
+      }
+    }
+  },
+  "secrets": [
+    {
+      "fact_id": "secret:burner_phone",
+      "statement": "Walter White is hiding a burner phone in his hospital room.",
+      "keywords": ["burner phone", "hidden phone", "second phone"],
+      "objective_id": "hide_burner_phone"
+    }
+  ]
+}

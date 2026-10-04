@@ -1,0 +1,42 @@
+{
+  "reason_code": "player_divergence",
+  "narrative_summary": "The orderly told Hank about Walter's phone. Hank turns on his brother-in-law and the orderly is caught between them.",
+  "confidence": 0.84,
+  "actions": [
+    { "type": "set_world_flag", "action_id": "a1", "flag": "hank_knows_about_phone" },
+    {
+      "type": "set_npc_disposition",
+      "action_id": "a2",
+      "npc_id": "hank_schrader",
+      "toward": "walter_white",
+      "disposition": "wary",
+      "reason": "A patient hiding a phone from his own family is hiding more than a phone."
+    },
+    {
+      "type": "trigger_world_event",
+      "action_id": "a3",
+      "event": "confrontation_begins",
+      "description": "Hank steps into the room and asks Walter whose phone is under the mattress.",
+      "location_id": "albuquerque_hospital",
+      "npc_ids": ["hank_schrader", "walter_white"]
+    },
+    {
+      "type": "start_dialogue",
+      "action_id": "a4",
+      "npc_id": "hank_schrader",
+      "opening_line": "You did the right thing telling me. Now tell me everything you saw."
+    },
+    {
+      "type": "set_objective",
+      "action_id": "a5",
+      "objective_id": "choose_what_to_tell_hank",
+      "title": "Choose what to tell Hank",
+      "description": "Hank wants the whole story. Decide how much of it he gets."
+    },
+    {
+      "type": "request_replan",
+      "action_id": "a6",
+      "reason": "Walter's cover is blown; the hospital arc needs a new direction."
+    }
+  ]
+}

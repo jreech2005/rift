@@ -14,8 +14,9 @@ NPC views ──────────────────┘             
 data is rejected unless every action is one of 13 allowlisted types and passes validation against
 the context. There is no action that carries code, a script or a console command.
 
-**Not wired in.** Nothing here touches `ws.rs`, `GameSession`, the protocol or `WorldEvent`s. A
-later integration pass calls the engine and applies its decisions. See [Integration](#integration).
+**This module only decides.** Nothing here touches `ws.rs`, the protocol or `WorldEvent`s, and
+nothing here mutates state. The Phase 2 runtime (`backend/src/runtime/`, [RUNTIME.md](RUNTIME.md))
+builds the context, calls the engine once per meaningful player action and applies its decisions.
 
 ```rust
 use rift_backend::director::*;
@@ -203,7 +204,7 @@ around the Director.
 
 ## Integration
 
-For whoever wires this in:
+The runtime follows these rules ([RUNTIME.md](RUNTIME.md)); they hold for any other caller:
 
 - Run `decide` in a spawned task. Build the context from a `SessionStore::get` snapshot, outside
   any lock. Gameplay never waits for it.
@@ -245,7 +246,7 @@ stand-in for the Interactions API (429, 503, 401, timeout, malformed and incompl
 redaction, the single repair). `tests/director_divergence.rs` runs the demo scenario on the real
 WorldBible. No test contacts Google or needs a key.
 
-## Not in Phase 2
+## Not in this module
 
-Applying decisions, `WorldEvent` mapping, WebSocket or protocol changes, mission and NPC state
-(owned elsewhere), persistence.
+Applying decisions, `WorldEvent` mapping, mission and NPC state, persistence. The runtime does the
+first two ([RUNTIME.md](RUNTIME.md)); the rest is owned by the narrative and NPC layers.

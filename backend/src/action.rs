@@ -74,6 +74,18 @@ pub enum WorldEventType {
     InspectionAcknowledged,
     LocationChanged,
     SpeechAcknowledged,
+    // Consequences produced by the Phase 2 runtime (`runtime`): the narrative
+    // layer and validated Director decisions. Never a direct reply to a
+    // `player_action`.
+    ObjectiveUpdated,
+    MissionUpdated,
+    NpcActivated,
+    NpcMoved,
+    NpcDispositionChanged,
+    InformationRevealed,
+    WorldFlagChanged,
+    WorldEventTriggered,
+    DialogueStarted,
 }
 
 /// A structured, validated event the game client may execute.

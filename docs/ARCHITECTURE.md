@@ -35,7 +35,14 @@
    action type, identifiers) → applies deterministic rule → `world_event`.
 4. Unreal executes the event.
 
-## Future AI path (not implemented)
+## Flow (Phase 2)
+
+In a session that runs a world, step 3 continues: the accepted action goes
+through NPC perception and the narrative layer, and a meaningful one is put to
+the Director once, off the read path. Its validated decision comes back as
+further `world_event`s. See [RUNTIME.md](RUNTIME.md).
+
+## AI path
 
 ```
 player_action ─► Rust validates ─► world_event (immediate, deterministic)

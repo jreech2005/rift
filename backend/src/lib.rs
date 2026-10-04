@@ -7,6 +7,7 @@ pub mod director;
 pub mod narrative;
 pub mod npc;
 pub mod protocol;
+pub mod runtime;
 pub mod session;
 pub mod ws;
 
@@ -14,12 +15,31 @@ use axum::routing::get;
 use axum::{Json, Router};
 use serde_json::{Value, json};
 
+use crate::runtime::Runtime;
 use crate::session::SessionStore;
 
 /// Shared application state. Cheap to clone.
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct AppState {
+    /// The authoritative sessions. The same store the runtime drives.
     pub sessions: SessionStore,
+    pub runtime: Runtime,
+}
+
+impl AppState {
+    pub fn new(runtime: Runtime) -> Self {
+        Self {
+            sessions: runtime.sessions().clone(),
+            runtime,
+        }
+    }
+}
+
+impl Default for AppState {
+    /// No world, deterministic Director, in-memory stores: plain protocol V1.
+    fn default() -> Self {
+        Self::new(Runtime::default())
+    }
 }
 
 /// Build the HTTP/WebSocket router.

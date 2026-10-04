@@ -501,3 +501,46 @@ fn revision_and_actual_timeline_record_what_happened() {
     );
     assert_eq!(state.actual_timeline.front().unwrap().revision, 7);
 }
+
+#[test]
+fn a_reported_invalidation_ends_an_active_mission_without_effects() {
+    let state = apply(&start(vault()), set_flag("briefed")).state;
+    assert_eq!(mission_status(&state, "open_vault"), MissionStatus::Active);
+
+    let event = NarrativeEvent::MissionInvalidated {
+        mission_id: "open_vault".into(),
+    };
+    let t = apply(&state, event.clone());
+    assert_eq!(
+        mission_status(&t.state, "open_vault"),
+        MissionStatus::Invalidated
+    );
+    assert_eq!(t.mission_changes[0].cause, Some(Cause::Reported));
+    // Its open objectives go with it, and neither outcome's effects fire.
+    assert_eq!(
+        objective_status(&t.state, "get_key"),
+        ObjectiveStatus::Invalidated
+    );
+    assert!(t.effects.is_empty());
+    assert_eq!(
+        t.replan
+            .expect("an invalidated mission asks for a replan")
+            .reason,
+        ReplanReason::MissionInvalidated
+    );
+
+    // Terminal: it cannot be invalidated twice, and unknown missions are refused.
+    assert!(matches!(
+        NarrativeEngine::apply_event(&t.state, &event),
+        Err(NarrativeError::InvalidTransition(_))
+    ));
+    let unknown = NarrativeEvent::MissionInvalidated {
+        mission_id: "no_such_mission".into(),
+    };
+    assert!(matches!(
+        NarrativeEngine::apply_event(&state, &unknown),
+        Err(NarrativeError::UnknownId { .. })
+    ));
+    // An inactive mission has nothing to invalidate yet.
+    assert!(NarrativeEngine::apply_event(&start(vault()), &event).is_err());
+}
