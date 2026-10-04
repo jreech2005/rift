@@ -21,10 +21,15 @@ public class Rift : ModuleRules
 			"Slate"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { });
+		// Backend connection (Network/): persistent WebSocket + JSON protocol V1
+		PrivateDependencyModuleNames.AddRange(new string[] {
+			"WebSockets",
+			"Json"
+		});
 
 		PublicIncludePaths.AddRange(new string[] {
 			"Rift",
+			"Rift/Network",
 			"Rift/Variant_Horror",
 			"Rift/Variant_Horror/UI",
 			"Rift/Variant_Shooter",
