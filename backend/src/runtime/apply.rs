@@ -478,7 +478,13 @@ impl Applier<'_, '_> {
             } => self.emit(
                 WorldEventType::DialogueStarted,
                 Some(npc_id),
-                json!({ "source": SOURCE, "npc_id": npc_id, "opening_line": opening_line }),
+                json!({
+                    "source": SOURCE,
+                    "npc_id": npc_id,
+                    "opening_line": opening_line,
+                    // The line as the client shows and speaks it.
+                    "text": opening_line,
+                }),
             ),
             DirectorAction::RequestReplan {
                 reason, mission_id, ..

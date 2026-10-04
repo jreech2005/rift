@@ -122,7 +122,7 @@ and the drafts are committed only if all of them applied.
 | `reveal_information` | to an NPC: `FactRevealed` to that NPC alone; to the player: event only | `information_revealed` |
 | `set_world_flag`, `clear_world_flag` | session flag + `flag_set` | `world_flag_changed` |
 | `trigger_world_event` | `NpcEventKind::WorldEvent`, perceived by the named NPCs, else by NPCs at the location | `world_event_triggered` |
-| `start_dialogue` | presentation only | `dialogue_started` |
+| `start_dialogue` | presentation only; voiced when configured (`docs/VOICE.md`) | `dialogue_started` |
 | `request_replan` | recorded (`Runtime::replan_notes`), reported as deferred, not executed | — |
 
 `DirectorReport` says what happened: `NotInvoked`, `Applied { decision, deferred }`,
@@ -137,6 +137,9 @@ and the drafts are committed only if all of them applied.
   is tried once (`docs/DIRECTOR.md`, "Failover"), all inside a fixed time budget. If no LLM
   answers, `FallbackDirector` answers instead. If nothing produces a decision the report is `Failed`; the player action and
   its deterministic consequences stand and the session carries on.
+- **Voice failure** (ElevenLabs unconfigured, unavailable, slow or returning something that is not
+  audio): the `dialogue_started` event is sent with its text and without `audio_url`. Nothing else
+  changes.
 - **Memory store failure**: logged and reported in `FollowUpOutcome::memory_errors`. NPC state is
   authoritative in memory, so recall is lost, not state.
 - **Telemetry failure**: recording cannot fail or block (events are dropped). If the recent

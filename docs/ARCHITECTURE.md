@@ -43,6 +43,13 @@ through NPC perception and the narrative layer, and a meaningful one is put to
 the Director once, off the read path. Its validated decision comes back as
 further `world_event`s. See [RUNTIME.md](RUNTIME.md).
 
+## Flow (Phase 3 voice)
+
+A `start_dialogue` decision becomes a `dialogue_started` event. When ElevenLabs
+is configured the line is synthesized, cached in memory and offered as
+`audio_url` (`GET /audio/<id>`); otherwise, and on any failure, the event
+carries the text alone. See [VOICE.md](VOICE.md).
+
 ## AI path
 
 ```
