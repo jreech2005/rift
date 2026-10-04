@@ -3,6 +3,7 @@
 
 pub mod action;
 pub mod config;
+pub mod director;
 pub mod protocol;
 pub mod session;
 pub mod ws;

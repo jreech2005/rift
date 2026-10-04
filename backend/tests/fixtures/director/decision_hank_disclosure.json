@@ -1,0 +1,51 @@
+{
+  "reason_code": "player_divergence",
+  "narrative_summary": "The orderly pointed Hank at Walter's hidden phone. Walter's cover story is compromised and Hank starts asking questions.",
+  "confidence": 0.86,
+  "actions": [
+    {
+      "type": "fail_objective",
+      "action_id": "a1",
+      "objective_id": "hide_burner_phone",
+      "reason": "The player told Hank where the phone is instead of hiding it."
+    },
+    {
+      "type": "invalidate_mission",
+      "action_id": "a2",
+      "mission_id": "protect_walters_cover",
+      "reason": "Hank now knows Walter has a hidden phone, so the cover cannot be protected."
+    },
+    { "type": "set_world_flag", "action_id": "a3", "flag": "hank_knows_about_phone" },
+    {
+      "type": "set_npc_disposition",
+      "action_id": "a4",
+      "npc_id": "walter_white",
+      "toward": "player",
+      "disposition": "hostile",
+      "reason": "The orderly he trusted exposed him to a DEA agent."
+    },
+    {
+      "type": "set_npc_disposition",
+      "action_id": "a5",
+      "npc_id": "hank_schrader",
+      "toward": "walter_white",
+      "disposition": "wary",
+      "reason": "A hidden phone does not fit a man who claims to remember nothing."
+    },
+    {
+      "type": "trigger_world_event",
+      "action_id": "a6",
+      "event": "confrontation_begins",
+      "description": "Hank lifts the mattress, finds the burner phone and turns to Walter for an explanation.",
+      "location_id": "albuquerque_hospital",
+      "npc_ids": ["hank_schrader", "walter_white"]
+    },
+    {
+      "type": "set_objective",
+      "action_id": "a7",
+      "objective_id": "choose_what_to_tell_hank",
+      "title": "Decide what to tell Hank",
+      "description": "Hank wants to know how you found the phone. Tell him everything, or give Walter a way out."
+    }
+  ]
+}

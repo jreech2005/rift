@@ -1,0 +1,483 @@
+{
+  "schema_version": 1,
+  "universe": {
+    "universe_id": "breaking_bad_tv_1396",
+    "title": "Breaking Bad",
+    "media_type": "tv",
+    "release_year": 2008,
+    "tmdb_id": 1396,
+    "genres": [
+      "Drama",
+      "Crime"
+    ],
+    "era": {
+      "text": "The story takes place between 2008 and 2010.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:14426270"
+      ]
+    },
+    "setting": {
+      "text": "Albuquerque, New Mexico, a desert city where the illicit drug trade clashes with suburban family life and federal law enforcement.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:14426270"
+      ]
+    }
+  },
+  "world_rules": [
+    {
+      "text": "High-purity methamphetamine production relies on advanced chemistry, utilizing specialized equipment and hard-to-acquire chemical precursors like methylamine to bypass standard restrictions.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:22529358",
+        "wikipedia:en:32611058"
+      ]
+    },
+    {
+      "text": "The local drug market is highly volatile, drawing immediate and lethal attention from violent street gangs, regional distributors, Mexican cartels, and the Drug Enforcement Administration.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:14426270"
+      ]
+    }
+  ],
+  "locations": [
+    {
+      "id": "albuquerque_hospital",
+      "name": "Albuquerque General Hospital",
+      "description": "The sterile, brightly lit local medical center where Walter White is placed under observation in a recovery ward while doctors run tests on his psychological state.",
+      "importance": "primary",
+      "classification": "inferred",
+      "source_refs": [
+        "wikipedia:en:14426270",
+        "wikipedia:en:27016797"
+      ]
+    },
+    {
+      "id": "pinkman_residence",
+      "name": "Aunt Ginny's House",
+      "description": "The suburban home belonging to Jesse Pinkman's late aunt, where Jesse is currently staying and trying to keep a low profile after his interrogation by the DEA.",
+      "importance": "secondary",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:14426270",
+        "wikipedia:en:32611058",
+        "wikipedia:en:27016802"
+      ]
+    }
+  ],
+  "characters": [
+    {
+      "id": "walter_white",
+      "name": "Walter White",
+      "role": "An overqualified high school chemistry teacher secretly operating as the rising meth cook Heisenberg.",
+      "personality_traits": [
+        "calculating",
+        "prideful",
+        "desperate",
+        "manipulative"
+      ],
+      "goals": [
+        {
+          "text": "Maintain the lie of his medical fugue state to keep his family and the DEA from discovering his criminal activities.",
+          "classification": "inferred",
+          "source_refs": [
+            "wikipedia:en:14426270",
+            "wikipedia:en:27016797"
+          ]
+        },
+        {
+          "text": "Secure enough money to guarantee his family's financial future before his stage-three lung cancer claims his life.",
+          "classification": "canon",
+          "source_refs": [
+            "tmdb:tv:1396",
+            "wikipedia:en:22529358"
+          ]
+        }
+      ],
+      "known_facts": [
+        {
+          "text": "He co-founded the multi-billion-dollar firm Gray Matter Technologies but sold his shares for five thousand dollars.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:22530352"
+          ]
+        },
+        {
+          "text": "He produces highly pure, blue-tinted methamphetamine using a unique chemical formula.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:14426270",
+            "wikipedia:en:22529358"
+          ]
+        }
+      ],
+      "status": "Currently hospitalized and undergoing psychiatric evaluation after fabricating a fugue state to cover his disappearance.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:14426270",
+        "wikipedia:en:27016797"
+      ],
+      "relationships": [
+        {
+          "other_id": "jesse_pinkman",
+          "direction": "outgoing",
+          "kind": "partner",
+          "description": "Walter treats Jesse as a foolish son requiring constant discipline, yet they share a deep, complex bond of loyalty.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:22529358"
+          ]
+        },
+        {
+          "other_id": "hank_schrader",
+          "direction": "incoming",
+          "kind": "brother-in-law",
+          "description": "Hank is Walter's brother-in-law, fiercely protective of him and his family, but entirely unaware that Walter is the drug lord he is hunting.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:22529358",
+            "wikipedia:en:27016802"
+          ]
+        },
+        {
+          "other_id": "player",
+          "direction": "incoming",
+          "kind": "caregiver",
+          "description": "The player is the night-shift medical orderly responsible for monitoring Walter's recovery and psychiatric state.",
+          "classification": "generated",
+          "source_refs": []
+        }
+      ]
+    },
+    {
+      "id": "jesse_pinkman",
+      "name": "Jesse Pinkman",
+      "role": "Walter White's former student and street-level business partner in the meth trade.",
+      "personality_traits": [
+        "impulsive",
+        "guilt-ridden",
+        "loyal",
+        "anxious"
+      ],
+      "goals": [
+        {
+          "text": "Avoid arrest and minimize his exposure to the federal investigation led by Hank Schrader.",
+          "classification": "inferred",
+          "source_refs": [
+            "wikipedia:en:32611058",
+            "wikipedia:en:27016802"
+          ]
+        }
+      ],
+      "known_facts": [
+        {
+          "text": "He was kicked out of his family home due to his drug use and lived with his Aunt Ginny before her death.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:22529358",
+            "wikipedia:en:32611058"
+          ]
+        }
+      ],
+      "status": "Laying low at his aunt's house, heavily traumatized after his brief kidnapping and subsequent DEA interrogation.",
+      "classification": "inferred",
+      "source_refs": [
+        "wikipedia:en:14426270",
+        "wikipedia:en:32611058",
+        "wikipedia:en:27016802"
+      ],
+      "relationships": [
+        {
+          "other_id": "walter_white",
+          "direction": "incoming",
+          "kind": "partner",
+          "description": "Walter treats Jesse as a foolish son requiring constant discipline, yet they share a deep, complex bond of loyalty.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:22529358"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hank_schrader",
+      "name": "Hank Schrader",
+      "role": "A highly competent DEA Agent, supervisor of investigations, and Walter White's brother-in-law.",
+      "personality_traits": [
+        "boisterous",
+        "obsessive",
+        "perceptive",
+        "vulnerable"
+      ],
+      "goals": [
+        {
+          "text": "Identify and apprehend the mysterious meth kingpin known to the DEA as Heisenberg.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:22529358",
+            "wikipedia:en:27016802"
+          ]
+        }
+      ],
+      "known_facts": [
+        {
+          "text": "He recently shot and killed the cartel enforcer Tuco Salamanca in a desert shootout.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:14426270",
+            "wikipedia:en:27016802"
+          ]
+        },
+        {
+          "text": "He brews his own line of beer called Schraderbrau as a personal hobby.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:27016802"
+          ]
+        }
+      ],
+      "status": "Investigating Walter's strange disappearance while tracking the remaining threads of Tuco Salamanca's operation.",
+      "classification": "inferred",
+      "source_refs": [
+        "wikipedia:en:14426270",
+        "wikipedia:en:27016802"
+      ],
+      "relationships": [
+        {
+          "other_id": "walter_white",
+          "direction": "outgoing",
+          "kind": "brother-in-law",
+          "description": "Hank is Walter's brother-in-law, fiercely protective of him and his family, but entirely unaware that Walter is the drug lord he is hunting.",
+          "classification": "canon",
+          "source_refs": [
+            "wikipedia:en:22529358",
+            "wikipedia:en:27016802"
+          ]
+        }
+      ]
+    }
+  ],
+  "factions": [
+    {
+      "id": "dea",
+      "name": "Drug Enforcement Administration",
+      "description": "The federal law enforcement agency tasked with dismantling the drug trade in Albuquerque, currently highly focused on the new blue meth on the streets.",
+      "member_ids": [
+        "hank_schrader"
+      ],
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:14426270",
+        "wikipedia:en:27016802"
+      ]
+    },
+    {
+      "id": "white_pinkman_partnership",
+      "name": "The Heisenberg Operation",
+      "description": "The secret alliance between chemistry teacher Walter White and small-time dealer Jesse Pinkman to manufacture and sell premium blue meth.",
+      "member_ids": [
+        "walter_white",
+        "jesse_pinkman"
+      ],
+      "classification": "inferred",
+      "source_refs": [
+        "wikipedia:en:14426270",
+        "wikipedia:en:22529358"
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "from_id": "walter_white",
+      "to_id": "jesse_pinkman",
+      "kind": "partner",
+      "description": "Walter treats Jesse as a foolish son requiring constant discipline, yet they share a deep, complex bond of loyalty.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:22529358"
+      ]
+    },
+    {
+      "from_id": "hank_schrader",
+      "to_id": "walter_white",
+      "kind": "brother-in-law",
+      "description": "Hank is Walter's brother-in-law, fiercely protective of him and his family, but entirely unaware that Walter is the drug lord he is hunting.",
+      "classification": "canon",
+      "source_refs": [
+        "wikipedia:en:22529358",
+        "wikipedia:en:27016802"
+      ]
+    },
+    {
+      "from_id": "player",
+      "to_id": "walter_white",
+      "kind": "caregiver",
+      "description": "The player is the night-shift medical orderly responsible for monitoring Walter's recovery and psychiatric state.",
+      "classification": "generated",
+      "source_refs": []
+    }
+  ],
+  "important_conflicts": [
+    {
+      "id": "heisenberg_investigation",
+      "name": "The Hunt for Heisenberg",
+      "description": "The DEA's ongoing pursuit of the high-purity blue meth distributor, which is complicated by the fact that the suspect is the lead agent's own brother-in-law.",
+      "party_ids": [
+        "dea",
+        "walter_white",
+        "jesse_pinkman"
+      ],
+      "stakes": "The survival and freedom of Walter's family and criminal enterprise versus a lifetime in federal prison.",
+      "classification": "inferred",
+      "source_refs": [
+        "wikipedia:en:14426270",
+        "wikipedia:en:22529358",
+        "wikipedia:en:27016802"
+      ]
+    }
+  ],
+  "player_role": {
+    "title": "Hospital Night Orderly",
+    "description": "An overnight medical staff member at Albuquerque General Hospital who works the quiet, low-traffic shifts in the psychiatric and recovery wards.",
+    "reason_for_presence": "Assigned to perform routine, hourly wellness checks on Walter White, who is currently being held under medical observation following his naked public appearance.",
+    "capabilities": [
+      "Access to patient rooms and hospital supplies",
+      "Basic clinical observation and charting",
+      "Stealthy movement through the quiet hospital corridors"
+    ],
+    "connections": [
+      {
+        "character_id": "walter_white",
+        "description": "A high-profile patient currently under my direct overnight care."
+      }
+    ],
+    "classification": "generated",
+    "source_refs": [
+      "wikipedia:en:14426270",
+      "wikipedia:en:27016797"
+    ]
+  },
+  "starting_location": {
+    "location_id": "albuquerque_hospital",
+    "rationale": "The hospital is the perfect venue for a tense, self-contained interaction where Walter White is highly vulnerable, isolated from his usual allies, and forced to protect his secrets from visiting family members."
+  },
+  "opening_conflict": {
+    "title": "The Hospital Slip",
+    "summary": "During a routine late-night check-in, the player catches Walter White fully alert, whispering frantically into a hidden burner cell phone. Before Walter can react, footsteps echo down the corridor—Hank Schrader is arriving for an unscheduled late-night family visit to check on Walt's recovery. Walter desperately needs the player to help him hide the phone and maintain his facade of a confused, semi-conscious patient.",
+    "location_id": "albuquerque_hospital",
+    "involved_character_ids": [
+      "walter_white",
+      "hank_schrader"
+    ],
+    "immediate_goal": "Decide how to handle Walter's hidden phone and the sudden arrival of his DEA brother-in-law.",
+    "decision_options": [
+      "Help Walter hide the burner phone under his mattress and tell Hank that Walter has been sleeping peacefully all night.",
+      "Subtly draw Hank's attention to the hidden phone, exposing Walter's active state of mind and putting his cover at immediate risk.",
+      "Quietly confiscate the phone yourself, promising Walter you will keep his secret in exchange for future leverage or financial compensation."
+    ],
+    "stakes": "If Walter's faked fugue state is exposed to Hank, the DEA will immediately link him to the investigation, bringing his entire criminal enterprise to a premature end.",
+    "estimated_minutes": 15,
+    "classification": "generated",
+    "source_refs": [
+      "wikipedia:en:14426270",
+      "wikipedia:en:27016797",
+      "wikipedia:en:27016802"
+    ]
+  },
+  "timeline_context": {
+    "canon_cutoff": "Season 2, during Walter White's hospital stay following his faked fugue state.",
+    "summary": "Walter White and Jesse Pinkman were recently kidnapped by the volatile cartel distributor Tuco Salamanca. Hank Schrader tracked them down and killed Tuco in a shootout, but Walter and Jesse managed to escape beforehand. While Jesse returned to town, Walter stripped naked in a convenience store and claimed to have entered a medical fugue state to explain his multi-day absence to his wife Skyler and the authorities. Walter is currently being held in an Albuquerque hospital for evaluation.",
+    "classification": "inferred",
+    "source_refs": [
+      "wikipedia:en:14426270",
+      "wikipedia:en:27016797",
+      "wikipedia:en:27016802"
+    ]
+  },
+  "provenance": {
+    "compiler_version": "1.0.0",
+    "compiled_at": "2026-10-04T04:10:45.016733Z",
+    "retrieved_at": "2026-10-04T03:00:03.672296Z",
+    "canon_packet_sha256": "4920dfef59def244546f29d08443ec414f493099337f78cfc538f0849e49b51e",
+    "sources": [
+      {
+        "source_id": "tmdb:tv:1396",
+        "source_type": "tmdb",
+        "title": "Breaking Bad",
+        "source_url": "https://www.themoviedb.org/tv/1396",
+        "retrieved_at": "2026-10-04T03:00:03.672296Z"
+      },
+      {
+        "source_id": "wikipedia:en:14426270",
+        "source_type": "wikipedia",
+        "title": "Breaking Bad",
+        "source_url": "https://en.wikipedia.org/wiki/Breaking_Bad",
+        "retrieved_at": "2026-10-04T03:00:03.672296Z"
+      },
+      {
+        "source_id": "wikipedia:en:22529358",
+        "source_type": "wikipedia",
+        "title": "List of characters in the Breaking Bad franchise",
+        "source_url": "https://en.wikipedia.org/wiki/List_of_characters_in_the_Breaking_Bad_franchise",
+        "retrieved_at": "2026-10-04T03:00:03.672296Z"
+      },
+      {
+        "source_id": "wikipedia:en:22530352",
+        "source_type": "wikipedia",
+        "title": "Walter White (Breaking Bad)",
+        "source_url": "https://en.wikipedia.org/wiki/Walter_White_(Breaking_Bad)",
+        "retrieved_at": "2026-10-04T03:00:03.672296Z"
+      },
+      {
+        "source_id": "wikipedia:en:32611058",
+        "source_type": "wikipedia",
+        "title": "Jesse Pinkman",
+        "source_url": "https://en.wikipedia.org/wiki/Jesse_Pinkman",
+        "retrieved_at": "2026-10-04T03:00:03.672296Z"
+      },
+      {
+        "source_id": "wikipedia:en:27016797",
+        "source_type": "wikipedia",
+        "title": "Skyler White",
+        "source_url": "https://en.wikipedia.org/wiki/Skyler_White",
+        "retrieved_at": "2026-10-04T03:00:03.672296Z"
+      },
+      {
+        "source_id": "wikipedia:en:38607363",
+        "source_type": "wikipedia",
+        "title": "Walter White Jr.",
+        "source_url": "https://en.wikipedia.org/wiki/Walter_White_Jr.",
+        "retrieved_at": "2026-10-04T03:00:03.672296Z"
+      },
+      {
+        "source_id": "wikipedia:en:27016802",
+        "source_type": "wikipedia",
+        "title": "Hank Schrader",
+        "source_url": "https://en.wikipedia.org/wiki/Hank_Schrader",
+        "retrieved_at": "2026-10-04T03:00:03.672296Z"
+      }
+    ],
+    "llm": {
+      "provider": "gemini",
+      "api": "interactions",
+      "model": "gemini-3.5-flash",
+      "attempts": 1,
+      "usage": {
+        "total_tokens": 18688,
+        "total_input_tokens": 13079,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 3328,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 2281
+      }
+    },
+    "classification_counts": {
+      "canon": 16,
+      "inferred": 8,
+      "generated": 3
+    },
+    "validation_notes": []
+  }
+}
