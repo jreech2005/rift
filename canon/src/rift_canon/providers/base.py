@@ -35,7 +35,23 @@ class LiveResult:
         return cls(response.is_success, f"HTTP {response.status_code}")
 
     @classmethod
+    def from_json_list(cls, response: httpx.Response, key: str) -> LiveResult:
+        """Success only if the body is a JSON object whose ``key`` is a list."""
+        if not response.is_success:
+            return cls.from_status(response)
+        try:
+            data = response.json()
+        except ValueError:
+            return cls(False, f"HTTP {response.status_code}, invalid JSON")
+        if isinstance(data, dict) and isinstance(data.get(key), list):
+            return cls(True, f"HTTP {response.status_code}")
+        return cls(False, f"HTTP {response.status_code}, unexpected response shape")
+
+    @classmethod
     def from_error(cls, exc: Exception) -> LiveResult:
+        # Only the kind of failure: exception messages can contain request URLs.
+        if isinstance(exc, (httpx.TimeoutException, TimeoutError)):
+            return cls(False, "timeout")
         return cls(False, type(exc).__name__)
 
 

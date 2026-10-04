@@ -1,10 +1,10 @@
 # Rift developer commands. Cargo lives in ~/.cargo/bin (rustup) unless on PATH.
 CARGO ?= $(shell command -v cargo 2>/dev/null || echo $(HOME)/.cargo/bin/cargo)
 
-.PHONY: help doctor canon-doctor canon-doctor-live backend test test-backend test-canon smoke format lint check
+.PHONY: help doctor doctor-live canon-doctor canon-doctor-live backend test test-backend test-canon smoke format lint check
 
 help:
-	@echo "make doctor        system + provider status"
+	@echo "make doctor        system + provider status (doctor-live adds connectivity checks)"
 	@echo "make canon-doctor  provider configuration (add -live for connectivity)"
 	@echo "make backend       run the Rust backend on BACKEND_HOST:BACKEND_PORT"
 	@echo "make test          Rust + Python tests"
@@ -15,6 +15,9 @@ help:
 
 doctor:
 	@./scripts/doctor.sh
+
+doctor-live:
+	@./scripts/doctor.sh --live
 
 canon-doctor:
 	@cd canon && uv run python -m rift_canon.doctor

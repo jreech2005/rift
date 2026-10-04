@@ -17,10 +17,10 @@ class ElevenLabsProvider(Provider):
         return self.settings.elevenlabs_api_key is not None
 
     async def live_check(self, client: httpx.AsyncClient) -> LiveResult:
-        # Listing models consumes no characters/credits.
+        # Account lookup: requires a valid key, consumes no characters/credits.
         assert self.settings.elevenlabs_api_key is not None
         response = await client.get(
-            f"{BASE_URL}/models",
+            f"{BASE_URL}/user",
             headers={"xi-api-key": self.settings.elevenlabs_api_key.get_secret_value()},
         )
         return LiveResult.from_status(response)

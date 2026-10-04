@@ -26,5 +26,10 @@ class TMDBProvider(Provider):
 
     async def live_check(self, client: httpx.AsyncClient) -> LiveResult:
         headers, params = self._auth()
-        response = await client.get(f"{BASE_URL}/configuration", headers=headers, params=params)
-        return LiveResult.from_status(response)
+        # One small, free search request; validates auth and the response shape.
+        response = await client.get(
+            f"{BASE_URL}/search/movie",
+            headers=headers,
+            params={**params, "query": "Inception", "page": 1},
+        )
+        return LiveResult.from_json_list(response, "results")
