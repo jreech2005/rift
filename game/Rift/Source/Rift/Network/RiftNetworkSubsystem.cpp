@@ -41,6 +41,7 @@ void URiftNetworkSubsystem::Deinitialize()
 {
 	CloseSocket();
 	State = ERiftConnectionState::Disconnected;
+	ClearSession();
 
 	Super::Deinitialize();
 }
@@ -57,7 +58,7 @@ void URiftNetworkSubsystem::Connect()
 
 	UE_LOG(LogRiftNet, Log, TEXT("Connecting to Rift backend at %s"), *BackendUrl);
 
-	Socket = FWebSocketsModule::Get().CreateWebSocket(BackendUrl);
+	Socket = SocketFactory ? SocketFactory() : FWebSocketsModule::Get().CreateWebSocket(BackendUrl);
 
 	// bound weakly: the socket can outlive this object without calling into it
 	Socket->OnConnected().AddUObject(this, &URiftNetworkSubsystem::HandleSocketConnected);
@@ -85,7 +86,30 @@ void URiftNetworkSubsystem::Disconnect()
 
 bool URiftNetworkSubsystem::CreateSession()
 {
-	return SendEnvelope(RiftProtocol::MessageType::CreateSession, nullptr);
+	if (!SendEnvelope(RiftProtocol::MessageType::CreateSession, nullptr, false, &SessionRequestId))
+	{
+		return false;
+	}
+
+	bSessionPending = true;
+	return true;
+}
+
+bool URiftNetworkSubsystem::EnsureSession()
+{
+	if (!SessionId.IsEmpty() || bSessionPending || State != ERiftConnectionState::Ready)
+	{
+		return false;
+	}
+
+	if (!CreateSession())
+	{
+		UE_LOG(LogRiftNet, Warning, TEXT("Rift session creation failed: could not send create_session"));
+		return false;
+	}
+
+	UE_LOG(LogRiftNet, Log, TEXT("Rift session creation requested"));
+	return true;
 }
 
 bool URiftNetworkSubsystem::SendTestAction()
@@ -115,7 +139,7 @@ bool URiftNetworkSubsystem::SendPlayerAction(const FString& ActionType, const FS
 		true);
 }
 
-bool URiftNetworkSubsystem::SendEnvelope(const FString& MessageType, const TSharedPtr<FJsonObject>& Payload, bool bWithSession)
+bool URiftNetworkSubsystem::SendEnvelope(const FString& MessageType, const TSharedPtr<FJsonObject>& Payload, bool bWithSession, FString* OutMessageId)
 {
 	const bool bSocketOpen = Socket.IsValid() && (State == ERiftConnectionState::Handshaking || State == ERiftConnectionState::Ready);
 
@@ -138,6 +162,11 @@ bool URiftNetworkSubsystem::SendEnvelope(const FString& MessageType, const TShar
 	const FString Text = RiftProtocol::BuildEnvelope(MessageType, bWithSession ? SessionId : FString(), Payload, &MessageId);
 
 	Socket->Send(Text);
+
+	if (OutMessageId)
+	{
+		*OutMessageId = MessageId;
+	}
 
 	UE_LOG(LogRiftNet, Verbose, TEXT("-> %s (%s)"), *MessageType, *MessageId);
 	return true;
@@ -235,6 +264,11 @@ void URiftNetworkSubsystem::HandleHelloAck(const FRiftEnvelope& Envelope)
 
 	UE_LOG(LogRiftNet, Log, TEXT("hello_ack from %s %s, connection %s"), *Server, *ServerVersion, *ConnectionId);
 
+	if (bAutoCreateSession)
+	{
+		EnsureSession();
+	}
+
 	OnReady.Broadcast();
 }
 
@@ -257,8 +291,10 @@ void URiftNetworkSubsystem::HandleSessionCreated(const FRiftEnvelope& Envelope)
 	}
 
 	SessionId = Envelope.SessionId;
+	bSessionPending = false;
+	SessionRequestId.Reset();
 
-	UE_LOG(LogRiftNet, Log, TEXT("session_created: %s"), *SessionId);
+	UE_LOG(LogRiftNet, Log, TEXT("Rift session ready: %s"), *SessionId);
 
 	OnSessionCreated.Broadcast(SessionId);
 }
@@ -303,10 +339,23 @@ void URiftNetworkSubsystem::HandleError(const FRiftEnvelope& Envelope)
 
 	UE_LOG(LogRiftNet, Warning, TEXT("Rift backend error '%s': %s (reply to %s)"), *Code, *Message, *Envelope.ReplyTo);
 
+	if (bSessionPending && !Envelope.ReplyTo.IsEmpty() && Envelope.ReplyTo.Equals(SessionRequestId, ESearchCase::CaseSensitive))
+	{
+		// not retried here: a backend that refuses create_session would be asked forever
+		UE_LOG(LogRiftNet, Warning, TEXT("Rift session creation failed: backend answered '%s': %s"), *Code, *Message);
+
+		bSessionPending = false;
+		SessionRequestId.Reset();
+	}
 	// sessions live in backend memory: after a backend restart ours is gone
-	if (IsType(Code, TEXT("session_not_found")))
+	else if (IsType(Code, TEXT("session_not_found")))
 	{
 		SessionId.Reset();
+
+		if (bAutoCreateSession)
+		{
+			EnsureSession();
+		}
 	}
 
 	OnBackendError.Broadcast(Code, Message);
@@ -334,9 +383,19 @@ void URiftNetworkSubsystem::CloseSocket()
 	Socket.Reset();
 }
 
+void URiftNetworkSubsystem::ClearSession()
+{
+	SessionId.Reset();
+	bSessionPending = false;
+	SessionRequestId.Reset();
+}
+
 void URiftNetworkSubsystem::EnterDisconnected(const FString& Reason)
 {
 	State = ERiftConnectionState::Disconnected;
+
+	// a session is only used over the connection that created it
+	ClearSession();
 
 	OnDisconnected.Broadcast(Reason);
 }

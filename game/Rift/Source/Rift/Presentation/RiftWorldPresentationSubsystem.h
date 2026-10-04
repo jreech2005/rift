@@ -159,8 +159,6 @@ private:
 
 	FRiftHudModel HudModel;
 
-	bool bSessionRequested = false;
-
 	/** The line being spoken, null when silent */
 	UPROPERTY(Transient)
 	TObjectPtr<UAudioComponent> VoiceComponent;

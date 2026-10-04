@@ -318,13 +318,10 @@ void URiftWorldPresentationSubsystem::HandleReady()
 
 void URiftWorldPresentationSubsystem::HandleDisconnected(const FString& Reason)
 {
-	bSessionRequested = false;
 }
 
 void URiftWorldPresentationSubsystem::HandleSessionCreated(const FString& SessionId)
 {
-	bSessionRequested = false;
-
 	// a new session starts a new story, nothing of the old one stays on screen
 	++VoiceRequestId;
 	StopVoice();
@@ -348,21 +345,16 @@ URiftNetworkSubsystem* URiftWorldPresentationSubsystem::GetNetwork() const
 
 void URiftWorldPresentationSubsystem::CreateSessionIfNeeded()
 {
-	if (!bAutoCreateSession || bSessionRequested || Entities.Num() == 0)
+	if (!bAutoCreateSession || Entities.Num() == 0)
 	{
 		return;
 	}
 
-	URiftNetworkSubsystem* Network = GetNetwork();
-
-	if (!Network || !Network->IsConnected() || !Network->GetSessionId().IsEmpty())
+	// the network layer normally has a session by now, it sends nothing if one exists or is on its way
+	if (URiftNetworkSubsystem* Network = GetNetwork())
 	{
-		return;
+		Network->EnsureSession();
 	}
-
-	UE_LOG(LogRiftPresentation, Log, TEXT("Level has Rift entities, requesting a game session"));
-
-	bSessionRequested = Network->CreateSession();
 }
 
 void URiftWorldPresentationSubsystem::RequestVoice(const FString& AudioUrl)

@@ -90,7 +90,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Rift|Network")
 	void Connect();
 
-	/** Closes the socket. The session id is kept so a later connection can keep using it */
+	/** Closes the socket. The session ends with the connection, the next connection gets a fresh one */
 	UFUNCTION(BlueprintCallable, Category="Rift|Network")
 	void Disconnect();
 
@@ -109,6 +109,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Rift|Network")
 	bool CreateSession();
 
+	/**
+	 *  Asks for a session unless one exists or a request is already on its way.
+	 *  Called on every hello_ack, safe to call from anywhere at any time.
+	 *  @return true if a create_session was sent by this call
+	 */
+	UFUNCTION(BlueprintCallable, Category="Rift|Network")
+	bool EnsureSession();
+
+	/** Returns true while a create_session is waiting for its session_created */
+	UFUNCTION(BlueprintPure, Category="Rift|Network")
+	bool IsSessionPending() const { return bSessionPending; }
+
 	/** Sends the interact / test_door action used to prove the action path */
 	UFUNCTION(BlueprintCallable, Category="Rift|Network")
 	bool SendTestAction();
@@ -126,9 +138,10 @@ public:
 	/**
 	 *  Wraps a payload in a V1 envelope and sends it.
 	 *  @param bWithSession	puts the current session id on the envelope instead of null
+	 *  @param OutMessageId	optionally receives the message_id of the sent envelope
 	 *  @return false if the connection cannot carry the message yet
 	 */
-	bool SendEnvelope(const FString& MessageType, const TSharedPtr<FJsonObject>& Payload, bool bWithSession = false);
+	bool SendEnvelope(const FString& MessageType, const TSharedPtr<FJsonObject>& Payload, bool bWithSession = false, FString* OutMessageId = nullptr);
 
 	const FString& GetBackendUrl() const { return BackendUrl; }
 
@@ -167,7 +180,14 @@ protected:
 	UPROPERTY(Config)
 	bool bAutoConnect = true;
 
+	/** If true, a game session is requested as soon as the backend acknowledged hello */
+	UPROPERTY(Config)
+	bool bAutoCreateSession = true;
+
 private:
+
+	// automation tests drive the socket callbacks through a fake socket
+	friend struct FRiftNetworkTestAccess;
 
 	// socket callbacks, game thread
 	void HandleSocketConnected();
@@ -185,7 +205,10 @@ private:
 	/** Unbinds from the socket, closes it if still open and lets go of it */
 	void CloseSocket();
 
-	/** Moves to Disconnected and tells listeners why */
+	/** Forgets the session and any pending request for one */
+	void ClearSession();
+
+	/** Moves to Disconnected, drops the session and tells listeners why */
 	void EnterDisconnected(const FString& Reason);
 
 	TSharedPtr<IWebSocket> Socket;
@@ -196,4 +219,13 @@ private:
 	ERiftConnectionState State = ERiftConnectionState::Disconnected;
 
 	FString SessionId;
+
+	/** True from a sent create_session until session_created, its error or a disconnect */
+	bool bSessionPending = false;
+
+	/** message_id of the pending create_session, to recognise the error that answers it */
+	FString SessionRequestId;
+
+	/** Tests only: replaces the real WebSocket */
+	TFunction<TSharedPtr<IWebSocket>()> SocketFactory;
 };
