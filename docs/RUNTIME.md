@@ -134,7 +134,7 @@ and the drafts are committed only if all of them applied.
   narrative change, no memory, no Director call.
 - **Provider failure** (unavailable/503, rate-limited/429, timeout, output still invalid after the
   one repair): transient failures get one short retry, then the next configured model/provider
-  is tried once (`docs/DIRECTOR.md`, "Failover"), all inside a fixed time budget. If no LLM
+  is tried once (`docs/DIRECTOR.md`, "Failover"), all inside `DIRECTOR_BUDGET_MS` (repair included). If no LLM
   answers, `FallbackDirector` answers instead. If nothing produces a decision the report is `Failed`; the player action and
   its deterministic consequences stand and the session carries on.
 - **Voice failure** (ElevenLabs unconfigured, unavailable, slow or returning something that is not

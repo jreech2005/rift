@@ -50,6 +50,43 @@ is configured the line is synthesized, cached in memory and offered as
 `audio_url` (`GET /audio/<id>`); otherwise, and on any failure, the event
 carries the text alone. See [VOICE.md](VOICE.md).
 
+## Phase 3: who does what
+
+```
+Unreal player action
+      |
+      v
+authoritative Runtime (Rust)
+      +--> NPC perception / memory ......... TiDB behind MemoryStore
+      +--> narrative causality
+      +--> telemetry event (never blocks) .. Tiger Data behind TelemetrySink
+      v
+DirectorContext, built after the consequences
+      +--> recent PlayerTelemetry (300 ms bounded read)
+      v
+Director failover, inside DIRECTOR_BUDGET_MS
+      Gemini primary -> one bounded retry -> Gemini fallback model
+      -> optional Anthropic -> deterministic FallbackDirector
+      v
+validated DirectorDecision (all of it or none of it)
+      +--> world state
+      +--> optional ElevenLabs synthesis -> audio_url
+      v
+world_event(s) --> Unreal presentation (HUD, NPCs, subtitles, voice)
+```
+
+| Service | Role | When it is missing or fails |
+|---|---|---|
+| TiDB | persistent semantic memory of NPCs and the world, behind `MemoryStore` ([NPC_MEMORY.md](NPC_MEMORY.md)) | in-memory store; recall is lost, state is not |
+| Tiger Data | recent behavioral telemetry: what the player has been doing in the last minutes, behind `TelemetrySink` / `TelemetryReader` ([TELEMETRY.md](TELEMETRY.md)) | in-memory telemetry; a slow read means the Director decides without it |
+| Gemini / Anthropic / `FallbackDirector` | adaptive reasoning with resilient failover ([DIRECTOR.md](DIRECTOR.md)) | the next leg, then the deterministic rules |
+| ElevenLabs | generated NPC speech ([VOICE.md](VOICE.md)) | the line goes out as text |
+| Unreal | physical presentation of validated events ([UNREAL_HOSPITAL_DEMO.md](UNREAL_HOSPITAL_DEMO.md)) | — |
+
+TiDB and Tiger Data are deliberately separate: TiDB remembers what was said and learned, for
+as long as the world exists; Tiger Data summarises recent behavior for the next decision. Neither
+is on the path of a player action, and none of these services can block gameplay.
+
 ## AI path
 
 ```

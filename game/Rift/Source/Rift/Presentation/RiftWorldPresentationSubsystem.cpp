@@ -2,12 +2,19 @@
 
 #include "RiftWorldPresentationSubsystem.h"
 
+#include "Components/AudioComponent.h"
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
+#include "HttpModule.h"
+#include "Interfaces/IHttpRequest.h"
+#include "Interfaces/IHttpResponse.h"
+#include "Kismet/GameplayStatics.h"
 #include "RiftEntityComponent.h"
 #include "RiftLocationMarker.h"
 #include "RiftNPC.h"
 #include "RiftProtocol.h"
+#include "RiftVoice.h"
+#include "Sound/SoundWaveProcedural.h"
 
 bool URiftWorldPresentationSubsystem::DoesSupportWorldType(const EWorldType::Type WorldType) const
 {
@@ -43,6 +50,10 @@ void URiftWorldPresentationSubsystem::Deinitialize()
 
 	Entities.Reset();
 
+	// a clip still on its way is dropped when it arrives
+	++VoiceRequestId;
+	StopVoice();
+
 	Super::Deinitialize();
 }
 
@@ -53,6 +64,12 @@ void URiftWorldPresentationSubsystem::Tick(float DeltaTime)
 	if (HudModel.Advance(Now()))
 	{
 		OnHudChanged.Broadcast(HudModel.State);
+	}
+
+	// a procedural wave never ends on its own
+	if (VoiceComponent && Now() >= VoiceEnds)
+	{
+		StopVoice();
 	}
 }
 
@@ -191,6 +208,12 @@ void URiftWorldPresentationSubsystem::HandleWorldEvent(const FRiftWorldEvent& Ev
 		}
 
 		OnHudChanged.Broadcast(HudModel.State);
+
+		// the subtitle is already up, the voice joins it when the clip arrives
+		if (Parsed.Type == ERiftWorldEventType::DialogueStarted)
+		{
+			RequestVoice(Parsed.GetString(TEXT("audio_url")));
+		}
 	}
 
 	RouteToWorld(Parsed);
@@ -303,6 +326,8 @@ void URiftWorldPresentationSubsystem::HandleSessionCreated(const FString& Sessio
 	bSessionRequested = false;
 
 	// a new session starts a new story, nothing of the old one stays on screen
+	++VoiceRequestId;
+	StopVoice();
 	HudModel = FRiftHudModel();
 	OnHudChanged.Broadcast(HudModel.State);
 }
@@ -338,6 +363,90 @@ void URiftWorldPresentationSubsystem::CreateSessionIfNeeded()
 	UE_LOG(LogRiftPresentation, Log, TEXT("Level has Rift entities, requesting a game session"));
 
 	bSessionRequested = Network->CreateSession();
+}
+
+void URiftWorldPresentationSubsystem::RequestVoice(const FString& AudioUrl)
+{
+	if (AudioUrl.IsEmpty() || !bPlayVoice)
+	{
+		return;
+	}
+
+	const URiftNetworkSubsystem* Network = GetNetwork();
+	const FString Url = Network ? RiftVoice::ResolveAudioUrl(Network->GetBackendUrl(), AudioUrl) : FString();
+
+	if (Url.IsEmpty())
+	{
+		UE_LOG(LogRiftPresentation, Warning, TEXT("Voice: audio_url '%s' is not a path on the backend, line stays text only"), *AudioUrl);
+		return;
+	}
+
+	const int32 RequestId = ++VoiceRequestId;
+
+	const TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
+	Request->SetVerb(TEXT("GET"));
+	Request->SetURL(Url);
+	Request->SetTimeout(10.0f);
+
+	// completes on the game thread, the game never waits for it
+	Request->OnProcessRequestComplete().BindWeakLambda(this, [this, RequestId, Url](FHttpRequestPtr, FHttpResponsePtr Response, bool bConnected)
+	{
+		if (!bConnected || !Response.IsValid() || Response->GetResponseCode() != 200)
+		{
+			UE_LOG(LogRiftPresentation, Warning, TEXT("Voice: could not fetch %s (HTTP %d), line stays text only"), *Url, Response.IsValid() ? Response->GetResponseCode() : 0);
+			return;
+		}
+
+		PlayVoiceClip(RequestId, Response->GetContent());
+	});
+
+	if (!Request->ProcessRequest())
+	{
+		UE_LOG(LogRiftPresentation, Warning, TEXT("Voice: could not start the request for %s"), *Url);
+	}
+}
+
+void URiftWorldPresentationSubsystem::PlayVoiceClip(int32 RequestId, const TArray<uint8>& Bytes)
+{
+	if (RequestId != VoiceRequestId)
+	{
+		// a newer line was requested while this one was on its way
+		return;
+	}
+
+	FRiftWavClip Clip;
+
+	if (!RiftVoice::ParseWav(Bytes, Clip))
+	{
+		UE_LOG(LogRiftPresentation, Warning, TEXT("Voice: clip is not 16 bit PCM WAV (%d bytes). Set ELEVENLABS_OUTPUT_FORMAT=pcm_24000 on the backend"), Bytes.Num());
+		return;
+	}
+
+	StopVoice();
+
+	USoundWaveProcedural* Wave = NewObject<USoundWaveProcedural>(this);
+	Wave->SetSampleRate(Clip.SampleRate);
+	Wave->NumChannels = Clip.NumChannels;
+	Wave->Duration = Clip.GetDuration();
+	Wave->SoundGroup = SOUNDGROUP_Voice;
+	Wave->bLooping = false;
+	Wave->QueueAudio(Clip.Pcm.GetData(), Clip.Pcm.Num());
+
+	// null without an audio device, for example a headless run
+	VoiceComponent = UGameplayStatics::SpawnSound2D(this, Wave, VoiceVolume, 1.0f, 0.0f, nullptr, false, false);
+	VoiceEnds = Now() + Clip.GetDuration() + 0.25;
+
+	UE_LOG(LogRiftPresentation, Log, TEXT("Voice: playing %.1f s at %d Hz%s"), Clip.GetDuration(), Clip.SampleRate, VoiceComponent ? TEXT("") : TEXT(" (no audio device)"));
+}
+
+void URiftWorldPresentationSubsystem::StopVoice()
+{
+	if (VoiceComponent)
+	{
+		VoiceComponent->Stop();
+		VoiceComponent->DestroyComponent();
+		VoiceComponent = nullptr;
+	}
 }
 
 double URiftWorldPresentationSubsystem::Now() const

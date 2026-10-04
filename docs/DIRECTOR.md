@@ -199,7 +199,21 @@ FallbackDirector (deterministic)  ->  the game continues
 | `ANTHROPIC_MODEL` | `claude-opus-5-5` | |
 | `ANTHROPIC_TIMEOUT_MS` | `10000` (1000–30000) | one Anthropic request |
 | `ANTHROPIC_EFFORT` | `low` | `output_config.effort`; set it blank for models that reject the field |
-| `DIRECTOR_BUDGET_MS` | `20000` (1000–60000) | one whole pass down the chain |
+| `DIRECTOR_BUDGET_MS` | `20000` (1000–60000) | everything the LLM chain may spend on one decision |
+
+Recommended for the live demo (the values in `.env.example`): the defaults above are generous and
+too slow for a room full of people waiting.
+
+```sh
+GEMINI_TIMEOUT_MS=3000
+GEMINI_TRANSIENT_RETRIES=1
+ANTHROPIC_TIMEOUT_MS=3000
+DIRECTOR_BUDGET_MS=6000
+```
+
+With these the world reacts through an LLM within 6 s or through the deterministic rules right
+after. Anthropic is optional: without `ANTHROPIC_API_KEY` that leg is left out and the chain is
+Gemini → `FallbackDirector`. It has been tested against mocks only.
 
 An unparsable value logs a warning and uses the default. Nothing here is required: with no key the
 Director is the deterministic rules, and startup never makes a request.
@@ -213,8 +227,10 @@ Hard bounds, all enforced in code:
 - Each request is bounded by its leg timeout and by what is left of the budget. When the budget is
   gone the pass ends, whatever is in flight.
 - With the defaults a pass makes at most 4 requests (2 + 1 + 1). A decision is one pass, plus one
-  more only when the output was rejected and is being repaired: at most 8 requests and 2 × budget,
-  then the deterministic rules answer. Normally it is one request.
+  more only when the output was rejected and is being repaired: at most 8 requests. The first call
+  and the repair call share one `DIRECTOR_BUDGET_MS` (`DirectorEngine::with_budget`), so the LLMs
+  never hold a decision longer than the budget. Then the deterministic rules answer at once; they
+  are not charged to the budget. Normally it is one request.
 
 Transport retry is not decision repair. A reply that arrives but fails validation is never
 retried by the chain; the engine repairs it once (step 3), and that repair call is again a single

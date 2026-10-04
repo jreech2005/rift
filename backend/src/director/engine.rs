@@ -67,6 +67,9 @@ pub struct DirectorEngine {
     provider: Arc<dyn DirectorProvider>,
     fallback: Option<Arc<dyn DirectorProvider>>,
     call_timeout: Duration,
+    /// Total time for the primary provider, repair attempt included. `None`:
+    /// each call is bounded by `call_timeout` alone.
+    budget: Option<Duration>,
 }
 
 impl std::fmt::Debug for DirectorEngine {
@@ -75,6 +78,7 @@ impl std::fmt::Debug for DirectorEngine {
             .field("provider", &self.provider.name())
             .field("fallback", &self.fallback.as_ref().map(|p| p.name()))
             .field("call_timeout", &self.call_timeout)
+            .field("budget", &self.budget)
             .finish()
     }
 }
@@ -85,6 +89,7 @@ impl DirectorEngine {
             provider,
             fallback: None,
             call_timeout: DEFAULT_CALL_TIMEOUT,
+            budget: None,
         }
     }
 
@@ -105,6 +110,13 @@ impl DirectorEngine {
         self
     }
 
+    /// Bound the primary provider's first call and its repair call together.
+    /// Once the budget is spent the fallback answers; it is not charged.
+    pub fn with_budget(mut self, budget: Duration) -> Self {
+        self.budget = Some(budget);
+        self
+    }
+
     /// Decide how the world reacts to `ctx`.
     ///
     /// Returns a decision whose every action passed validation, or an error.
@@ -112,7 +124,10 @@ impl DirectorEngine {
     pub async fn decide(&self, ctx: &DirectorContext) -> Result<DirectorDecision, DirectorError> {
         ctx.validate().map_err(DirectorError::InvalidContext)?;
 
-        let primary = match self.run(self.provider.as_ref(), ctx, MAX_ATTEMPTS).await {
+        let primary = match self
+            .run(self.provider.as_ref(), ctx, MAX_ATTEMPTS, self.budget)
+            .await
+        {
             Ok(decision) => return Ok(decision),
             Err(error) => error,
         };
@@ -126,7 +141,7 @@ impl DirectorEngine {
             error = %primary,
             "director provider failed; using fallback"
         );
-        match self.run(fallback.as_ref(), ctx, 1).await {
+        match self.run(fallback.as_ref(), ctx, 1, None).await {
             Ok(mut decision) => {
                 decision.metadata.fallback_reason = Some(truncate_chars(&primary.to_string(), 300));
                 Ok(decision)
@@ -143,6 +158,7 @@ impl DirectorEngine {
         provider: &dyn DirectorProvider,
         ctx: &DirectorContext,
         max_attempts: u8,
+        budget: Option<Duration>,
     ) -> Result<DirectorDecision, DirectorError> {
         let started = Instant::now();
         let mut usage: BTreeMap<String, u64> = BTreeMap::new();
@@ -156,15 +172,23 @@ impl DirectorEngine {
                     issues,
                 }),
             };
-            let output = tokio::time::timeout(self.call_timeout, provider.propose(request))
+            let timeout = budget.map_or(self.call_timeout, |budget| {
+                self.call_timeout
+                    .min(budget.saturating_sub(started.elapsed()))
+            });
+            let timed_out = || {
+                ProviderError::new(
+                    provider.name(),
+                    ProviderErrorKind::Timeout,
+                    format!("no response within {} ms", timeout.as_millis()),
+                )
+            };
+            if timeout.is_zero() {
+                return Err(timed_out().into());
+            }
+            let output = tokio::time::timeout(timeout, provider.propose(request))
                 .await
-                .map_err(|_| {
-                    ProviderError::new(
-                        provider.name(),
-                        ProviderErrorKind::Timeout,
-                        format!("no response within {} ms", self.call_timeout.as_millis()),
-                    )
-                })??;
+                .map_err(|_| timed_out())??;
             for (key, value) in &output.usage {
                 *usage.entry(key.clone()).or_default() += value;
             }
@@ -393,6 +417,28 @@ mod tests {
         assert_eq!(provider_error.kind, ProviderErrorKind::Timeout);
         assert_eq!(provider_error.provider, "scripted");
         assert_eq!(provider.call_count(), 1);
+    }
+
+    #[tokio::test]
+    async fn the_budget_covers_the_first_call_and_the_repair_together() {
+        let ctx = sample_context();
+        let provider = Arc::new(ScriptedProvider::new([
+            ScriptedResponse::Text("not json".into()),
+            ScriptedResponse::Hang,
+        ]));
+        let started = Instant::now();
+        let error = engine(&provider)
+            .with_call_timeout(Duration::from_secs(30))
+            .with_budget(Duration::from_millis(60))
+            .decide(&ctx)
+            .await
+            .unwrap_err();
+        assert!(started.elapsed() < Duration::from_secs(5));
+        let DirectorError::Provider(provider_error) = &error else {
+            panic!("expected Provider, got {error:?}");
+        };
+        assert_eq!(provider_error.kind, ProviderErrorKind::Timeout);
+        assert_eq!(provider.call_count(), 2);
     }
 
     #[tokio::test]

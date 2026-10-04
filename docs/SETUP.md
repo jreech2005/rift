@@ -82,14 +82,14 @@ See `.env.example`. Provider keys are read only by server-side code.
 |---|---|---|
 | `GEMINI_API_KEY` | canon, backend | live check: list models (free, no generation) |
 | `GEMINI_MODEL`, `GEMINI_FALLBACK_MODEL`, `GEMINI_TIMEOUT_MS`, `GEMINI_TRANSIENT_RETRIES` | backend | Director failover chain, see `docs/DIRECTOR.md` |
-| `DIRECTOR_PRIMARY_PROVIDER`, `DIRECTOR_SECONDARY_PROVIDER`, `DIRECTOR_BUDGET_MS` | backend | `gemini` / `anthropic`; total time per Director pass |
+| `DIRECTOR_PRIMARY_PROVIDER`, `DIRECTOR_SECONDARY_PROVIDER`, `DIRECTOR_BUDGET_MS` | backend | `gemini` / `anthropic`; total LLM time per Director decision (demo: `6000`) |
 | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `ANTHROPIC_TIMEOUT_MS`, `ANTHROPIC_EFFORT` | backend | optional second LLM; `make director-preflight` checks every model |
 | `TMDB_API_KEY` | canon | v3 key or v4 read token; live check: one `/3/search/movie` request |
 | `ELEVENLABS_API_KEY` | canon, backend | canon live check: `/v1/user` account lookup (no credits); backend: NPC voice |
 | `ELEVENLABS_VOICES` | backend | `npc_id=voice_id,...`; with the key, enables NPC voice (`docs/VOICE.md`) |
-| `ELEVENLABS_MODEL`, `ELEVENLABS_OUTPUT_FORMAT`, `ELEVENLABS_TIMEOUT_MS` | backend | optional voice tuning |
+| `ELEVENLABS_MODEL`, `ELEVENLABS_OUTPUT_FORMAT`, `ELEVENLABS_TIMEOUT_MS` | backend | optional voice tuning; the Unreal demo needs `ELEVENLABS_OUTPUT_FORMAT=pcm_24000` |
 | `WORLD_LABS_API_KEY` | canon | configuration only — no live check (avoids paid generation) |
-| `TIDB_*` | canon | live check: TCP reachability only, no auth |
+| `TIDB_*` | canon, backend (`--features tidb`) | persistent NPC memory; canon live check: TCP reachability only, no auth |
 | `TIGER_DATABASE_URL` | backend (`--features tiger`) | Tiger Data `postgres://` URL for gameplay telemetry; a secret as a whole. Unset: in-memory telemetry. See [TELEMETRY.md](TELEMETRY.md) |
 | `BACKEND_HOST`, `BACKEND_PORT` | backend | default `127.0.0.1:3000` |
 | `RUST_LOG` | backend | e.g. `info`, `rift_backend=debug` |

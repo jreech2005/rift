@@ -144,7 +144,7 @@ payload carries `"source": "narrative" | "director"`.
 Their `event_id` is a UUIDv5 of the action or decision that caused them.
 
 `audio_url` is present only when the line was voiced (`docs/VOICE.md`). It is a path on the
-backend's HTTP origin, e.g. `/audio/<uuid>`; `GET` it for the clip (`audio/mpeg` by default, `404`
+backend's HTTP origin, e.g. `/audio/<uuid>`; `GET` it for the clip (`audio/mpeg` by default, `audio/wav` for `pcm_*` formats, `404`
 once expired). When it is absent, show `text` as a subtitle. Audio is never sent over the WebSocket.
 
 ### `error`

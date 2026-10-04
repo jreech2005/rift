@@ -21,10 +21,12 @@ public class Rift : ModuleRules
 			"Slate"
 		});
 
-		// Backend connection (Network/): persistent WebSocket + JSON protocol V1
+		// Backend connection (Network/): persistent WebSocket + JSON protocol V1.
+		// HTTP fetches voiced NPC lines (Presentation/RiftVoice).
 		PrivateDependencyModuleNames.AddRange(new string[] {
 			"WebSockets",
-			"Json"
+			"Json",
+			"HTTP"
 		});
 
 		PublicIncludePaths.AddRange(new string[] {

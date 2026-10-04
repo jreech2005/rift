@@ -1,6 +1,7 @@
-// Automation tests for the HUD model: run with "Automation RunTests Rift.Presentation".
+// Automation tests for the HUD model and the voice helpers: run with "Automation RunTests Rift.Presentation".
 
 #include "Misc/AutomationTest.h"
+#include "RiftVoice.h"
 #include "RiftWorldEventTypes.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
@@ -118,6 +119,54 @@ bool FRiftHudModelTest::RunTest(const FString& Parameters)
 		TestTrue(TEXT("subtitle expires"), Model.State.Subtitle.IsEmpty());
 		TestTrue(TEXT("notice expires"), Model.State.Notice.IsEmpty());
 	}
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRiftVoiceTest, "Rift.Presentation.Voice", EAutomationTestFlags_ApplicationContextMask | EAutomationTestFlags::EngineFilter)
+
+bool FRiftVoiceTest::RunTest(const FString& Parameters)
+{
+	// audio_url is a path on the backend that owns the socket
+	TestEqual(TEXT("ws becomes http"), RiftVoice::ResolveAudioUrl(TEXT("ws://127.0.0.1:3000/ws"), TEXT("/audio/abc")), FString(TEXT("http://127.0.0.1:3000/audio/abc")));
+	TestEqual(TEXT("wss becomes https"), RiftVoice::ResolveAudioUrl(TEXT("wss://rift.example/ws"), TEXT("/audio/abc")), FString(TEXT("https://rift.example/audio/abc")));
+	TestEqual(TEXT("backend url without a path"), RiftVoice::ResolveAudioUrl(TEXT("ws://localhost:3000"), TEXT("/audio/abc")), FString(TEXT("http://localhost:3000/audio/abc")));
+	TestTrue(TEXT("a full url is refused"), RiftVoice::ResolveAudioUrl(TEXT("ws://127.0.0.1:3000/ws"), TEXT("http://elsewhere/audio/abc")).IsEmpty());
+	TestTrue(TEXT("a //host reference is refused"), RiftVoice::ResolveAudioUrl(TEXT("ws://127.0.0.1:3000/ws"), TEXT("//elsewhere/audio/abc")).IsEmpty());
+	TestTrue(TEXT("no audio_url, no request"), RiftVoice::ResolveAudioUrl(TEXT("ws://127.0.0.1:3000/ws"), TEXT("")).IsEmpty());
+	TestTrue(TEXT("unknown backend scheme"), RiftVoice::ResolveAudioUrl(TEXT("ftp://127.0.0.1/ws"), TEXT("/audio/abc")).IsEmpty());
+
+	// the 44 byte header the backend writes for pcm_24000, then four samples
+	TArray<uint8> Wav = {
+		'R', 'I', 'F', 'F', 44, 0, 0, 0, 'W', 'A', 'V', 'E',
+		'f', 'm', 't', ' ', 16, 0, 0, 0, 1, 0, 1, 0, 0xC0, 0x5D, 0, 0, 0x80, 0xBB, 0, 0, 2, 0, 16, 0,
+		'd', 'a', 't', 'a', 8, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+
+	FRiftWavClip Clip;
+	TestTrue(TEXT("pcm wav parses"), RiftVoice::ParseWav(Wav, Clip));
+	TestEqual(TEXT("sample rate"), Clip.SampleRate, 24000);
+	TestEqual(TEXT("channels"), Clip.NumChannels, 1);
+	TestEqual(TEXT("pcm size"), Clip.Pcm.Num(), 8);
+	TestEqual(TEXT("first pcm byte"), static_cast<int32>(Clip.Pcm[0]), 1);
+	TestEqual(TEXT("duration"), Clip.GetDuration(), 4.0f / 24000.0f);
+
+	// a data chunk that claims more than was received is cut to whole samples
+	TArray<uint8> Truncated = Wav;
+	Truncated.SetNum(Wav.Num() - 3);
+	TestTrue(TEXT("truncated wav still parses"), RiftVoice::ParseWav(Truncated, Clip));
+	TestEqual(TEXT("truncated pcm keeps whole samples"), Clip.Pcm.Num(), 4);
+
+	const TArray<uint8> Mp3 = { 'I', 'D', '3', 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	TestFalse(TEXT("mp3 is refused"), RiftVoice::ParseWav(Mp3, Clip));
+	TestFalse(TEXT("empty is refused"), RiftVoice::ParseWav(TArray<uint8>(), Clip));
+
+	TArray<uint8> Float32 = Wav;
+	Float32[20] = 3;
+	TestFalse(TEXT("non PCM encoding is refused"), RiftVoice::ParseWav(Float32, Clip));
+
+	TArray<uint8> HeaderOnly = Wav;
+	HeaderOnly.SetNum(44);
+	TestFalse(TEXT("a clip without samples is refused"), RiftVoice::ParseWav(HeaderOnly, Clip));
 
 	return true;
 }

@@ -4,8 +4,8 @@ How to build the hospital vertical slice in the Unreal Editor on top of the Phas
 code (`game/Rift/Source/Rift/Presentation/`). The C++ is done; the level is assembled by hand.
 Nothing here needs a Blueprint graph.
 
-Status: the code compiles, the HUD logic is covered by the automation test
-`Rift.Presentation.HudModel`, and `Rift.NetSmoke` still passes. The level below has **not** been
+Status: the code compiles, the HUD logic and the voice helpers are covered by the automation
+tests `Rift.Presentation.HudModel` and `Rift.Presentation.Voice`, and `Rift.NetSmoke` still passes. The level below has **not** been
 assembled or looked at in the editor yet — the first person to do it should expect small fixes.
 
 ## How events reach the screen
@@ -16,6 +16,7 @@ Rust backend ──world_event──► URiftNetworkSubsystem      (socket + par
                                   ▼
                         URiftWorldPresentationSubsystem   (one per game world)
                           ├─ FRiftHudModel ─► ARiftHUD    (text on screen)
+                          ├─ audio_url ─► HTTP GET ─► 2D sound (voiced dialogue, optional)
                           ├─ ARiftNPC                     (face player, walk to marker)
                           └─ URiftEntityComponent.OnRiftEvent (per actor, for Blueprints)
 ```
@@ -27,7 +28,7 @@ Rust backend ──world_event──► URiftNetworkSubsystem      (socket + par
 | `objective_updated` `completed` | banner `OBJECTIVE COMPLETE` |
 | `mission_updated` `failed` / `invalidated` | banner `MISSION FAILED` |
 | `mission_updated` `completed` / `active` | banner `MISSION COMPLETE` / `NEW MISSION: <title>` |
-| `dialogue_started` | subtitle `<NPC name>: <opening_line>`, the NPC turns to the player |
+| `dialogue_started` | subtitle `<NPC name>: <opening_line>`, the NPC turns to the player; with an `audio_url` the line is also spoken |
 | `information_revealed` to `player` | subtitle with the revealed text |
 | `world_event_triggered` | description as a notice line; each NPC in `npc_ids` walks to a marker named after `event` |
 | `npc_moved`, `npc_activated` | the NPC walks to the marker for `location_id` |
@@ -110,7 +111,29 @@ To replace it with UMG later: in a widget, **Get World Subsystem → Rift World 
 Subsystem**, bind `OnHudChanged` and read `GetHudState` (`CurrentObjective`, `Banner`, `Subtitle`,
 `Notice`). Then set the HUD class back to `HUD`.
 
-## 7. Check it without the backend
+## 7. Voice (optional)
+
+Nothing to place in the level: voiced lines play as 2D sound. It is all backend configuration, in
+the repo-root `.env`:
+
+```sh
+ELEVENLABS_API_KEY=<key>
+ELEVENLABS_VOICES=hank_schrader=<voice_id>,walter_white=<voice_id>
+ELEVENLABS_OUTPUT_FORMAT=pcm_24000
+ELEVENLABS_TIMEOUT_MS=3000
+```
+
+`ELEVENLABS_OUTPUT_FORMAT=pcm_24000` is required for sound in Unreal: the client plays 16-bit PCM
+WAV and nothing else. With the backend default (MP3) the subtitle shows and the Output Log says
+`Voice: clip is not 16 bit PCM WAV`.
+
+When Hank speaks, the subtitle appears first and the Output Log shows
+`LogRiftPresentation: Voice: playing 3.2 s at 24000 Hz` a moment later. Without a key, without a
+voice for that NPC, or when the download fails, the subtitle is all there is — nothing else
+changes. Check the editor is not muted (**Editor Preferences → Level Editor → Play → Enable Game
+Sound**) and that the backend log said `voice: elevenlabs` at startup. Details: `docs/VOICE.md`.
+
+## 8. Check it without the backend
 
 Press Play, open the console (`` ` ``):
 
@@ -127,10 +150,13 @@ Rift.FakeEvent npc_moved hank_schrader npc_id=hank_schrader location_id=albuquer
 JSON object. (On a `-ExecCmds=` command line the comma in `npc_ids=a,b` splits the command; use
 the in-game console for that one.)
 
-## 8. Run it against the backend
+## 9. Run it against the backend
+
+Use the demo timings from `.env.example` (`DIRECTOR_BUDGET_MS=6000`, `GEMINI_TIMEOUT_MS=3000`) so
+the Director answers, or the deterministic rules take over, within about six seconds.
 
 ```sh
-cd ~/rift-phase3-unreal
+cd <repo root>
 RIFT_WORLD_BIBLE=backend/tests/fixtures/director/world_bible_breaking_bad.json \
 RIFT_SCENARIO=backend/tests/fixtures/runtime/scenario_burner_phone.json \
 make backend
@@ -159,6 +185,7 @@ from the beginning.
 | NPC slides without animation | Anim Class `ABP_Unarmed` on the mesh |
 | no HUD text | section 6 |
 | `Rift id '…' is used by both` | two actors share an id |
+| subtitle but no voice | section 7: `ELEVENLABS_OUTPUT_FORMAT=pcm_24000`, a voice id for that NPC, `LogRiftPresentation: Voice:` lines |
 
 ## Limits
 
@@ -167,4 +194,6 @@ from the beginning.
   first `objective_updated`.
 - One player, one level. NPCs are found by Rift id in the loaded level only.
 - `npc_disposition_changed` has no built-in presentation; use `OnRiftEvent` on the NPC's entity.
-- No voice, no dialogue UI for the player's reply: speaking is a preset line or `Rift.Speak`.
+- Voice playback has not been heard in the editor yet (no ElevenLabs credentials were available
+  at integration time). It is 2D, without lip sync.
+- No dialogue UI for the player's reply: speaking is a preset line or `Rift.Speak`.

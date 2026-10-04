@@ -9,6 +9,7 @@
 #include "RiftWorldPresentationSubsystem.generated.h"
 
 class ARiftNPC;
+class UAudioComponent;
 class URiftEntityComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRiftHudChangedDelegate, const FRiftHudState&, HudState);
@@ -20,7 +21,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRiftTriggeredEventDelegate, const 
 
 /**
  *  The presentation side of the backend connection. Listens to URiftNetworkSubsystem::OnWorldEvent and
- *  shows each event: HUD state, NPC movement and facing, per entity notifications.
+ *  shows each event: HUD state, NPC movement and facing, voiced dialogue, per entity notifications.
  *  It only presents. Authoritative state stays in the backend and nothing here is sent back as a result of an event.
  *  One per game world. Actors join through URiftEntityComponent.
  */
@@ -106,6 +107,14 @@ protected:
 	UPROPERTY(Config)
 	bool bAutoCreateSession = true;
 
+	/** If true a dialogue_started event with an audio_url is fetched from the backend and played. Subtitles show either way */
+	UPROPERTY(Config)
+	bool bPlayVoice = true;
+
+	/** Volume of voiced NPC lines */
+	UPROPERTY(Config)
+	float VoiceVolume = 1.0f;
+
 private:
 
 	UFUNCTION()
@@ -136,6 +145,14 @@ private:
 	/** Sends the NPC to the marker for MarkerId. Does nothing when either is missing from the level */
 	void MoveNpcToMarker(const FString& NpcId, const FString& MarkerId);
 
+	/** Fetches a voiced line from the backend without blocking and plays it when it arrives. Failures only log */
+	void RequestVoice(const FString& AudioUrl);
+
+	/** Plays a fetched clip, unless a newer line was requested in the meantime */
+	void PlayVoiceClip(int32 RequestId, const TArray<uint8>& Bytes);
+
+	void StopVoice();
+
 	double Now() const;
 
 	TMap<FString, TWeakObjectPtr<URiftEntityComponent>> Entities;
@@ -143,4 +160,13 @@ private:
 	FRiftHudModel HudModel;
 
 	bool bSessionRequested = false;
+
+	/** The line being spoken, null when silent */
+	UPROPERTY(Transient)
+	TObjectPtr<UAudioComponent> VoiceComponent;
+
+	/** Counts voice requests, a clip that arrives after a newer request is dropped */
+	int32 VoiceRequestId = 0;
+
+	double VoiceEnds = 0.0;
 };

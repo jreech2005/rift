@@ -368,6 +368,7 @@ impl DirectorSettings {
         DirectorEngine::new(Arc::new(chain))
             .with_fallback(Arc::new(FallbackDirector))
             .with_call_timeout(self.budget)
+            .with_budget(self.budget)
     }
 }
 

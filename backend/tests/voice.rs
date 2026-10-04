@@ -146,6 +146,28 @@ async fn failure(canned: Canned) -> VoiceError {
 }
 
 #[tokio::test]
+async fn raw_pcm_is_returned_as_a_wav_file() {
+    let pcm = [0u8, 1, 2, 3, 4, 5];
+    let (mock, url) = spawn_mock(vec![reply(200, "audio/pcm", &pcm)]).await;
+    let mut config = ElevenLabsConfig::new(Secret::new(KEY));
+    config.base_url = url;
+    config.output_format = "pcm_24000".to_owned();
+    let clip = ElevenLabsVoiceProvider::new(config)
+        .unwrap()
+        .synthesize(hank_line())
+        .await
+        .unwrap();
+    assert_eq!(clip.content_type, "audio/wav");
+    assert_eq!(&clip.bytes[..4], b"RIFF");
+    assert_eq!(clip.bytes[24..28], 24_000u32.to_le_bytes());
+    assert_eq!(&clip.bytes[44..], &pcm);
+    assert_eq!(
+        mock.requests.lock().unwrap()[0].query.as_deref(),
+        Some("output_format=pcm_24000")
+    );
+}
+
+#[tokio::test]
 async fn successful_synthesis_returns_the_audio() {
     let (mock, url) = spawn_mock(vec![audio(MP3)]).await;
     let clip = elevenlabs(&url, Duration::from_secs(5))

@@ -60,8 +60,8 @@ All optional. Without `ELEVENLABS_API_KEY` or without any voice, the backend log
 | `ELEVENLABS_API_KEY` | — | server-side only; sent as the `xi-api-key` header, never logged |
 | `ELEVENLABS_VOICES` | — | `npc_id=voice_id` pairs, comma separated, e.g. `hank_schrader=<id>,walter_white=<id>` |
 | `ELEVENLABS_MODEL` | `eleven_flash_v2_5` | low-latency model |
-| `ELEVENLABS_OUTPUT_FORMAT` | `mp3_44100_128` | any ElevenLabs `output_format` |
-| `ELEVENLABS_TIMEOUT_MS` | `6000` | per line; after it the line goes out as text |
+| `ELEVENLABS_OUTPUT_FORMAT` | `mp3_44100_128` | any ElevenLabs `output_format`. **Unreal demo: `pcm_24000`** (see "Unreal playback") |
+| `ELEVENLABS_TIMEOUT_MS` | `6000` | per line; after it the line goes out as text. Demo: `3000` |
 
 NPC ids are WorldBible character ids. Voice ids must be ASCII letters and digits. Put them in the
 git-ignored `.env`; `.env.example` carries placeholders only.
@@ -71,7 +71,8 @@ git-ignored `.env`; `.env.example` carries placeholders only.
 `audio_url` is a path on the backend's HTTP origin (the host and port that serve `/ws`), e.g.
 `/audio/3f0c…`. The audio itself never travels over the WebSocket.
 
-`GET /audio/{id}` returns the clip with its `Content-Type` (`audio/mpeg` by default) and
+`GET /audio/{id}` returns the clip with its `Content-Type` (`audio/mpeg` by default, `audio/wav`
+for a `pcm_<rate>` format) and
 `Cache-Control: no-store`, or `404` when the id is unknown, expired or evicted. Ids are random
 UUIDv4.
 
@@ -124,10 +125,40 @@ Live check (spends a few characters of quota; fails with `BLOCKED` without crede
 make voice-live
 ```
 
+## Unreal playback
+
+Set this in `.env` for the Unreal demo:
+
+```sh
+ELEVENLABS_OUTPUT_FORMAT=pcm_24000
+```
+
+ElevenLabs then returns headerless 16-bit mono PCM at 24 kHz. The backend puts a 44-byte WAV
+header in front of any `pcm_<rate>` clip and serves it as `audio/wav`, so the clip describes
+itself. No transcoding happens anywhere. (`pcm_24000` is available on every ElevenLabs plan;
+`pcm_44100` needs a higher tier.)
+
+In Unreal, `URiftWorldPresentationSubsystem` handles `dialogue_started`:
+
+1. the subtitle is shown immediately, as before;
+2. if the payload has an `audio_url`, it is resolved against the backend's HTTP origin
+   (`ws://host:port/ws` → `http://host:port/audio/<id>`; only paths are accepted) and fetched
+   with an asynchronous HTTP request — the game thread never waits;
+3. the WAV is parsed (`RiftVoice::ParseWav`), queued into a `USoundWaveProcedural` and played as
+   a 2D sound in the Voice sound group. A newer line replaces the one playing.
+
+Any failure — no `audio_url`, download error, `404`, a clip that is not 16-bit PCM WAV (MP3, for
+example) — logs one `LogRiftPresentation` warning and leaves the subtitle as it is.
+`[/Script/Rift.RiftWorldPresentationSubsystem]` in `DefaultGame.ini` takes `bPlayVoice=False` to
+turn playback off and `VoiceVolume=`.
+
 ## Limits
 
 - The events of a decision that contains a dialogue are held until synthesis ends or times out.
 - One clip per line, synthesized in full before it is offered: no streaming, no lip sync, no voice
   cloning, no on-disk cache.
-- The default format is MP3. A client that needs PCM can set `ELEVENLABS_OUTPUT_FORMAT`.
-- The Unreal client does not fetch or play `audio_url` yet; it ignores the new fields.
+- The default format is MP3, which the Unreal client does not decode: set
+  `ELEVENLABS_OUTPUT_FORMAT=pcm_24000` for the demo.
+- Unreal playback is 2D (not positioned at the NPC), one line at a time.
+- Not yet verified end to end against live ElevenLabs audio in the editor; the parts are covered
+  by `backend/tests/voice.rs` and the Unreal automation test `Rift.Presentation.Voice`.

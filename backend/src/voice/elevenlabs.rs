@@ -27,7 +27,8 @@ const CONNECT_TIMEOUT: Duration = Duration::from_secs(5);
 pub struct ElevenLabsConfig {
     pub api_key: Secret,
     pub model: String,
-    /// ElevenLabs `output_format`, e.g. `mp3_44100_128`.
+    /// ElevenLabs `output_format`, e.g. `mp3_44100_128`. A `pcm_<rate>`
+    /// format is served as a WAV file (what the Unreal client plays).
     pub output_format: String,
     /// Overridable so tests can point at a local server.
     pub base_url: String,
@@ -204,11 +205,49 @@ impl ElevenLabsVoiceProvider {
         if bytes.len() > MAX_AUDIO_BYTES {
             return Err(malformed("audio is larger than the clip limit"));
         }
+        // `pcm_<rate>` is headerless 16-bit mono: add the WAV header so the
+        // clip describes itself to whoever fetches it.
+        if let Some(sample_rate) = pcm_sample_rate(&self.config.output_format) {
+            return Ok(VoiceAudio {
+                bytes: wav_from_pcm16_mono(&bytes, sample_rate),
+                content_type: "audio/wav".to_owned(),
+            });
+        }
         Ok(VoiceAudio {
             bytes: bytes.to_vec(),
             content_type,
         })
     }
+}
+
+/// The sample rate of an ElevenLabs raw PCM format name (`pcm_24000`).
+fn pcm_sample_rate(output_format: &str) -> Option<u32> {
+    output_format
+        .strip_prefix("pcm_")?
+        .parse()
+        .ok()
+        .filter(|rate| *rate > 0)
+}
+
+/// Wrap signed 16-bit little-endian mono samples in a 44-byte WAV header.
+fn wav_from_pcm16_mono(pcm: &[u8], sample_rate: u32) -> Vec<u8> {
+    // Clips are capped at MAX_AUDIO_BYTES, far below the 4 GiB WAV limit.
+    let data_len = pcm.len() as u32;
+    let mut wav = Vec::with_capacity(44 + pcm.len());
+    wav.extend_from_slice(b"RIFF");
+    wav.extend_from_slice(&(36 + data_len).to_le_bytes());
+    wav.extend_from_slice(b"WAVEfmt ");
+    wav.extend_from_slice(&16u32.to_le_bytes());
+    wav.extend_from_slice(&1u16.to_le_bytes()); // PCM
+    wav.extend_from_slice(&1u16.to_le_bytes()); // mono
+    wav.extend_from_slice(&sample_rate.to_le_bytes());
+    wav.extend_from_slice(&(sample_rate * 2).to_le_bytes()); // bytes per second
+    wav.extend_from_slice(&2u16.to_le_bytes()); // block align
+    wav.extend_from_slice(&16u16.to_le_bytes()); // bits per sample
+    wav.extend_from_slice(b"data");
+    wav.extend_from_slice(&data_len.to_le_bytes());
+    wav.extend_from_slice(pcm);
+    wav
 }
 
 impl VoiceProvider for ElevenLabsVoiceProvider {
@@ -245,6 +284,26 @@ mod tests {
     use super::*;
 
     const KEY: &str = "unit-key-do-not-leak";
+
+    #[test]
+    fn only_raw_pcm_formats_are_wrapped_as_wav() {
+        assert_eq!(pcm_sample_rate("pcm_24000"), Some(24_000));
+        assert_eq!(pcm_sample_rate("pcm_16000"), Some(16_000));
+        assert_eq!(pcm_sample_rate("mp3_44100_128"), None);
+        assert_eq!(pcm_sample_rate("pcm_"), None);
+        assert_eq!(pcm_sample_rate("pcm_0"), None);
+
+        let wav = wav_from_pcm16_mono(&[1, 2, 3, 4], 24_000);
+        assert_eq!(wav.len(), 48);
+        assert_eq!(&wav[..4], b"RIFF");
+        assert_eq!(wav[4..8], 40u32.to_le_bytes());
+        assert_eq!(&wav[8..16], b"WAVEfmt ");
+        assert_eq!(wav[22..24], 1u16.to_le_bytes());
+        assert_eq!(wav[24..28], 24_000u32.to_le_bytes());
+        assert_eq!(wav[28..32], 48_000u32.to_le_bytes());
+        assert_eq!(wav[40..44], 4u32.to_le_bytes());
+        assert_eq!(&wav[44..], &[1, 2, 3, 4]);
+    }
 
     #[test]
     fn config_defaults_and_overrides() {
