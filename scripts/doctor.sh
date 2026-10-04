@@ -26,9 +26,29 @@ else
   row "Xcode" MISSING "only Command Line Tools; Unreal needs full Xcode (see game/README.md)"
 fi
 
-ue=$(ls -d "/Users/Shared/Epic Games"/UE_5* 2>/dev/null | tail -1)
-if [ -n "$ue" ]; then row "Unreal Engine" PASS "$ue"; else row "Unreal Engine" MISSING "see game/README.md"; fi
-if ls "$ROOT"/game/*/*.uproject >/dev/null 2>&1; then row "Unreal project" PASS "$(ls "$ROOT"/game/*/*.uproject)"; else row "Unreal project" MISSING; fi
+# Detection reads files only; it never launches or builds Unreal.
+json_field() { sed -nE "s/.*\"$2\": *\"?([^\",]*)\"?,?.*/\1/p" "$1" 2>/dev/null | head -1; }
+ue_version=""
+if ue="$("$ROOT/scripts/find_unreal.sh")"; then
+  bv="$ue/Engine/Build/Build.version"
+  ue_version="$(json_field "$bv" MajorVersion).$(json_field "$bv" MinorVersion)"
+  row "Unreal Engine" PASS "$ue (${ue_version}.$(json_field "$bv" PatchVersion))"
+else
+  row "Unreal Engine" MISSING "no UE_5.x with UnrealEditor.app found; set UE_ROOT (see docs/SETUP.md)"
+fi
+
+uproject="$ROOT/game/Rift/Rift.uproject"
+[ -f "$uproject" ] || uproject="$(ls "$ROOT"/game/*/*.uproject 2>/dev/null | head -1)"
+if [ -n "$uproject" ] && [ -f "$uproject" ]; then
+  assoc="$(json_field "$uproject" EngineAssociation)"
+  if [ -n "$ue_version" ] && [ -n "$assoc" ] && [ "$assoc" != "$ue_version" ]; then
+    row "Unreal project" WARN "$uproject (wants engine $assoc, found $ue_version)"
+  else
+    row "Unreal project" PASS "$uproject (engine ${assoc:-unknown})"
+  fi
+else
+  row "Unreal project" MISSING "expected game/Rift/Rift.uproject"
+fi
 
 if [ -f "$ROOT/.env" ]; then
   if git -C "$ROOT" check-ignore -q .env; then row ".env" PASS "present, git-ignored"; else row ".env" FAIL "NOT ignored by git"; fi

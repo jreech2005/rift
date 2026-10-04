@@ -26,10 +26,17 @@ def _line(label: str, status: str, detail: str = "") -> str:
     return f"{label:<{LABEL_WIDTH}}{status:<12}{detail}".rstrip()
 
 
-def _live_status(result: LiveResult) -> str:
+def _provider_line(provider: Provider, settings: Settings, result: LiveResult | None) -> str:
+    """MISSING (not configured), CONFIGURED (not live-tested), TESTED or FAILED (live check)."""
+    if not provider.is_configured():
+        # Names only; values are never read here.
+        missing = [v for v in provider.env_vars if getattr(settings, v.lower(), None) is None]
+        return _line(provider.name, "MISSING", f"set {', '.join(missing)}")
+    if result is None:
+        return _line(provider.name, "CONFIGURED")
     if result.ok is None:
-        return f"live: SKIPPED ({result.detail})"
-    return f"live: {'PASS' if result.ok else 'FAIL'} ({result.detail})"
+        return _line(provider.name, "CONFIGURED", result.detail)
+    return _line(provider.name, "TESTED" if result.ok else "FAILED", result.detail)
 
 
 async def _run_live(providers: Sequence[Provider]) -> list[LiveResult]:
@@ -54,13 +61,9 @@ def report(settings: Settings, live: bool = False) -> tuple[list[str], bool]:
     providers = all_providers(settings)
     results = asyncio.run(_run_live(providers)) if live else [None] * len(providers)
     for provider, result in zip(providers, results, strict=True):
-        configured = provider.is_configured()
-        detail = "" if configured else f"set {', '.join(provider.env_vars)}"
-        if result is not None:
-            detail = _live_status(result) if configured else detail
-            if result.ok is False:
-                healthy = False
-        lines.append(_line(provider.name, "CONFIGURED" if configured else "MISSING", detail))
+        if result is not None and result.ok is False:
+            healthy = False
+        lines.append(_provider_line(provider, settings, result))
 
     if not live:
         lines += ["", "Run with --live for free, read-only connectivity checks."]

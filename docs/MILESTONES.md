@@ -1,6 +1,6 @@
 # Milestones
 
-## Phase 0 — Setup  ✅ complete (software)  ·  ⏳ Unreal pending manual install
+## Phase 0 — Setup  ✅ complete (software)  ·  ⏳ Unreal project verification pending
 
 Verified 2026-10-03 on macOS 15.2 / Apple M3.
 
@@ -15,8 +15,10 @@ Verified 2026-10-03 on macOS 15.2 / Apple M3.
 - [x] CLI smoke client proves the full protocol path against a live server
 - [x] Python uv project, tests, doctor, provider configuration detection
 - [x] Unreal/Xcode status known; exact manual steps in `game/README.md`
+- [x] Xcode 27.0 and Unreal Engine 5.8.3 installed (`/Users/Shared/UE_5.8`); `game/Rift/Rift.uproject`
+      exists — detected by `make doctor` (2026-10-03, filesystem check only)
 - [ ] Unreal project opens, C++ compiles, First Person template runs, WebSockets module enabled
-      — **blocked on manual Xcode + UE5 install**
+      — engine is installed; not yet verified by QA (owner: Unreal engineer)
 
 ## Phase 1 — Universe Compiler
 Python: resolve a title (TMDB), retrieve canon, generate a `WorldBible` (Gemini),

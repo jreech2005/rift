@@ -24,4 +24,4 @@ class GeminiProvider(Provider):
             headers={"x-goog-api-key": self.settings.gemini_api_key.get_secret_value()},
             params={"pageSize": 1},
         )
-        return LiveResult.from_status(response)
+        return LiveResult.from_json_list(response, "models")

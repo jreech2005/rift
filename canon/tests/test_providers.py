@@ -41,13 +41,19 @@ def test_live_checks_send_keys_in_expected_place(full_settings: Settings) -> Non
 
     def handler(request: httpx.Request) -> httpx.Response:
         seen[request.url.host] = request
-        return httpx.Response(200, json={})
+        return httpx.Response(200, json={"results": [], "models": []})
 
     for cls in (TMDBProvider, GeminiProvider, ElevenLabsProvider):
         result = _run(cls(full_settings), handler)
         assert result == LiveResult(True, "HTTP 200")
 
-    assert seen["api.themoviedb.org"].url.params["api_key"] == FAKE_SECRETS["TMDB_API_KEY"]
+    tmdb = seen["api.themoviedb.org"]
+    assert tmdb.method == "GET" and tmdb.url.path == "/3/search/movie"
+    assert tmdb.url.params["api_key"] == FAKE_SECRETS["TMDB_API_KEY"]
+    assert seen["generativelanguage.googleapis.com"].method == "GET"
+    assert seen["generativelanguage.googleapis.com"].url.path == "/v1beta/models"
+    assert seen["api.elevenlabs.io"].method == "GET"
+    assert seen["api.elevenlabs.io"].url.path == "/v1/user"
     gemini = seen["generativelanguage.googleapis.com"]
     assert gemini.headers["x-goog-api-key"] == FAKE_SECRETS["GEMINI_API_KEY"]
     assert "key" not in gemini.url.params
@@ -94,3 +100,33 @@ def test_unconfigured_live_check_is_skipped(empty_settings: Settings) -> None:
 
     for provider in all_providers(empty_settings):
         assert _run(provider, handler) == LiveResult.skipped("not configured")
+
+
+def test_unexpected_body_is_a_failure(full_settings: Settings) -> None:
+    def wrong_shape(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"status_message": "nope"})
+
+    def not_json(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, text="<html>captive portal</html>")
+
+    for cls in (TMDBProvider, GeminiProvider):
+        assert _run(cls(full_settings), wrong_shape) == LiveResult(
+            False, "HTTP 200, unexpected response shape"
+        )
+        assert _run(cls(full_settings), not_json) == LiveResult(False, "HTTP 200, invalid JSON")
+
+
+def test_timeout_is_reported_cleanly(full_settings: Settings) -> None:
+    def slow(request: httpx.Request) -> httpx.Response:
+        raise httpx.ReadTimeout(f"timed out reading {request.url}")
+
+    for cls in (TMDBProvider, GeminiProvider, ElevenLabsProvider):
+        assert _run(cls(full_settings), slow) == LiveResult(False, "timeout")
+
+
+def test_tidb_unreachable_is_a_clean_failure() -> None:
+    # Port 1 on localhost: refused immediately, no external traffic.
+    settings = Settings.from_mapping({**FAKE_SECRETS, "TIDB_PORT": "1"})
+    result = _run(TiDBProvider(settings), lambda request: httpx.Response(500))
+    assert result.ok is False
+    assert all(secret not in result.detail for secret in SECRET_VALUES)
