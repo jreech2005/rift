@@ -1,0 +1,60 @@
+{
+  "page": 1,
+  "results": [
+    {
+      "adult": false,
+      "backdrop_path": null,
+      "first_air_date": "2008-01-20",
+      "genre_ids": [18, 80],
+      "id": 1396,
+      "media_type": "tv",
+      "name": "Breaking Bad",
+      "origin_country": ["US"],
+      "original_language": "en",
+      "original_name": "Breaking Bad",
+      "overview": "A chemistry teacher diagnosed with cancer starts making methamphetamine to provide for his family.",
+      "popularity": 169.5259,
+      "poster_path": null,
+      "vote_average": 8.9,
+      "vote_count": 18745
+    },
+    {
+      "adult": false,
+      "genre_ids": [80, 18],
+      "id": 559969,
+      "media_type": "movie",
+      "original_language": "en",
+      "original_title": "El Camino: A Breaking Bad Movie",
+      "overview": "A fugitive tries to outrun his past.",
+      "popularity": 9.4569,
+      "release_date": "2019-10-11",
+      "title": "El Camino: A Breaking Bad Movie",
+      "vote_average": 7.0,
+      "vote_count": 5892
+    },
+    {
+      "adult": false,
+      "id": 17419,
+      "known_for_department": "Acting",
+      "media_type": "person",
+      "name": "Bryan Cranston",
+      "popularity": 5.1
+    },
+    {
+      "adult": false,
+      "genre_ids": [],
+      "id": 635602,
+      "media_type": "movie",
+      "original_language": "en",
+      "original_title": "Breaking Bad Wolf",
+      "overview": "",
+      "popularity": 0.6874,
+      "release_date": "",
+      "title": "Breaking Bad Wolf",
+      "vote_average": 0.0,
+      "vote_count": 2
+    }
+  ],
+  "total_pages": 1,
+  "total_results": 4
+}

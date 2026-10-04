@@ -1,0 +1,472 @@
+{
+  "schema_version": 1,
+  "universe": {
+    "universe_id": "breaking_bad_tv_1396",
+    "title": "Breaking Bad",
+    "media_type": "tv",
+    "release_year": 2008,
+    "tmdb_id": 1396,
+    "overview": "A chemistry teacher diagnosed with cancer starts making methamphetamine to provide for his family.",
+    "original_language": "en",
+    "provider_metadata": {
+      "provider": "tmdb",
+      "popularity": 169.5259,
+      "vote_count": 18745,
+      "candidates_considered": 3
+    },
+    "query": "Breaking Bad",
+    "match": "exact",
+    "ambiguous": false,
+    "candidates": [
+      {
+        "tmdb_id": 1396,
+        "media_type": "tv",
+        "title": "Breaking Bad",
+        "release_year": 2008,
+        "overview": "A chemistry teacher diagnosed with cancer starts making methamphetamine to provide for his family.",
+        "original_language": "en",
+        "popularity": 169.5259,
+        "vote_count": 18745
+      },
+      {
+        "tmdb_id": 559969,
+        "media_type": "movie",
+        "title": "El Camino: A Breaking Bad Movie",
+        "release_year": 2019,
+        "overview": "A fugitive tries to outrun his past.",
+        "original_language": "en",
+        "popularity": 9.4569,
+        "vote_count": 5892
+      },
+      {
+        "tmdb_id": 635602,
+        "media_type": "movie",
+        "title": "Breaking Bad Wolf",
+        "release_year": null,
+        "overview": "",
+        "original_language": "en",
+        "popularity": 0.6874,
+        "vote_count": 2
+      }
+    ]
+  },
+  "documents": [
+    {
+      "source_id": "tmdb:tv:1396",
+      "source_type": "tmdb",
+      "title": "Breaking Bad",
+      "source_url": "https://www.themoviedb.org/tv/1396",
+      "retrieved_at": "2026-10-03T12:00:00Z",
+      "text": "Breaking Bad (TV series, 2008)\nTagline: Change the equation.\nOverview: A chemistry teacher diagnosed with cancer starts making methamphetamine to provide for his family.\n\nStructured facts (subject | predicate | object):\n- Breaking Bad | media_type | TV series\n- Breaking Bad | first_air_date | 2008-01-20\n- Breaking Bad | last_air_date | 2013-09-29\n- Breaking Bad | number_of_seasons | 5\n- Breaking Bad | number_of_episodes | 62\n- Breaking Bad | created_by | Vince Gilligan\n- Breaking Bad | network | AMC\n- Breaking Bad | status | Ended\n- Breaking Bad | genre | Drama\n- Breaking Bad | genre | Crime\n- Breaking Bad | origin_country | US\n- Breaking Bad | original_language | en\n- Walter White | portrayed_by | Bryan Cranston\n- Walter White | episode_count | 62\n- Jesse Pinkman | portrayed_by | Aaron Paul\n- Jesse Pinkman | episode_count | 62\n- Skyler White | portrayed_by | Anna Gunn\n- Skyler White | episode_count | 62\n- Walter White Jr. | portrayed_by | RJ Mitte\n- Walter White Jr. | episode_count | 62\n- Hank Schrader | portrayed_by | Dean Norris\n- Hank Schrader | episode_count | 62\n- Saul Goodman | portrayed_by | Bob Odenkirk\n- Saul Goodman | episode_count | 43\n- Gustavo Fring | portrayed_by | Giancarlo Esposito\n- Gustavo Fring | episode_count | 28",
+      "metadata": {
+        "role": "metadata",
+        "tmdb_id": 1396,
+        "wikidata_id": "Q1079",
+        "imdb_id": "tt0903747",
+        "license": "TMDB API terms of use (attribution required; not endorsed by TMDB)"
+      }
+    },
+    {
+      "source_id": "wikipedia:en:1001",
+      "source_type": "wikipedia",
+      "title": "Breaking Bad",
+      "source_url": "https://en.wikipedia.org/wiki/Breaking_Bad",
+      "retrieved_at": "2026-10-03T12:00:00Z",
+      "text": "Breaking Bad is an American crime drama television series created by Vince Gilligan. Set in Albuquerque, New Mexico, it follows Walter White, a high school chemistry teacher who is diagnosed with lung cancer and starts producing methamphetamine with his former student Jesse Pinkman.\n\n## Premise\nWalter White teaches chemistry at J. P. Wynne High School and works a second job at the A1A Car Wash. After his diagnosis he partners with Jesse Pinkman to cook methamphetamine in a recreational vehicle in the desert outside Albuquerque. His brother-in-law Hank Schrader is an agent of the Drug Enforcement Administration who investigates the local drug trade.\n\n## Cast and characters\nBryan Cranston as Walter White, a chemistry teacher turned drug manufacturer.\nAaron Paul as Jesse Pinkman, a former student and small-time dealer.\nAnna Gunn as Skyler White, Walter's wife.\nDean Norris as Hank Schrader, a DEA agent and Walter's brother-in-law.",
+      "metadata": {
+        "role": "main",
+        "pageid": 1001,
+        "revid": 501001,
+        "rev_timestamp": "2026-09-27T20:29:13Z",
+        "wikibase_item": "Q1079",
+        "license": "CC BY-SA 4.0",
+        "original_chars": 940,
+        "truncated": false,
+        "sections_dropped": [
+          "Production",
+          "Reception",
+          "References"
+        ]
+      }
+    },
+    {
+      "source_id": "wikipedia:en:1002",
+      "source_type": "wikipedia",
+      "title": "List of characters in the Breaking Bad franchise",
+      "source_url": "https://en.wikipedia.org/wiki/List_of_characters_in_the_Breaking_Bad_franchise",
+      "retrieved_at": "2026-10-03T12:00:00Z",
+      "text": "This is a list of characters in the Breaking Bad franchise.\n\n## Main characters\n\n### Walter White\nWalter White is a chemistry teacher who becomes a methamphetamine manufacturer.\n\n### Jesse Pinkman\nJesse Pinkman is Walter's former student and business partner.\n\n### Hank Schrader\nHank Schrader is a DEA agent married to Marie Schrader, the sister of Skyler White.",
+      "metadata": {
+        "role": "characters",
+        "pageid": 1002,
+        "revid": 501002,
+        "rev_timestamp": "2026-09-27T20:29:13Z",
+        "wikibase_item": "Q900002",
+        "license": "CC BY-SA 4.0",
+        "original_chars": 362,
+        "truncated": false,
+        "sections_dropped": [
+          "See also"
+        ]
+      }
+    },
+    {
+      "source_id": "wikipedia:en:1003",
+      "source_type": "wikipedia",
+      "title": "Walter White (Breaking Bad)",
+      "source_url": "https://en.wikipedia.org/wiki/Walter_White_(Breaking_Bad)",
+      "retrieved_at": "2026-10-03T12:00:00Z",
+      "text": "Walter Hartwell White Sr. is the protagonist of Breaking Bad, portrayed by Bryan Cranston.\n\n## Character biography\n\n### Background\nWalter White co-founded Gray Matter Technologies before leaving the company and becoming a teacher in Albuquerque.\n\n### Season 1\nAfter his cancer diagnosis, Walter rides along on a DEA raid with Hank Schrader and sees Jesse Pinkman escaping. He pressures Jesse into becoming his partner.",
+      "metadata": {
+        "role": "character",
+        "pageid": 1003,
+        "revid": 501003,
+        "rev_timestamp": "2026-09-27T20:29:13Z",
+        "wikibase_item": "Q23554",
+        "license": "CC BY-SA 4.0",
+        "original_chars": 418,
+        "truncated": false,
+        "sections_dropped": [
+          "Concept and creation",
+          "Critical reception"
+        ]
+      }
+    },
+    {
+      "source_id": "wikipedia:en:1004",
+      "source_type": "wikipedia",
+      "title": "Jesse Pinkman",
+      "source_url": "https://en.wikipedia.org/wiki/Jesse_Pinkman",
+      "retrieved_at": "2026-10-03T12:00:00Z",
+      "text": "Jesse Bruce Pinkman is a character in Breaking Bad, portrayed by Aaron Paul. He is a small-time methamphetamine cook and dealer who becomes the partner of his former teacher Walter White.",
+      "metadata": {
+        "role": "character",
+        "pageid": 1004,
+        "revid": 501004,
+        "rev_timestamp": "2026-09-27T20:29:13Z",
+        "wikibase_item": "Q900004",
+        "license": "CC BY-SA 4.0",
+        "original_chars": 187,
+        "truncated": false,
+        "sections_dropped": []
+      }
+    }
+  ],
+  "facts": [
+    {
+      "fact_id": "fact:001",
+      "subject": "Breaking Bad",
+      "predicate": "media_type",
+      "object": "TV series",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:002",
+      "subject": "Breaking Bad",
+      "predicate": "first_air_date",
+      "object": "2008-01-20",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:003",
+      "subject": "Breaking Bad",
+      "predicate": "last_air_date",
+      "object": "2013-09-29",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:004",
+      "subject": "Breaking Bad",
+      "predicate": "number_of_seasons",
+      "object": "5",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:005",
+      "subject": "Breaking Bad",
+      "predicate": "number_of_episodes",
+      "object": "62",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:006",
+      "subject": "Breaking Bad",
+      "predicate": "created_by",
+      "object": "Vince Gilligan",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:007",
+      "subject": "Breaking Bad",
+      "predicate": "network",
+      "object": "AMC",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:008",
+      "subject": "Breaking Bad",
+      "predicate": "status",
+      "object": "Ended",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:009",
+      "subject": "Breaking Bad",
+      "predicate": "genre",
+      "object": "Drama",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:010",
+      "subject": "Breaking Bad",
+      "predicate": "genre",
+      "object": "Crime",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:011",
+      "subject": "Breaking Bad",
+      "predicate": "origin_country",
+      "object": "US",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:012",
+      "subject": "Breaking Bad",
+      "predicate": "original_language",
+      "object": "en",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:013",
+      "subject": "Walter White",
+      "predicate": "portrayed_by",
+      "object": "Bryan Cranston",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:014",
+      "subject": "Walter White",
+      "predicate": "episode_count",
+      "object": "62",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:015",
+      "subject": "Jesse Pinkman",
+      "predicate": "portrayed_by",
+      "object": "Aaron Paul",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:016",
+      "subject": "Jesse Pinkman",
+      "predicate": "episode_count",
+      "object": "62",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:017",
+      "subject": "Skyler White",
+      "predicate": "portrayed_by",
+      "object": "Anna Gunn",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:018",
+      "subject": "Skyler White",
+      "predicate": "episode_count",
+      "object": "62",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:019",
+      "subject": "Walter White Jr.",
+      "predicate": "portrayed_by",
+      "object": "RJ Mitte",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:020",
+      "subject": "Walter White Jr.",
+      "predicate": "episode_count",
+      "object": "62",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:021",
+      "subject": "Hank Schrader",
+      "predicate": "portrayed_by",
+      "object": "Dean Norris",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:022",
+      "subject": "Hank Schrader",
+      "predicate": "episode_count",
+      "object": "62",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:023",
+      "subject": "Saul Goodman",
+      "predicate": "portrayed_by",
+      "object": "Bob Odenkirk",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:024",
+      "subject": "Saul Goodman",
+      "predicate": "episode_count",
+      "object": "43",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:025",
+      "subject": "Gustavo Fring",
+      "predicate": "portrayed_by",
+      "object": "Giancarlo Esposito",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "fact_id": "fact:026",
+      "subject": "Gustavo Fring",
+      "predicate": "episode_count",
+      "object": "28",
+      "classification": "canon",
+      "source_ids": [
+        "tmdb:tv:1396"
+      ],
+      "confidence": 1.0
+    }
+  ],
+  "retrieved_at": "2026-10-03T12:00:00Z",
+  "provenance": {
+    "pipeline_version": "1.0.0",
+    "sources": [
+      {
+        "provider": "tmdb",
+        "endpoint": "https://api.themoviedb.org/3",
+        "license": "TMDB API terms of use (attribution required; not endorsed by TMDB)",
+        "documents": 1
+      },
+      {
+        "provider": "wikipedia",
+        "endpoint": "https://en.wikipedia.org/w/api.php",
+        "license": "CC BY-SA 4.0",
+        "documents": 4
+      }
+    ],
+    "limits": {
+      "max_wiki_requests": 9,
+      "max_character_pages": 5,
+      "main_doc_chars": 12000,
+      "character_doc_chars": 8000
+    },
+    "notes": [
+      "no page found for 'Skyler White Breaking Bad'",
+      "'Walter White Jr. Breaking Bad' led to an already included page: 'Walter White (Breaking Bad)'",
+      "rejected unrelated page 'Hank Williams' for 'Hank Schrader Breaking Bad'"
+    ]
+  }
+}
